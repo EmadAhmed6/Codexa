@@ -10,6 +10,7 @@ const passwordSchema = z
 const RegisterSchema = z.object({
   username: z.string().min(3).max(10),
   email: z.string().email().trim().min(4),
+  jobTitle: z.string().min(3).max(50).optional(),
   password: passwordSchema,
 });
 
@@ -25,6 +26,7 @@ const OtpSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   otp: z.string().min(6, { message: "Otp Must be at least 6 digits" }),
 });
+
 const ResetPasswordSchema = z
   .object({
     password: passwordSchema,
@@ -45,6 +47,7 @@ const UserSchema = z.object({
       publicId: z.string().nullable(),
     })
     .optional(),
+  jobTitle: z.string().min(3).max(50).optional(),
 });
 
 const UpdateUserSchema = UserSchema.partial();

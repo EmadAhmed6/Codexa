@@ -1,0 +1,40 @@
+import { z } from "zod";
+
+export const postFormSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title is required")
+    .max(32, "Title must not exceed 32 characters"),
+  category: z.string().min(1, "Category is required"),
+  description: z
+    .string()
+    .trim()
+    .min(1, "Content description is required")
+    .max(250, "Content description must not exceed 250 characters"),
+});
+
+export type IPostForm = z.infer<typeof postFormSchema>;
+
+export const commentFormSchema = z.object({
+  text: z.string().trim().min(1, "Comment text cannot be empty"),
+});
+
+export type ICommentForm = z.infer<typeof commentFormSchema>;
+
+export const editProfileSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .min(3, "Username must be at least 3 characters")
+    .max(10, "Username must not exceed 10 characters"),
+  jobTitle: z
+    .string()
+    .trim()
+    .max(20, "Job title must not exceed 20 characters")
+    .optional()
+    .or(z.literal("")),
+  email: z.string().trim().email("Invalid email address"),
+});
+
+export type IEditProfile = z.infer<typeof editProfileSchema>;

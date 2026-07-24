@@ -1,0 +1,167 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-bgPrimary: var(--bg-primary);
+  --color-bgSecondary: var(--bg-secondary);
+  --color-textPrimary: var(--text-primary);
+  --color-textPrimary2: var(--text-primary2);
+  --color-textSecondary: var(--text-secondary);
+  --color-textError: var(--text-error);
+  --color-borderPrimary: var(--border-primary);
+  --color-primary: var(--primary);
+  --color-primaryHover: var(--primary-hover);
+  --color-ringPrimary: var(--ring-primary);
+
+  /* Standard mappings for internal system components */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-sans);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Micro-interactions */
+  --animate-gradient-slow: gradient-shift 15s ease infinite;
+  --animate-pulse-slow: pulse-glow 8s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.15);
+  }
+}
+
+:root {
+  /* Semantic Variables (bgPrimary, bgSecondary, textPrimary, textSecondary, etc.) */
+  --bg-primary: oklch(0.985 0.004 240);
+  --bg-secondary: oklch(1 0 0);
+  --text-primary: oklch(0.15 0.01 240);
+  --text-primary2: #fff;
+  --text-secondary: oklch(0.45 0.015 240);
+  --border-primary: oklch(0.91 0.006 240);
+  --primary: oklch(0.51 0.22 286);
+  --primary-hover: oklch(0.44 0.2 286);
+  --ring-primary: oklch(0.51 0.22 286 / 40%);
+  --text-error: #e24b4a;
+
+  /* Shadcn standard overrides mapping to our custom variables */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
+  --card: var(--bg-secondary);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-secondary);
+  --popover-foreground: var(--text-primary);
+  --primary-foreground: oklch(0.99 0.005 286);
+  --secondary: var(--bg-primary);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-primary);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--bg-primary);
+  --accent-foreground: var(--primary);
+  --border: var(--border-primary);
+  --input: var(--border-primary);
+  --ring: var(--primary);
+
+  --radius: 0.75rem;
+  --font-sans:
+    var(--font-plus-jakarta), ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.dark {
+  /* Semantic Variables - Dark Mode */
+  --bg-primary: oklch(0.06 0.005 240);
+  --bg-secondary: oklch(0.1 0.008 240);
+  --text-primary: oklch(0.98 0.005 240);
+  --text-secondary: oklch(0.7 0.01 240);
+  --border-primary: oklch(0.16 0.01 240 / 70%);
+  --primary: oklch(0.62 0.22 286);
+  --primary-hover: oklch(0.55 0.2 286);
+  --ring-primary: oklch(0.62 0.22 286 / 50%);
+
+  /* Shadcn dark overrides mapping to our custom variables */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
+  --card: var(--bg-secondary);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-secondary);
+  --primary-foreground: #ffffff;
+  --secondary: var(--bg-primary);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-primary);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--bg-primary);
+  --accent-foreground: var(--primary);
+  --border: var(--border-primary);
+  --input: var(--border-primary);
+  --ring: var(--primary);
+}
+
+@layer base {
+  * {
+    @apply border-borderPrimary outline-none transition-colors duration-200;
+  }
+
+  body {
+    @apply bg-bgPrimary text-textPrimary font-sans;
+    background-image:
+      radial-gradient(at 0% 0%, var(--bg-primary) 0, transparent 50%),
+      radial-gradient(at 100% 100%, var(--bg-primary) 0, transparent 50%);
+  }
+
+  /* Focus States UI */
+  .focus-ring {
+    @apply focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bgPrimary;
+  }
+
+  /* Glassmorphism Wrapper card */
+  .glass-card {
+    @apply relative overflow-hidden bg-bgSecondary/60 backdrop-blur-xl border border-borderPrimary/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.4)];
+  }
+
+  .glass-card::before {
+    content: "";
+    @apply absolute inset-0 -z-10 bg-linear-to-tr from-primary/5 via-transparent to-secondary/5 opacity-50;
+  }
+}

@@ -26,6 +26,6 @@ router
   .route("/:id")
   .get(verifyToken, getUserById)
   .put(verifyAuthorizedToken, updateUser)
-  .delete(verifyAdminToken, deleteUser);
+  .delete(verifyAuthorizedToken, deleteUser);
 
 export default router;

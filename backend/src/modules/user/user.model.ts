@@ -36,6 +36,13 @@ const userSchema = new Schema<IUser>(
       minLength: 4,
       unique: true,
     },
+    jobTitle: {
+      type: String,
+      default: "User",
+      trim: true,
+      minLength: 2,
+      maxLength: 20,
+    },
     password: {
       type: String,
       required: true,

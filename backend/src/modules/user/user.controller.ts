@@ -18,7 +18,7 @@ const getAllUsers = asyncHandler(
 const getUserById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const user = await User.findById(req.params.id)
-      .select("-password")
+      .select("-password -email")
       .populate({
         path: "posts",
         populate: [
@@ -64,10 +64,13 @@ const updateUser = asyncHandler(
           username: req.body.username,
           email: req.body.email,
           password: req.body.password,
+          jobTitle: req.body.jobTitle,
         },
       },
       { new: true, runValidators: true },
-    ).select("-password");
+    )
+      .select("-password")
+      .select("+email");
     if (!user) {
       res.status(404).json({ success: false, message: "User not found" });
       return;

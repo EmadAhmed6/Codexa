@@ -29,7 +29,6 @@ const getAllPosts = asyncHandler(
           },
         ],
       })
-      .populate("sharedPost")
       .skip((pageNumber - 1) * postsPerPage)
       .limit(postsPerPage)
       .sort({ createdAt: -1 });
@@ -239,7 +238,7 @@ const sharePost = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
   const { postId } = req.params;
-  const { description } = req.body;
+  const { description } = req.body || {};
   const originalPost = await Post.findById(postId);
   if (!originalPost) {
     res
@@ -249,7 +248,8 @@ const sharePost = asyncHandler(async (req: Request, res: Response) => {
   }
   const sharedPostRecord = new Post({
     title: originalPost?.title,
-    description: description || "",
+    description:
+      description?.trim() || originalPost?.description || "Shared Article",
     category: originalPost?.category,
     image: originalPost?.image,
     user: req.user.id,
