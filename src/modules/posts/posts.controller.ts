@@ -29,6 +29,7 @@ const getAllPosts = asyncHandler(
           },
         ],
       })
+      .populate("sharedPost")
       .skip((pageNumber - 1) * postsPerPage)
       .limit(postsPerPage)
       .sort({ createdAt: -1 });
@@ -154,25 +155,43 @@ const deletePost = asyncHandler(
 // UPLOAD IMAGE POST
 const uploadPostImage = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const postId = req.params.postId;
+    if (!postId || typeof postId !== "string") {
+      res.status(400).json({ success: false, message: "Post ID is required" });
+      return;
+    }
     if (!req.file) {
       res.status(400).json({ success: false, message: "No file provided" });
       return;
     }
 
+    const post = await Post.findById(postId);
+    if (!post) {
+      res.status(404).json({ success: false, message: "Post was not found" });
+      return;
+    }
+
+    if (post.image?.publicId) {
+      await cloudinary.uploader.destroy(post.image.publicId);
+    }
+
     const result = await cloudinary.uploader.upload(req.file.path);
+
+    post.image = {
+      url: result.secure_url,
+      publicId: result.public_id,
+    };
+    await post.save();
+
     fs.unlinkSync(req.file.path);
+
     res.status(200).json({
       success: true,
-      data: {
-        message: "Uploaded successfully",
-        url: result.secure_url,
-        publicId: result.public_id,
-      },
+      data: post,
     });
     return;
   },
 );
-
 // LIKE POST
 const likePost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {

@@ -4,7 +4,7 @@
 // PUT    /posts/{postId}
 // DELETE /posts/{postId}
 // PUT    /posts/{postId}/like
-// POST   /posts/upload
+// POST   /posts/{postId}/upload
 
 /**
  * @swagger
@@ -345,13 +345,21 @@
 
 /**
  * @swagger
- * /posts/upload:
+ * /posts/{postId}/upload:
  *   post:
  *     summary: Upload post image
  *     tags:
  *       - Posts
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         description: Post ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
  *     requestBody:
  *       required: true
  *       content:
@@ -376,21 +384,13 @@
  *                   type: boolean
  *                   example: true
  *                 data:
- *                   type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: Uploaded successfully
- *                     url:
- *                       type: string
- *                       format: uri
- *                     publicId:
- *                       type: string
- *                       example: post_thumbnail_987
+ *                   $ref: '#/components/schemas/Post'
  *       400:
- *         description: No file provided
+ *         description: No file provided or Post ID missing
  *       401:
  *         description: Not authorized
+ *       404:
+ *         description: Post was not found
  */
 
 /**

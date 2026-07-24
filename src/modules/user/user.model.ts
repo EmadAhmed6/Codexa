@@ -14,7 +14,6 @@ import {
   type IUserSchema,
 } from "./user.schema.js";
 
-
 interface IUser extends Document, IUserSchema {
   isAdmin: boolean;
   generateToken: () => string;
@@ -46,7 +45,6 @@ const userSchema = new Schema<IUser>(
       type: Number,
       default: 0,
     },
-
     profilePicture: {
       type: {
         url: String,
@@ -63,10 +61,14 @@ const userSchema = new Schema<IUser>(
       default: false,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
-userSchema.virtual("userPosts", {
-  ref: "Posts",
+userSchema.virtual("posts", {
+  ref: "Post",
   foreignField: "user",
   localField: "_id",
 });
@@ -113,4 +115,3 @@ export {
   validateVerifyOtp,
   validateUpdateUser,
 };
-

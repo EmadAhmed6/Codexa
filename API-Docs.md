@@ -52,7 +52,7 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 | 15 | DELETE | `/posts/:postId` | Delete a post and clear its associated media | 🔒 |
 | 16 | PUT | `/posts/:postId/like` | Toggle like/unlike status on a blog post | 🔒 |
 | 17 | POST | `/posts/:postId/share` | Share an existing blog post | 🔒 |
-| 18 | POST | `/posts/upload` | Upload thumbnail/cover image to Cloudinary | 🔒 |
+| 18 | POST | `/posts/:postId/upload` | Upload thumbnail/cover image to Cloudinary for a specific post | 🔒 |
 | 19 | GET | `/posts/:postId/comments` | Retrieve list of comments for a specific post | 🔒 |
 | 20 | POST | `/posts/:postId/comments` | Post a new comment under a specific post | 🔒 |
 | 21 | PUT | `/posts/:postId/comments/:commentId` | Update text content of a comment | 🔒 |
@@ -991,8 +991,13 @@ Original post was not found.
 
 ---
 
-### POST /posts/upload 🔒
+### POST /posts/:postId/upload 🔒
 Upload an image to Cloudinary to be used as a post thumbnail or cover. Multipart binary upload required.
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `postId` | string | ✅ | Database record ID of the post. |
 
 #### Request Body (Multipart Form-Data)
 | Field | Type | Required | Description |
@@ -1002,20 +1007,32 @@ Upload an image to Cloudinary to be used as a post thumbnail or cover. Multipart
 #### Responses
 
 ##### Response 200
-Image uploaded successfully. Returns URL and public identifier path parameters.
+Image uploaded successfully. Returns the updated post object.
 ```json
 {
   "success": true,
   "data": {
-    "message": "Uploaded successfully",
-    "url": "https://res.cloudinary.com/example/image/upload/post_thumbnail.jpg",
-    "publicId": "post_thumbnail_987"
+    "_id": "65f1a2b3c4d5e6f789012345",
+    "title": "My First Blog Post",
+    "description": "This is my first blog post description.",
+    "category": "Technology",
+    "user": "65f1a2b3c4d5e6f789012347",
+    "image": {
+      "url": "https://res.cloudinary.com/example/image/upload/post_thumbnail.jpg",
+      "publicId": "post_thumbnail_987"
+    },
+    "likes": [],
+    "sharesCount": 0,
+    "postLikesCount": 0,
+    "commentsCount": 0,
+    "createdAt": "2026-07-20T18:27:29.000Z",
+    "updatedAt": "2026-07-24T21:35:00.000Z"
   }
 }
 ```
 
 ##### Response 400
-No file provided in the request payload.
+No file provided in the request payload or missing Post ID.
 ```json
 {
   "message": "No file provided"
@@ -1027,6 +1044,14 @@ Not authorized.
 ```json
 {
   "message": "Invalid token"
+}
+```
+
+##### Response 404
+Post was not found.
+```json
+{
+  "message": "Post was not found"
 }
 ```
 

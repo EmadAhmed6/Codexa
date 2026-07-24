@@ -33,7 +33,12 @@ router
 router.put("/:postId/like", verifyToken, likePost);
 
 // Upload Image
-router.post("/upload", verifyToken, upload.single("image"), uploadPostImage);
+router.post(
+  "/:postId/upload",
+  verifyPostOwner,
+  upload.single("image"),
+  uploadPostImage,
+);
 
 router.use("/:postId/comments", verifyToken, comments);
 

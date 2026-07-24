@@ -11,6 +11,7 @@ import {
   validateForgotPassword,
   validateVerifyOtp,
 } from "../user/user.model.js";
+import { unsubscribe } from "diagnostics_channel";
 
 const sendEmail = async (to: string, subject: string, html: string) => {
   const transporter = nodemailer.createTransport({
@@ -224,10 +225,47 @@ const resetPassword = asyncHandler(
   },
 );
 
+const getMe = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res
+      .status(401)
+      .json({ success: false, data: { message: "Not authorized" } });
+    return;
+  }
+  const user = await User.findById(userId)
+    .select("-password")
+    .populate({
+      path: "posts",
+      populate: [
+        {
+          path: "user",
+          select: ["_id", "username", "profilePicture"],
+        },
+        {
+          path: "sharedPost",
+          populate: {
+            path: "user",
+            select: ["_id", "username", "profilePicture"],
+          },
+        },
+      ],
+    });
+  if (!user) {
+    res
+      .status(404)
+      .json({ success: false, data: { message: "User not found" } });
+    return;
+  }
+  res.status(200).json({ success: true, data: user });
+  return;
+});
+
 export {
   register,
   login,
   sendForgotPasswodLink,
   resetPassword,
   verifyEmailOTP,
+  getMe,
 };

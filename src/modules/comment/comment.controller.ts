@@ -203,7 +203,9 @@ const uploadCommentImage = asyncHandler(
         .json({ success: false, message: "Comment was not found" });
       return;
     }
-
+    if (comment.image?.publicId) {
+      await cloudinary.uploader.destroy(comment.image.publicId);
+    }
     const result = await cloudinary.uploader.upload(req.file.path);
 
     comment.image = {

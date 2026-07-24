@@ -17,7 +17,24 @@ const getAllUsers = asyncHandler(
 // GET USER BY ID
 const getUserById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const user = await User.findById(req.params.id).select("-password");
+    const user = await User.findById(req.params.id)
+      .select("-password")
+      .populate({
+        path: "posts",
+        populate: [
+          {
+            path: "user",
+            select: ["_id", "username", "profilePicture"],
+          },
+          {
+            path: "sharedPost",
+            populate: {
+              path: "user",
+              select: ["_id", "username", "profilePicture"],
+            },
+          },
+        ],
+      });
     res.status(200).json({ success: true, data: user });
     return;
   },
