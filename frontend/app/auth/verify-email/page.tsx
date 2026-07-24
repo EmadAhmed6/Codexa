@@ -47,7 +47,7 @@ export default function VerifyEmailPage() {
           onClick={handleResendEmail}
           variant="outline"
           disabled={isResending}
-          className="w-full rounded-xl border-borderPrimary text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isResending ? "animate-spin" : ""}`} />
           <span>{isResending ? "Resending Link..." : "Resend Verification Email"}</span>

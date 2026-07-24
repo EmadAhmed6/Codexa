@@ -19,20 +19,21 @@ import {
   useUpdateComment,
   useDeleteComment,
   useLikeComment,
-} from "@/_features/posts/post-hooks";
-import {
-  uploadPostImage,
-  uploadCommentImage,
-} from "@/_features/posts/api/post-api";
-import { useGetAuthMeQuery } from "@/_features/auth/hooks/auth-hooks";
+} from "@/_features/posts/hooks";
+import { uploadCommentImage } from "@/_features/posts/api";
+import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import Cookies from "js-cookie";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { commentFormSchema, type ICommentForm } from "@/_features/posts/schemas/post-schemas";
+import {
+  commentFormSchema,
+  type ICommentForm,
+} from "@/_features/posts/schemas/post";
 import Error from "@/_components/Error";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn, formatRelativeTime } from "@/lib/utils";
+import { Text } from "@/_components/Text";
 
 interface CommentSectionProps {
   postId: string;
@@ -110,30 +111,50 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
   const handleSaveEdit = async (commentId: string) => {
     if (!editText.trim()) return;
-    await updateCommentMutation.mutateAsync({ commentId, text: editText });
-    setEditingCommentId(null);
+    try {
+      await updateCommentMutation.mutateAsync({
+        commentId,
+        text: editText.trim(),
+      });
+      setEditingCommentId(null);
+      setEditText("");
+    } catch {
+      // Handled in mutation
+    }
   };
 
+  const commentsCount = comments ? comments.length : 0;
+
   return (
-    <div id="comments" className="mt-12 pt-8 border-t border-borderPrimary/40">
-      <div className="flex items-center gap-2 mb-6">
+    <div id="comments" className="space-y-6 pt-8 border-t border-borderPrimary/40">
+      {/* Section Title */}
+      <div className="flex items-center gap-2">
         <MessageSquare className="h-5 w-5 text-primary" />
-        <h3 className="text-xl font-bold text-textPrimary">
-          Discussion ({comments?.length || 0})
-        </h3>
+        <Text as="h3" size="lg" font="bold" color="primary">
+          Discussion & Comments ({commentsCount})
+        </Text>
       </div>
 
       {/* Add Comment Input Form */}
       {token ? (
-        <form onSubmit={handleSubmit(onSubmitComment)} className="mb-8 space-y-3">
-          <div className="relative rounded-2xl border border-borderPrimary/60 bg-bgSecondary/60 p-4 focus-within:border-primary transition-all">
+        <form onSubmit={handleSubmit(onSubmitComment)} className="space-y-3">
+          <div className="p-4 rounded-2xl bg-bgSecondary/60 border border-borderPrimary/50 shadow-sm focus-within:border-primary/50 transition-all">
+            <div className="flex justify-between items-center mb-2">
+              <Text as="span" size="xs" font="semiBold" color="secondary">
+                Write a response
+              </Text>
+              <Text as="span" size="xs" color="secondary" className="text-[11px]">
+                {watchText.length}/500
+              </Text>
+            </div>
+
             <textarea
               rows={3}
-              placeholder="What are your thoughts? Write a constructive reply..."
+              placeholder="What are your thoughts on this article?"
               {...register("text", {
                 onChange: () => clearErrors("text"),
               })}
-              className="w-full bg-transparent text-sm text-textPrimary placeholder:text-textSecondary/50 outline-none resize-none"
+              className="w-full bg-transparent text-textPrimary placeholder:text-textSecondary/50 text-xs sm:text-sm outline-none resize-none"
             />
             <Error error={errors.text?.message} />
 
@@ -162,7 +183,9 @@ export default function CommentSection({ postId }: CommentSectionProps) {
             <div className="flex items-center justify-between pt-3 border-t border-borderPrimary/30 mt-2">
               <label className="flex items-center gap-1.5 text-xs text-textSecondary hover:text-primary transition-colors cursor-pointer">
                 <ImageIcon className="h-4 w-4 text-primary" />
-                <span>Attach Image</span>
+                <Text as="span" size="xs" font="medium" color="secondary">
+                  Attach Image
+                </Text>
                 <input
                   type="file"
                   accept="image/*"
@@ -175,7 +198,9 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                 type="submit"
                 size="sm"
                 disabled={
-                  !watchText.trim() || addCommentMutation.isPending || isUploading
+                  !watchText.trim() ||
+                  addCommentMutation.isPending ||
+                  isUploading
                 }
                 className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground text-xs font-semibold px-4 cursor-pointer"
               >
@@ -183,7 +208,9 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
                   <>
-                    <span>Post Comment</span>
+                    <Text as="span" size="xs" font="semiBold" color="white">
+                      Post Comment
+                    </Text>
                     <Send className="h-3.5 w-3.5 ml-1.5" />
                   </>
                 )}
@@ -193,9 +220,9 @@ export default function CommentSection({ postId }: CommentSectionProps) {
         </form>
       ) : (
         <div className="p-4 rounded-2xl bg-bgSecondary/40 border border-borderPrimary/40 text-center mb-8">
-          <p className="text-xs text-textSecondary">
+          <Text as="p" size="xs" color="secondary">
             Please log in to join the conversation and post comments.
-          </p>
+          </Text>
         </div>
       )}
 
@@ -246,13 +273,18 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                       </div>
                     )}
                     <div>
-                      <span className="text-xs font-bold text-textPrimary">
+                      <Text as="span" size="xs" font="bold" color="primary">
                         {comment.user?.username || "Anonymous"}
-                      </span>
+                      </Text>
                       {comment.createdAt && (
-                        <span className="text-[10px] text-textSecondary ml-2">
+                        <Text
+                          as="span"
+                          size="xs"
+                          color="secondary"
+                          className="text-[10px] ml-2"
+                        >
                           {formatRelativeTime(comment.createdAt)}
-                        </span>
+                        </Text>
                       )}
                     </div>
                   </div>
@@ -299,7 +331,9 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                         onClick={() => setEditingCommentId(null)}
                         className="text-xs rounded-lg"
                       >
-                        Cancel
+                        <Text as="span" size="xs" color="secondary">
+                          Cancel
+                        </Text>
                       </Button>
                       <Button
                         size="sm"
@@ -307,14 +341,21 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                         disabled={updateCommentMutation.isPending}
                         className="text-xs rounded-lg bg-primary text-primary-foreground"
                       >
-                        Save
+                        <Text as="span" size="xs" font="semiBold" color="white">
+                          Save
+                        </Text>
                       </Button>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs md:text-sm text-textPrimary/90 leading-relaxed whitespace-pre-line">
+                  <Text
+                    as="p"
+                    size="sm"
+                    color="primary"
+                    className="leading-relaxed whitespace-pre-line text-xs md:text-sm"
+                  >
                     {comment.text}
-                  </p>
+                  </Text>
                 )}
 
                 {/* Attached Image */}
@@ -348,7 +389,14 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                         isLiked && "fill-rose-500 text-rose-500",
                       )}
                     />
-                    <span>{likesCount}</span>
+                    <Text
+                      as="span"
+                      size="xs"
+                      font="semiBold"
+                      className={isLiked ? "text-rose-500" : "text-textSecondary"}
+                    >
+                      {likesCount}
+                    </Text>
                   </button>
                 </div>
               </div>
@@ -356,8 +404,10 @@ export default function CommentSection({ postId }: CommentSectionProps) {
           })}
         </div>
       ) : (
-        <div className="text-center py-6 text-xs text-textSecondary">
-          No comments yet. Be the first to share your thoughts!
+        <div className="text-center py-6">
+          <Text as="p" size="xs" color="secondary">
+            No comments yet. Be the first to share your thoughts!
+          </Text>
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 export const axiosClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -29,11 +29,9 @@ axiosClient.interceptors.request.use(
   },
 );
 
-// Response interceptor: handle global errors
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Global error handler (e.g. logouts on 401 status)
     return Promise.reject(error);
   },
 );

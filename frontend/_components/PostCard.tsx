@@ -17,12 +17,13 @@ import {
   useLikePost,
   useSharePost,
   useDeletePost,
-} from "@/_features/posts/post-hooks";
-import { useGetAuthMeQuery } from "@/_features/auth/hooks/auth-hooks";
+} from "@/_features/posts/hooks";
+import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import Cookies from "js-cookie";
 import EditPostModal from "./EditPostModal";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 import { formatRelativeTime } from "@/lib/utils";
+import { Text } from "@/_components/Text";
 
 interface PostCardProps {
   post: Post;
@@ -113,11 +114,9 @@ export default function PostCard({ post }: PostCardProps) {
     if (!token) return;
 
     if (isLiked) {
-      // User is unliking
       setUserLikedState(false);
       setLikesCountDelta((prev) => prev - 1);
     } else {
-      // User is liking
       setUserLikedState(true);
       setLikesCountDelta((prev) => prev + 1);
     }
@@ -175,24 +174,38 @@ export default function PostCard({ post }: PostCardProps) {
             {/* Header Info: Category Badge, Date, & Owner/Admin Controls */}
             <div className="flex items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2">
-                <span className="inline-block text-[11px] font-bold tracking-wide uppercase px-2.5 py-1 rounded-md bg-primary/10 text-primary border border-primary/20">
+                <Text
+                  as="span"
+                  size="xs"
+                  font="bold"
+                  color="primary"
+                  className="inline-block text-[11px] uppercase tracking-wide px-2.5 py-1 rounded-md bg-primary/10 border border-primary/20"
+                >
                   {post.category || "General"}
-                </span>
+                </Text>
                 {post.sharedPost && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary/90 bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10">
+                  <Text
+                    as="span"
+                    size="xs"
+                    font="semiBold"
+                    color="primary"
+                    className="inline-flex items-center gap-1 text-[10px] bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10"
+                  >
                     <Repeat className="h-3 w-3" />
                     Shared
-                  </span>
+                  </Text>
                 )}
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 text-[11px] font-medium text-textSecondary">
-                  <Calendar className="h-3 w-3" />
-                  <span>{formattedDate}</span>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3 text-textSecondary" />
+                  <Text as="span" size="xs" font="medium" color="secondary" className="text-[11px]">
+                    {formattedDate}
+                  </Text>
                 </div>
 
-                {/* Edit & Delete Controls (Shown ONLY to Post Owner or Admin) */}
+                {/* Edit & Delete Controls */}
                 {isOwnerOrAdmin && (
                   <div className="flex items-center gap-1 ml-2 border-l border-borderPrimary/40 pl-2">
                     <button
@@ -218,17 +231,28 @@ export default function PostCard({ post }: PostCardProps) {
             {/* Title */}
             {post.title && (
               <Link href={`/posts/${post._id}`}>
-                <h2 className="text-lg md:text-xl font-extrabold text-textPrimary group-hover:text-primary transition-colors line-clamp-2 mb-2 leading-snug">
+                <Text
+                  as="h2"
+                  size="lg"
+                  font="extraBold"
+                  color="primary"
+                  className="group-hover:text-primary transition-colors line-clamp-2 mb-2 leading-snug md:text-xl"
+                >
                   {post.title}
-                </h2>
+                </Text>
               </Link>
             )}
 
             {/* Description Excerpt */}
             {post.description && (
-              <p className="text-xs md:text-sm text-textSecondary line-clamp-3 leading-relaxed mb-3">
+              <Text
+                as="p"
+                size="sm"
+                color="secondary"
+                className="line-clamp-3 leading-relaxed mb-3 text-xs md:text-sm"
+              >
                 {post.description}
-              </p>
+              </Text>
             )}
           </div>
 
@@ -251,13 +275,24 @@ export default function PostCard({ post }: PostCardProps) {
                 </div>
               )}
               <div>
-                <span className="text-xs font-semibold text-textPrimary group-hover/author:text-primary transition-colors block truncate max-w-36">
+                <Text
+                  as="span"
+                  size="xs"
+                  font="semiBold"
+                  color="primary"
+                  className="group-hover/author:text-primary transition-colors block truncate max-w-36"
+                >
                   {displayAuthor?.username || "Anonymous"}
-                </span>
+                </Text>
                 {displayAuthor?.jobTitle && (
-                  <span className="text-[10px] text-textSecondary block truncate max-w-36">
+                  <Text
+                    as="span"
+                    size="xs"
+                    color="secondary"
+                    className="text-[10px] block truncate max-w-36"
+                  >
                     {displayAuthor.jobTitle}
-                  </span>
+                  </Text>
                 )}
               </div>
             </Link>
@@ -282,9 +317,14 @@ export default function PostCard({ post }: PostCardProps) {
                       : "text-textSecondary fill-transparent"
                   }`}
                 />
-                <span className={isLiked ? "text-rose-500 font-bold" : ""}>
+                <Text
+                  as="span"
+                  size="xs"
+                  font="bold"
+                  className={isLiked ? "text-rose-500" : "text-textSecondary"}
+                >
                   {displayLikesCount}
-                </span>
+                </Text>
               </button>
 
               {/* Comment Counter */}
@@ -294,7 +334,9 @@ export default function PostCard({ post }: PostCardProps) {
                 title="Comments"
               >
                 <MessageSquare className="h-4 w-4" />
-                <span>{commentsCount}</span>
+                <Text as="span" size="xs" font="semiBold" color="secondary">
+                  {commentsCount}
+                </Text>
               </Link>
 
               {/* Share Counter */}
@@ -305,7 +347,9 @@ export default function PostCard({ post }: PostCardProps) {
                 title="Share Post"
               >
                 <Share2 className="h-4 w-4" />
-                <span>{sharesCount}</span>
+                <Text as="span" size="xs" font="semiBold" color="secondary">
+                  {sharesCount}
+                </Text>
               </button>
             </div>
           </div>

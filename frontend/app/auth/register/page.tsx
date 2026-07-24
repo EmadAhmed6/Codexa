@@ -2,7 +2,15 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { User, Mail, Lock, Eye, EyeOff, ArrowRight, Briefcase } from "lucide-react";
+import {
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  Briefcase,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -10,11 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
-import {
-  registerSchema,
-  type IRegister,
-} from "@/_features/auth/schemas/auth-schemas";
-import { useRegisterMutation } from "@/_features/auth/hooks/auth-hooks";
+import { registerSchema, type IRegister } from "@/_features/auth/schemas/auth";
+import { useRegisterMutation } from "@/_features/auth/hooks";
 import { Text } from "@/_components/Text";
 import Error from "@/_components/Error";
 import { useRouter } from "next/navigation";
@@ -44,7 +49,9 @@ export default function RegisterPage() {
   const onSubmit = (data: IRegister) => {
     registerMutation.mutate(data, {
       onSuccess: () => {
-        toast.success("Account created successfully! Please verify your OTP code.");
+        toast.success(
+          "Account created successfully! Please verify your OTP code.",
+        );
         router.push(`/auth/verify-otp?email=${encodeURIComponent(data.email)}`);
         reset();
       },
@@ -177,7 +184,7 @@ export default function RegisterPage() {
         <Button
           type="submit"
           disabled={registerMutation.isPending}
-          className="w-full bg-primary hover:bg-primaryHover text-primary-foreground font-semibold py-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-2"
+          className="w-full"
         >
           {registerMutation.isPending ? (
             <span>Creating Account...</span>

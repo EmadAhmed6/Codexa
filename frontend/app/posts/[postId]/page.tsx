@@ -11,8 +11,8 @@ import {
   useDeletePost,
   useLikePost,
   useSharePost,
-} from "@/_features/posts/post-hooks";
-import { useGetAuthMeQuery } from "@/_features/auth/hooks/auth-hooks";
+} from "@/_features/posts/hooks";
+import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import {
   Calendar,
   Heart,
@@ -27,6 +27,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Cookies from "js-cookie";
 import { formatRelativeTime } from "@/lib/utils";
+import { Text } from "@/_components/Text";
 
 export default function SinglePostPage() {
   const params = useParams();
@@ -117,15 +118,17 @@ export default function SinglePostPage() {
       <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center py-24 text-center px-4">
-          <h2 className="text-2xl font-bold text-textPrimary mb-2">
+          <Text as="h2" size="2xl" font="bold" color="primary" className="mb-2">
             Article Not Found
-          </h2>
-          <p className="text-xs text-textSecondary mb-6">
+          </Text>
+          <Text as="p" size="xs" color="secondary" className="mb-6">
             The article you requested could not be retrieved.
-          </p>
+          </Text>
           <Link href="/">
             <Button className="rounded-xl bg-primary text-primary-foreground">
-              Back to Feed
+              <Text as="span" size="xs" font="semiBold" color="white">
+                Back to Feed
+              </Text>
             </Button>
           </Link>
         </div>
@@ -146,7 +149,9 @@ export default function SinglePostPage() {
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors mb-6"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to Feed</span>
+          <Text as="span" size="xs" font="semiBold" color="secondary">
+            Back to Feed
+          </Text>
         </Link>
 
         {/* Author Header Bar (Top) */}
@@ -167,12 +172,18 @@ export default function SinglePostPage() {
               </div>
             )}
             <div>
-              <p className="text-sm font-bold text-textPrimary group-hover:text-primary transition-colors">
+              <Text
+                as="p"
+                size="sm"
+                font="bold"
+                color="primary"
+                className="group-hover:text-primary transition-colors"
+              >
                 {post.user?.username || "Anonymous Author"}
-              </p>
-              <p className="text-[11px] text-textSecondary font-medium">
+              </Text>
+              <Text as="p" size="xs" font="medium" color="secondary" className="text-[11px]">
                 {post.user?.jobTitle || "Verified Technical Writer"}
-              </p>
+              </Text>
             </div>
           </Link>
 
@@ -186,7 +197,9 @@ export default function SinglePostPage() {
                 className="rounded-xl text-xs flex items-center gap-1.5 cursor-pointer border-borderPrimary"
               >
                 <Edit2 className="h-3.5 w-3.5" />
-                <span>Edit</span>
+                <Text as="span" size="xs" font="semiBold" color="primary">
+                  Edit
+                </Text>
               </Button>
               <Button
                 variant="destructive"
@@ -196,7 +209,9 @@ export default function SinglePostPage() {
                 className="rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                <span>Delete</span>
+                <Text as="span" size="xs" font="semiBold" color="white">
+                  Delete
+                </Text>
               </Button>
             </div>
           )}
@@ -204,19 +219,33 @@ export default function SinglePostPage() {
 
         {/* Category & Date Header */}
         <div className="flex items-center justify-between gap-4 mb-4">
-          <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-md bg-primary/10 text-primary border border-primary/20">
+          <Text
+            as="span"
+            size="xs"
+            font="bold"
+            color="primary"
+            className="uppercase tracking-wider px-3 py-1 rounded-md bg-primary/10 border border-primary/20"
+          >
             {post.category || "General"}
-          </span>
-          <div className="flex items-center gap-1.5 text-xs font-medium text-textSecondary">
-            <Calendar className="h-3.5 w-3.5" />
-            <span>{formattedDate}</span>
+          </Text>
+          <div className="flex items-center gap-1.5">
+            <Calendar className="h-3.5 w-3.5 text-textSecondary" />
+            <Text as="span" size="xs" font="medium" color="secondary">
+              {formattedDate}
+            </Text>
           </div>
         </div>
 
         {/* Article Title */}
-        <h1 className="text-3xl md:text-5xl font-black text-textPrimary leading-tight tracking-tight mb-6">
+        <Text
+          as="h1"
+          size="3xl"
+          font="black"
+          color="primary"
+          className="leading-tight tracking-tight mb-6 md:text-5xl"
+        >
           {post.title}
-        </h1>
+        </Text>
 
         {/* Cloudinary Header Cover Image */}
         {post.image?.url && (
@@ -230,9 +259,14 @@ export default function SinglePostPage() {
         )}
 
         {/* Article Body Content */}
-        <article className="prose prose-slate dark:prose-invert max-w-none text-textPrimary text-base md:text-lg leading-relaxed whitespace-pre-line mb-10">
+        <Text
+          as="article"
+          size="default"
+          color="primary"
+          className="prose prose-slate dark:prose-invert max-w-none text-textPrimary leading-relaxed whitespace-pre-line mb-10 text-base md:text-lg"
+        >
           {post.description}
-        </article>
+        </Text>
 
         {/* Article Bottom Actions */}
         <div className="flex items-center justify-between p-4 rounded-2xl bg-bgSecondary/40 border border-borderPrimary/40 mb-10">
@@ -249,7 +283,14 @@ export default function SinglePostPage() {
               <Heart
                 className={`h-4 w-4 ${isLiked ? "fill-white text-white" : "fill-rose-500/20"}`}
               />
-              <span>Like Article ({likesCount})</span>
+              <Text
+                as="span"
+                size="xs"
+                font="semiBold"
+                className={isLiked ? "text-white" : "text-rose-500"}
+              >
+                Like Article ({likesCount})
+              </Text>
             </button>
 
             <button
@@ -258,7 +299,9 @@ export default function SinglePostPage() {
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-bgPrimary hover:bg-bgSecondary border border-borderPrimary/40 text-textSecondary hover:text-textPrimary font-semibold text-xs transition-all cursor-pointer"
             >
               <Share2 className="h-4 w-4" />
-              <span>Share ({sharesCount})</span>
+              <Text as="span" size="xs" font="semiBold" color="secondary">
+                Share ({sharesCount})
+              </Text>
             </button>
           </div>
         </div>
@@ -276,7 +319,7 @@ export default function SinglePostPage() {
         />
       )}
 
-      {/* Delete Post Framer Motion Modal */}
+      {/* Delete Post Modal */}
       <DeleteConfirmModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}

@@ -3,7 +3,7 @@
 import React from "react";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLogout } from "@/_features/auth/hooks/auth-hooks";
+import { useLogout } from "@/_features/auth/hooks";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";

@@ -13,8 +13,8 @@ import { toast } from "sonner";
 import {
   verifyOtpSchema,
   type IVerifyOtp,
-} from "@/_features/auth/schemas/auth-schemas";
-import { useVerifyOtpMutation } from "@/_features/auth/hooks/auth-hooks";
+} from "@/_features/auth/schemas/auth";
+import { useVerifyOtpMutation } from "@/_features/auth/hooks";
 import { Text } from "@/_components/Text";
 import Error from "@/_components/Error";
 
@@ -49,7 +49,9 @@ function VerifyOtpForm() {
       {
         onSuccess: (res: any) => {
           toast.success(
-            res?.message || res?.data?.message || "Account verified successfully! Please sign in.",
+            res?.message ||
+              res?.data?.message ||
+              "Account verified successfully! Please sign in.",
           );
           router.push("/auth/login");
           reset();
@@ -134,7 +136,7 @@ function VerifyOtpForm() {
         <Button
           type="submit"
           disabled={verifyOtpMutation.isPending}
-          className="w-full bg-primary hover:bg-primaryHover text-primary-foreground font-semibold py-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-2"
+          className="w-full"
         >
           {verifyOtpMutation.isPending ? (
             <>

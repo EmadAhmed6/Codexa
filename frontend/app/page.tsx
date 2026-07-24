@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "@/_components/Navbar";
 import PostCard from "@/_components/PostCard";
 import CreatePostModal from "@/_components/CreatePostModal";
-import { useGetPosts } from "@/_features/posts/post-hooks";
+import { useGetPosts } from "@/_features/posts/hooks";
 import {
   Sparkles,
   ChevronLeft,
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Cookies from "js-cookie";
+import { Text } from "@/_components/Text";
 
 const CATEGORIES = [
   "All",
@@ -77,23 +78,36 @@ function HomeContent() {
       <Navbar />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-        {/* Banner / Hero Section with Create Post Button */}
+        {/* Banner / Hero Section */}
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary mb-4">
               <Sparkles className="h-3.5 w-3.5" />
-              <span>DevQuill Technical Community Feed</span>
+              <Text as="span" size="xs" font="bold" color="primary">
+                DevQuill Technical Community Feed
+              </Text>
             </div>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-textPrimary leading-tight mb-4">
+            <Text
+              as="h1"
+              size="4xl"
+              font="black"
+              color="primary"
+              className="tracking-tight leading-tight mb-4 md:text-5xl"
+            >
               Architecting the Future of <br className="hidden md:block" />
               <span className="bg-linear-to-r from-primary via-indigo-500 to-primaryHover bg-clip-text text-transparent">
                 Software & Web Engineering
               </span>
-            </h1>
-            <p className="text-sm md:text-base text-textSecondary leading-relaxed">
+            </Text>
+            <Text
+              as="p"
+              size="default"
+              color="secondary"
+              className="leading-relaxed text-sm md:text-base"
+            >
               Discover peer-reviewed tutorials, architecture breakdowns, and
               developer insights directly from experts.
-            </p>
+            </Text>
           </div>
         </div>
 
@@ -111,7 +125,14 @@ function HomeContent() {
                     : "bg-bgSecondary/60 text-textSecondary border-borderPrimary/40 hover:bg-bgSecondary hover:text-textPrimary"
                 }`}
               >
-                {cat}
+                <Text
+                  as="span"
+                  size="xs"
+                  font="bold"
+                  color={isActive ? "white" : "secondary"}
+                >
+                  {cat}
+                </Text>
               </button>
             );
           })}
@@ -120,15 +141,17 @@ function HomeContent() {
         {/* Search indicator message */}
         {search && (
           <div className="mb-6 flex items-center justify-between p-3.5 rounded-xl bg-bgSecondary/60 border border-borderPrimary/40">
-            <span className="text-xs text-textSecondary">
+            <Text as="span" size="xs" color="secondary">
               Showing search results for:{" "}
               <strong className="text-textPrimary">"{search}"</strong>
-            </span>
+            </Text>
             <button
               onClick={() => router.push("/")}
               className="text-xs font-bold text-primary hover:underline cursor-pointer"
             >
-              Clear Search
+              <Text as="span" size="xs" font="bold" color="primary">
+                Clear Search
+              </Text>
             </button>
           </div>
         )}
@@ -161,18 +184,25 @@ function HomeContent() {
             <div className="h-16 w-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4">
               <FileText className="h-8 w-8" />
             </div>
-            <h3 className="text-xl font-bold text-textPrimary mb-2">
+            <Text as="h3" size="xl" font="bold" color="primary" className="mb-2">
               No Articles Found
-            </h3>
-            <p className="text-xs md:text-sm text-textSecondary max-w-md mb-6">
+            </Text>
+            <Text
+              as="p"
+              size="xs"
+              color="secondary"
+              className="max-w-md mb-6 md:text-sm"
+            >
               We couldn't find any published articles matching your current
               filter criteria.
-            </p>
+            </Text>
             <Button
               onClick={() => router.push("/")}
               className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground text-xs font-semibold cursor-pointer"
             >
-              Reset Filters
+              <Text as="span" size="xs" font="semiBold" color="white">
+                Reset Filters
+              </Text>
             </Button>
           </div>
         )}
@@ -187,12 +217,14 @@ function HomeContent() {
             className="w-fit rounded-xl border-borderPrimary/60 px-3 py-1.5 h-8 text-xs font-semibold shrink-0 cursor-pointer"
           >
             <ChevronLeft className="h-3.5 w-3.5 mr-1" />
-            Prev
+            <Text as="span" size="xs" font="semiBold" color="primary">
+              Prev
+            </Text>
           </Button>
 
-          <span className="text-xs font-bold text-textPrimary px-2">
+          <Text as="span" size="xs" font="bold" color="primary" className="px-2">
             {pageNumber}
-          </span>
+          </Text>
 
           <Button
             variant="outline"
@@ -201,7 +233,9 @@ function HomeContent() {
             onClick={() => handlePageChange(pageNumber + 1)}
             className="w-fit rounded-xl border-borderPrimary/60 px-3 py-1.5 h-8 text-xs font-semibold shrink-0 cursor-pointer"
           >
-            Next
+            <Text as="span" size="xs" font="semiBold" color="primary">
+              Next
+            </Text>
             <ChevronRight className="h-3.5 w-3.5 ml-1" />
           </Button>
         </div>
@@ -215,7 +249,9 @@ function HomeContent() {
           title="Create New Post"
         >
           <PlusCircle className="h-5 w-5" />
-          <span className="hidden sm:inline">Create Post</span>
+          <Text as="span" size="xs" font="bold" color="white" className="hidden sm:inline">
+            Create Post
+          </Text>
         </button>
       )}
 
@@ -227,14 +263,14 @@ function HomeContent() {
 
       {/* Footer */}
       <footer className="w-full max-w-7xl mx-auto px-6 py-8 border-t border-borderPrimary/20 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-textSecondary">
-        <p>
+        <Text as="p" size="xs" color="secondary">
           © {new Date().getFullYear()} DevQuill Engineering Blog. Built with
           Next.js 16 & Tailwind CSS.
-        </p>
+        </Text>
         <div className="flex gap-4">
-          <span>Terms</span>
-          <span>Privacy</span>
-          <span>API Documentation</span>
+          <Text as="span" size="xs" color="secondary">Terms</Text>
+          <Text as="span" size="xs" color="secondary">Privacy</Text>
+          <Text as="span" size="xs" color="secondary">API Documentation</Text>
         </div>
       </footer>
     </div>

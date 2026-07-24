@@ -10,9 +10,9 @@ import {
   useUploadProfilePicture,
   useUpdateUser,
   useDeleteUser,
-} from "@/_features/user/user-hooks";
-import { useGetPosts } from "@/_features/posts/post-hooks";
-import { useGetAuthMeQuery } from "@/_features/auth/hooks/auth-hooks";
+} from "@/_features/user/hooks";
+import { useGetPosts } from "@/_features/posts/hooks";
+import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import {
   User as UserIcon,
   Camera,
@@ -30,9 +30,13 @@ import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { editProfileSchema, type IEditProfile } from "@/_features/posts/schemas/post-schemas";
+import {
+  editProfileSchema,
+  type IEditProfile,
+} from "@/_features/posts/schemas/post";
 import Error from "@/_components/Error";
 import { toast } from "sonner";
+import { Text } from "@/_components/Text";
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -48,7 +52,8 @@ export default function UserProfilePage() {
     routeUserId === "me" ||
     (currentUser && String(currentUser._id) === String(targetUserId));
 
-  const { data: profileUser, isLoading: isUserLoading } = useGetUserProfile(targetUserId);
+  const { data: profileUser, isLoading: isUserLoading } =
+    useGetUserProfile(targetUserId);
   const { data: userPosts, isLoading: isPostsLoading } = useGetPosts({
     userId: targetUserId,
   });
@@ -62,9 +67,7 @@ export default function UserProfilePage() {
   const [isDeleteUserModalOpen, setIsDeleteUserModalOpen] = useState(false);
 
   const userToDisplay =
-    profileUser ||
-    (isOwnProfile ? currentUser : null) ||
-    currentUser;
+    profileUser || (isOwnProfile ? currentUser : null) || currentUser;
 
   const handleDeleteAccount = async () => {
     const deleteId = targetUserId || currentUser?._id;
@@ -152,8 +155,6 @@ export default function UserProfilePage() {
     return String(pUserId) === String(targetUserId);
   });
 
-  const totalUserPosts = displayUserPosts.length;
-
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col justify-between">
       <Navbar />
@@ -169,7 +170,7 @@ export default function UserProfilePage() {
             </div>
           ) : (
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 relative z-10">
-              {/* Avatar Section with Upload Button (POST /users/:id/upload) */}
+              {/* Avatar Section */}
               <div className="relative group shrink-0">
                 {userToDisplay?.profilePicture?.url ? (
                   <img
@@ -191,7 +192,9 @@ export default function UserProfilePage() {
                     ) : (
                       <>
                         <Camera className="h-6 w-6 mb-1" />
-                        <span className="text-[10px] font-bold uppercase">Upload</span>
+                        <Text as="span" size="xs" font="bold" color="white" className="text-[10px] uppercase">
+                          Upload
+                        </Text>
                       </>
                     )}
                     <input
@@ -210,9 +213,15 @@ export default function UserProfilePage() {
                 <div className="flex flex-col md:flex-row items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2 justify-center md:justify-start">
-                      <h1 className="text-2xl md:text-4xl font-extrabold text-textPrimary tracking-tight">
+                      <Text
+                        as="h1"
+                        size="2xl"
+                        font="extraBold"
+                        color="primary"
+                        className="tracking-tight md:text-4xl"
+                      >
                         {userToDisplay?.username || "Developer"}
-                      </h1>
+                      </Text>
                       {userToDisplay?.isAdmin && (
                         <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1">
                           <ShieldCheck className="h-3.5 w-3.5" />
@@ -221,16 +230,20 @@ export default function UserProfilePage() {
                       )}
                     </div>
                     {userToDisplay?.jobTitle && (
-                      <p className="text-xs text-primary font-semibold flex items-center justify-center md:justify-start gap-1.5 mt-1">
-                        <Briefcase className="h-3.5 w-3.5" />
-                        <span>{userToDisplay.jobTitle}</span>
-                      </p>
+                      <div className="flex items-center justify-center md:justify-start gap-1.5 mt-1">
+                        <Briefcase className="h-3.5 w-3.5 text-primary" />
+                        <Text as="p" size="xs" font="semiBold" color="primary">
+                          {userToDisplay.jobTitle}
+                        </Text>
+                      </div>
                     )}
                     {userToDisplay?.email && (
-                      <p className="text-xs text-textSecondary flex items-center justify-center md:justify-start gap-1.5 mt-1">
-                        <Mail className="h-3.5 w-3.5" />
-                        <span>{userToDisplay.email}</span>
-                      </p>
+                      <div className="flex items-center justify-center md:justify-start gap-1.5 mt-1">
+                        <Mail className="h-3.5 w-3.5 text-textSecondary" />
+                        <Text as="p" size="xs" color="secondary">
+                          {userToDisplay.email}
+                        </Text>
+                      </div>
                     )}
                   </div>
 
@@ -243,7 +256,9 @@ export default function UserProfilePage() {
                         className="rounded-xl border-borderPrimary text-xs flex items-center gap-1.5 cursor-pointer"
                       >
                         <Edit className="h-3.5 w-3.5" />
-                        <span>Edit Profile</span>
+                        <Text as="span" size="xs" font="semiBold" color="primary">
+                          Edit Profile
+                        </Text>
                       </Button>
                     )}
 
@@ -256,32 +271,33 @@ export default function UserProfilePage() {
                         className="rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
-                        <span>
+                        <Text as="span" size="xs" font="semiBold" color="white">
                           {isOwnProfile ? "Delete My Account" : "Delete User"}
-                        </span>
+                        </Text>
                       </Button>
                     )}
                   </div>
                 </div>
 
-                {/* Stats & Details Pills (Articles Count, Joined Date) */}
+                {/* Stats & Details Pills */}
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-bgPrimary/80 border border-borderPrimary/40 text-xs font-semibold text-textPrimary">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-bgPrimary/80 border border-borderPrimary/40">
                     <FileText className="h-4 w-4 text-primary" />
-                    <span>
-                      {userToDisplay?.postsCount ?? displayUserPosts.length} Articles
-                    </span>
+                    <Text as="span" size="xs" font="semiBold" color="primary">
+                      {userToDisplay?.postsCount ?? displayUserPosts.length}{" "}
+                      Articles
+                    </Text>
                   </div>
                   {userToDisplay?.createdAt && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-bgPrimary/80 border border-borderPrimary/40 text-xs font-semibold text-textSecondary">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-bgPrimary/80 border border-borderPrimary/40">
                       <Calendar className="h-4 w-4 text-primary/70" />
-                      <span>
+                      <Text as="span" size="xs" font="semiBold" color="secondary">
                         Joined{" "}
                         {new Date(userToDisplay.createdAt).toLocaleDateString(
                           "en-US",
                           { month: "short", day: "numeric", year: "numeric" },
                         )}
-                      </span>
+                      </Text>
                     </div>
                   )}
                 </div>
@@ -294,9 +310,11 @@ export default function UserProfilePage() {
         <div className="space-y-6">
           <div className="flex items-center gap-2 pb-2 border-b border-borderPrimary/40">
             <FileText className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-bold text-textPrimary">
-              {isOwnProfile ? "My Published Articles" : `${userToDisplay?.username}'s Articles`}
-            </h2>
+            <Text as="h2" size="xl" font="bold" color="primary">
+              {isOwnProfile
+                ? "My Published Articles"
+                : `${userToDisplay?.username}'s Articles`}
+            </Text>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
               {displayUserPosts.length}
             </span>
@@ -309,12 +327,14 @@ export default function UserProfilePage() {
           ) : displayUserPosts.length === 0 ? (
             <div className="text-center py-12 p-8 rounded-2xl bg-bgSecondary/40 border border-borderPrimary/40">
               <FileText className="h-10 w-10 text-textSecondary mx-auto mb-3 opacity-40" />
-              <p className="text-sm font-semibold text-textPrimary">No articles published yet</p>
-              <p className="text-xs text-textSecondary mt-1">
+              <Text as="p" size="sm" font="semiBold" color="primary">
+                No articles published yet
+              </Text>
+              <Text as="p" size="xs" color="secondary" className="mt-1">
                 {isOwnProfile
                   ? "Create your first post from the main feed to get started."
                   : "This user hasn't published any articles yet."}
-              </p>
+              </Text>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -326,12 +346,14 @@ export default function UserProfilePage() {
         </div>
       </main>
 
-      {/* Edit Profile Modal (PUT /users/:id) */}
+      {/* Edit Profile Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="relative w-full max-w-md bg-bgSecondary border border-borderPrimary rounded-2xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-borderPrimary/40 pb-3">
-              <h3 className="text-lg font-bold text-textPrimary">Edit Profile Settings</h3>
+              <Text as="h3" size="lg" font="bold" color="primary">
+                Edit Profile Settings
+              </Text>
               <button
                 onClick={() => setIsEditModalOpen(false)}
                 className="p-1.5 rounded-lg text-textSecondary hover:text-textPrimary"
@@ -340,11 +362,20 @@ export default function UserProfilePage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit(handleUpdateProfile)} className="space-y-4">
+            <form
+              onSubmit={handleSubmit(handleUpdateProfile)}
+              className="space-y-4"
+            >
               <div>
-                <label className="block text-xs font-semibold text-textSecondary mb-1">
+                <Text
+                  as="label"
+                  size="xs"
+                  font="semiBold"
+                  color="secondary"
+                  className="block mb-1"
+                >
                   Username (3-10 characters)
-                </label>
+                </Text>
                 <input
                   type="text"
                   {...register("username", {
@@ -356,9 +387,15 @@ export default function UserProfilePage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-textSecondary mb-1">
+                <Text
+                  as="label"
+                  size="xs"
+                  font="semiBold"
+                  color="secondary"
+                  className="block mb-1"
+                >
                   Job Title (Optional)
-                </label>
+                </Text>
                 <input
                   type="text"
                   placeholder="e.g. Frontend Developer"
@@ -371,9 +408,15 @@ export default function UserProfilePage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-textSecondary mb-1">
+                <Text
+                  as="label"
+                  size="xs"
+                  font="semiBold"
+                  color="secondary"
+                  className="block mb-1"
+                >
                   Email Address
-                </label>
+                </Text>
                 <input
                   type="email"
                   {...register("email", {
@@ -392,7 +435,9 @@ export default function UserProfilePage() {
                   onClick={() => setIsEditModalOpen(false)}
                   className="rounded-xl text-xs"
                 >
-                  Cancel
+                  <Text as="span" size="xs" color="secondary">
+                    Cancel
+                  </Text>
                 </Button>
                 <Button
                   type="submit"
@@ -400,7 +445,9 @@ export default function UserProfilePage() {
                   disabled={updateUserMutation.isPending}
                   className="rounded-xl bg-primary text-primary-foreground text-xs"
                 >
-                  {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
+                  <Text as="span" size="xs" font="semiBold" color="white">
+                    {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
+                  </Text>
                 </Button>
               </div>
             </form>
@@ -408,7 +455,7 @@ export default function UserProfilePage() {
         </div>
       )}
 
-      {/* Delete User / My Account Framer Motion Modal */}
+      {/* Delete User Modal */}
       <DeleteConfirmModal
         isOpen={isDeleteUserModalOpen}
         onClose={() => setIsDeleteUserModalOpen(false)}

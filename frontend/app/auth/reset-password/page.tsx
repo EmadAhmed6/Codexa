@@ -14,16 +14,20 @@ import { toast } from "sonner";
 import {
   resetPasswordSchema,
   type IResetPassword,
-} from "@/_features/auth/schemas/auth-schemas";
-import { useResetPasswordMutation } from "@/_features/auth/hooks/auth-hooks";
+} from "@/_features/auth/schemas/auth";
+import { useResetPasswordMutation } from "@/_features/auth/hooks";
 import { Text } from "@/_components/Text";
 import Error from "@/_components/Error";
 
 interface ResetPasswordPageProps {
-  params?: { userId?: string; token?: string } | Promise<{ userId?: string; token?: string }>;
+  params?:
+    | { userId?: string; token?: string }
+    | Promise<{ userId?: string; token?: string }>;
 }
 
-export default function ResetPasswordPage({ params: initialParams }: ResetPasswordPageProps = {}) {
+export default function ResetPasswordPage({
+  params: initialParams,
+}: ResetPasswordPageProps = {}) {
   const router = useRouter();
   const routeParams = useParams();
   const searchParams = useSearchParams();
@@ -240,7 +244,12 @@ export default function ResetPasswordPage({ params: initialParams }: ResetPasswo
         </div>
 
         {/* Submit button */}
-        <Button type="submit" disabled={resetMutation.isPending} size="lg">
+        <Button
+          type="submit"
+          disabled={resetMutation.isPending}
+          size="lg"
+          className={"w-full"}
+        >
           {resetMutation.isPending ? (
             <div className="flex items-center gap-2">
               <span className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />

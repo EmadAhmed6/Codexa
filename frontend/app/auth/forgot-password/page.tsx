@@ -19,8 +19,8 @@ import { toast } from "sonner";
 import {
   forgotPasswordSchema,
   type IForgotPassword,
-} from "@/_features/auth/schemas/auth-schemas";
-import { useForgotPasswordMutation } from "@/_features/auth/hooks/auth-hooks";
+} from "@/_features/auth/schemas/auth";
+import { useForgotPasswordMutation } from "@/_features/auth/hooks";
 import { Text } from "@/_components/Text";
 import Error from "@/_components/Error";
 
@@ -146,7 +146,10 @@ export default function ForgotPasswordPage() {
   return (
     <div className="w-full max-w-md glass-card p-8 md:p-10 transition-all duration-300">
       {/* Back button link */}
-      <Link href="/auth/login" className="inline-flex items-center gap-1 mb-6 group">
+      <Link
+        href="/auth/login"
+        className="inline-flex items-center gap-1 mb-6 group"
+      >
         <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform text-textSecondary" />
         <Text
           as="span"
@@ -196,7 +199,12 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Submit Button */}
-        <Button type="submit" disabled={forgotMutation.isPending} size="lg">
+        <Button
+          type="submit"
+          disabled={forgotMutation.isPending}
+          size="lg"
+          className={"w-full"}
+        >
           {forgotMutation.isPending ? (
             <div className="flex items-center gap-2">
               <span className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />

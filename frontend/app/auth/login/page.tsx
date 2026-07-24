@@ -8,11 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  loginSchema,
-  type ILogin,
-} from "@/_features/auth/schemas/auth-schemas";
-import { useLoginMutation } from "@/_features/auth/hooks/auth-hooks";
+import { loginSchema, type ILogin } from "@/_features/auth/schemas/auth";
+import { useLoginMutation } from "@/_features/auth/hooks";
 import Cookies from "js-cookie";
 import { toast } from "sonner";
 import { Text } from "@/_components/Text";
@@ -144,7 +141,12 @@ export default function LoginPage() {
         </div>
 
         {/* Submit Button */}
-        <Button type="submit" disabled={loginMutation.isPending} size="lg">
+        <Button
+          type="submit"
+          disabled={loginMutation.isPending}
+          size="lg"
+          className={"w-full"}
+        >
           {loginMutation.isPending ? (
             <div className="flex items-center gap-2">
               <span className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />

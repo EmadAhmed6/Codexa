@@ -4,6 +4,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, Trash2, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Text } from "@/_components/Text";
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
@@ -61,10 +62,17 @@ export default function DeleteConfirmModal({
             </div>
 
             {/* Title & Description */}
-            <h3 className="text-xl font-bold text-textPrimary mb-2">{title}</h3>
-            <p className="text-xs md:text-sm text-textSecondary leading-relaxed mb-6">
+            <Text as="h3" size="xl" font="bold" color="primary" className="mb-2">
+              {title}
+            </Text>
+            <Text
+              as="p"
+              size="sm"
+              color="secondary"
+              className="leading-relaxed mb-6 text-xs md:text-sm"
+            >
               {description}
-            </p>
+            </Text>
 
             {/* Action Buttons */}
             <div className="flex items-center justify-end gap-3 pt-2 border-t border-borderPrimary/40">
@@ -75,7 +83,9 @@ export default function DeleteConfirmModal({
                 disabled={isPending}
                 className="rounded-xl border-borderPrimary px-4 text-xs font-semibold"
               >
-                Cancel
+                <Text as="span" size="xs" font="semiBold" color="primary">
+                  Cancel
+                </Text>
               </Button>
               <Button
                 type="button"
@@ -87,12 +97,16 @@ export default function DeleteConfirmModal({
                 {isPending ? (
                   <>
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>Deleting...</span>
+                    <Text as="span" size="xs" font="semiBold" color="white">
+                      Deleting...
+                    </Text>
                   </>
                 ) : (
                   <>
                     <Trash2 className="h-3.5 w-3.5" />
-                    <span>{confirmText}</span>
+                    <Text as="span" size="xs" font="semiBold" color="white">
+                      {confirmText}
+                    </Text>
                   </>
                 )}
               </Button>

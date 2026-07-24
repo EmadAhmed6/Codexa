@@ -5,11 +5,12 @@ import { X, Loader2, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useUpdatePost } from "@/_features/posts/post-hooks";
+import { useUpdatePost } from "@/_features/posts/hooks";
 import { Post } from "@/_features/posts/types/Post";
-import { postFormSchema, type IPostForm } from "@/_features/posts/schemas/post-schemas";
+import { postFormSchema, type IPostForm } from "@/_features/posts/schemas/post";
 import Error from "@/_components/Error";
 import { toast } from "sonner";
+import { Text } from "@/_components/Text";
 
 interface EditPostModalProps {
   isOpen: boolean;
@@ -27,7 +28,11 @@ const CATEGORIES = [
   "Career & Insights",
 ];
 
-export default function EditPostModal({ isOpen, onClose, post }: EditPostModalProps) {
+export default function EditPostModal({
+  isOpen,
+  onClose,
+  post,
+}: EditPostModalProps) {
   const updatePostMutation = useUpdatePost();
 
   const {
@@ -88,8 +93,12 @@ export default function EditPostModal({ isOpen, onClose, post }: EditPostModalPr
               <Edit3 className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-textPrimary">Edit Article</h2>
-              <p className="text-xs text-textSecondary">Update article details and category</p>
+              <Text as="h2" size="xl" font="bold" color="primary">
+                Edit Article
+              </Text>
+              <Text as="p" size="xs" color="secondary">
+                Update article details and category
+              </Text>
             </div>
           </div>
           <button
@@ -104,9 +113,15 @@ export default function EditPostModal({ isOpen, onClose, post }: EditPostModalPr
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           {/* Category */}
           <div>
-            <label className="block text-xs font-semibold text-textSecondary uppercase tracking-wider mb-2">
+            <Text
+              as="label"
+              size="xs"
+              font="semiBold"
+              color="secondary"
+              className="block uppercase tracking-wider mb-2"
+            >
               Category
-            </label>
+            </Text>
             <select
               {...register("category", {
                 onChange: () => clearErrors("category"),
@@ -125,12 +140,18 @@ export default function EditPostModal({ isOpen, onClose, post }: EditPostModalPr
           {/* Title */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-xs font-semibold text-textSecondary uppercase tracking-wider">
+              <Text
+                as="label"
+                size="xs"
+                font="semiBold"
+                color="secondary"
+                className="block uppercase tracking-wider"
+              >
                 Title
-              </label>
-              <span className="text-[11px] text-textSecondary">
+              </Text>
+              <Text as="span" size="xs" color="secondary" className="text-[11px]">
                 {watchTitle.length}/32
-              </span>
+              </Text>
             </div>
             <input
               type="text"
@@ -145,12 +166,18 @@ export default function EditPostModal({ isOpen, onClose, post }: EditPostModalPr
           {/* Description */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-xs font-semibold text-textSecondary uppercase tracking-wider">
+              <Text
+                as="label"
+                size="xs"
+                font="semiBold"
+                color="secondary"
+                className="block uppercase tracking-wider"
+              >
                 Content & Description
-              </label>
-              <span className="text-[11px] text-textSecondary">
+              </Text>
+              <Text as="span" size="xs" color="secondary" className="text-[11px]">
                 {watchDescription.length}/250
-              </span>
+              </Text>
             </div>
             <textarea
               rows={6}
@@ -170,7 +197,9 @@ export default function EditPostModal({ isOpen, onClose, post }: EditPostModalPr
               onClick={onClose}
               className="rounded-xl border-borderPrimary"
             >
-              Cancel
+              <Text as="span" size="xs" font="semiBold" color="primary">
+                Cancel
+              </Text>
             </Button>
             <Button
               type="submit"
@@ -180,10 +209,14 @@ export default function EditPostModal({ isOpen, onClose, post }: EditPostModalPr
               {updatePostMutation.isPending ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Saving...
+                  <Text as="span" size="xs" font="semiBold" color="white">
+                    Saving...
+                  </Text>
                 </span>
               ) : (
-                "Save Changes"
+                <Text as="span" size="xs" font="semiBold" color="white">
+                  Save Changes
+                </Text>
               )}
             </Button>
           </div>
