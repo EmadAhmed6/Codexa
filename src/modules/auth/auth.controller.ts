@@ -171,7 +171,7 @@ const sendForgotPasswodLink = asyncHandler(
     const token = jwt.sign({ email, id: user.id }, secret, {
       expiresIn: "10m",
     });
-    const link = `http://localhost:5000/auth/reset-password/${user.id}/${token}`;
+    const link = `http://localhost:3000/auth/reset-password/${user.id}/${token}`;
     await sendEmail(
       user.email,
       "Reset Password Link",

@@ -8,10 +8,11 @@ import { Types } from "mongoose";
 import { User } from "../user/user.model.js";
 
 // GET ALL POSTS
+
 const getAllPosts = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const pageNumber = Number(req.query.pageNumber) || 1;
-    const postsPerPage = 2;
+    const postsPerPage = 5;
     const posts = await Post.find()
       .populate("user", ["_id", "username", "profilePicture"])
       .populate("likes", ["_id", "username"])
@@ -29,7 +30,8 @@ const getAllPosts = asyncHandler(
         ],
       })
       .skip((pageNumber - 1) * postsPerPage)
-      .limit(postsPerPage);
+      .limit(postsPerPage)
+      .sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: posts });
     return;
   },

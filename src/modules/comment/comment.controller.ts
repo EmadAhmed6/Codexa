@@ -23,8 +23,8 @@ const getAllComments = asyncHandler(
     const commentsPerPost = Number(req.query.commentsPerPost) || 5;
 
     const comments = await Comment.find({ postId: new Types.ObjectId(postId) })
-      .populate("user", ["_id", "username"])
-      .populate("likes", ["_id", "username"])
+      .populate("user", ["_id", "username", "profilePicture"])
+      .populate("likes", ["_id", "username", "profilePicture"])
       .skip((pageNumber - 1) * commentsPerPost)
       .limit(commentsPerPost)
       .sort({ createdAt: -1 });

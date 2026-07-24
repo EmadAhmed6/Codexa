@@ -6,6 +6,7 @@ import {
   type ICreatePost,
   type IUpdatePost,
 } from "./post.schema.js";
+
 interface IPost extends ICreatePost, Document {
   user: Types.ObjectId;
   likes: Types.ObjectId[];
@@ -14,6 +15,7 @@ interface IPost extends ICreatePost, Document {
   commentsCount: Number;
   postLikesCount: Number;
 }
+
 const PostSchema = new Schema<IPost>(
   {
     title: {
