@@ -1,13 +1,18 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { KeyRound, ArrowRight, Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { toast } from "sonner";
 import {
   verifyOtpSchema,
@@ -28,12 +33,13 @@ function VerifyOtpForm() {
   const {
     register,
     handleSubmit,
-    reset,
+    control,
+    getValues,
     clearErrors,
     formState: { errors },
   } = useForm<IVerifyOtp>({
     resolver: zodResolver(verifyOtpSchema as any),
-    mode: "onBlur",
+    mode: "onChange",
     defaultValues: {
       email: emailQuery,
       otp: "",
@@ -54,7 +60,6 @@ function VerifyOtpForm() {
               "Account verified successfully! Please sign in.",
           );
           router.push("/auth/login");
-          reset();
         },
         onError: (err: any) => {
           toast.error(
@@ -87,8 +92,8 @@ function VerifyOtpForm() {
         </Text>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        {/* Email Field (hidden or readonly display) */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Email Field */}
         <div className="space-y-1.5">
           <Label htmlFor="email">Email address</Label>
           <Input
@@ -102,26 +107,46 @@ function VerifyOtpForm() {
           <Error error={errors.email?.message} />
         </div>
 
-        {/* OTP Field */}
-        <div className="space-y-1.5">
-          <Label htmlFor="otp">6-Digit OTP Code</Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
-              <KeyRound className="h-4.5 w-4.5" />
-            </span>
-            <Input
-              id="otp"
-              type="text"
-              placeholder="123456"
-              maxLength={6}
-              disabled={verifyOtpMutation.isPending}
-              className={`pl-11 tracking-widest font-mono text-base ${errors.otp ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
-              {...register("otp", {
-                onChange: () => clearErrors("otp"),
-              })}
+        {/* Shadcn InputOTP Component */}
+        <div className="space-y-2">
+          <Label className="block text-center text-xs font-semibold text-textSecondary mb-6">
+            Enter 6-Digit Code
+          </Label>
+          <div className="flex justify-center">
+            <Controller
+              name="otp"
+              control={control}
+              render={({ field }) => (
+                <InputOTP
+                  maxLength={6}
+                  value={field.value}
+                  onChange={(val) => {
+                    field.onChange(val);
+                    if (val.length === 6 && !verifyOtpMutation.isPending) {
+                      clearErrors("otp");
+                      const currentEmail = getValues("email");
+                      if (currentEmail) {
+                        onSubmit({ email: currentEmail, otp: val });
+                      }
+                    }
+                  }}
+                  disabled={verifyOtpMutation.isPending}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} className="rounded-sm" />
+                    <InputOTPSlot index={1} className="rounded-sm" />
+                    <InputOTPSlot index={2} className="rounded-sm" />
+                    <InputOTPSlot index={3} className="rounded-sm" />
+                    <InputOTPSlot index={4} className="rounded-sm" />
+                    <InputOTPSlot index={5} className="rounded-sm" />
+                  </InputOTPGroup>
+                </InputOTP>
+              )}
             />
           </div>
-          <Error error={errors.otp?.message} />
+          <div className="text-center mt-1">
+            <Error error={errors.otp?.message} />
+          </div>
         </div>
 
         {/* Submit Button */}
@@ -129,7 +154,7 @@ function VerifyOtpForm() {
           type="submit"
           disabled={verifyOtpMutation.isPending}
           size="lg"
-          className="w-full"
+          className="w-full rounded-2xl"
         >
           {verifyOtpMutation.isPending ? (
             <div className="flex items-center gap-2">
@@ -150,7 +175,7 @@ function VerifyOtpForm() {
       </form>
 
       {/* Footer Link */}
-      <div className="mt-2 text-center border-t border-borderPrimary/40 pt-4">
+      <div className="mt-6 text-center border-t border-borderPrimary/40 pt-4">
         <Text size="xs" color="secondary">
           Already verified?{" "}
           <Link
