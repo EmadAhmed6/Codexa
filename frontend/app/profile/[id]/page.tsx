@@ -40,6 +40,7 @@ import Error from "@/_components/Error";
 import { toast } from "sonner";
 import { Text } from "@/_components/Text";
 import { Post } from "@/_features/posts/types/Post";
+import { Input } from "@/components/ui/input";
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -268,9 +269,9 @@ export default function UserProfilePage() {
                         <Button
                           onClick={() => setIsCreateModalOpen(true)}
                           size="sm"
-                          className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground text-xs flex items-center gap-1.5 cursor-pointer font-semibold"
+                          className="rounded-xl bg-primary hover:bg-primaryHover text-white text-xs flex items-center gap-1.5 cursor-pointer font-semibold shadow-md shadow-primary/20"
                         >
-                          <PlusCircle className="h-3.5 w-3.5" />
+                          <PlusCircle className="h-3.5 w-3.5 text-white" />
                           <Text
                             as="span"
                             size="xs"
@@ -305,10 +306,15 @@ export default function UserProfilePage() {
                         variant="destructive"
                         size="sm"
                         disabled={deleteUserMutation.isPending}
-                        className="rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
+                        className="group/delBtn rounded-xl text-xs flex items-center gap-1.5 cursor-pointer bg-rose-500/15 border border-rose-500/30 hover:bg-rose-600 transition-all"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        <Text as="span" size="xs" font="semiBold" color="white">
+                        <Trash2 className="h-3.5 w-3.5 text-rose-700  group-hover/delBtn:text-white transition-colors" />
+                        <Text
+                          as="span"
+                          size="xs"
+                          font="semiBold"
+                          className="text-rose-700  group-hover/delBtn:text-white transition-colors"
+                        >
                           {isOwnProfile ? "Delete Account" : "Delete User"}
                         </Text>
                       </Button>
@@ -331,7 +337,7 @@ export default function UserProfilePage() {
                         as="span"
                         size="xs"
                         font="semiBold"
-                        color="secondary"
+                        color="primary"
                       >
                         Joined{" "}
                         {new Date(userToDisplay.createdAt).toLocaleDateString(
@@ -438,12 +444,11 @@ export default function UserProfilePage() {
                 >
                   Username (3-10 characters)
                 </Text>
-                <input
+                <Input
                   type="text"
                   {...register("username", {
                     onChange: () => clearErrors("username"),
                   })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary outline-none focus:ring-2 focus:ring-primary"
                 />
                 <Error error={errors.username?.message} />
               </div>
@@ -458,13 +463,12 @@ export default function UserProfilePage() {
                 >
                   Job Title (Optional)
                 </Text>
-                <input
+                <Input
                   type="text"
                   placeholder="e.g. Frontend Developer"
                   {...register("jobTitle" as any, {
                     onChange: () => clearErrors("jobTitle" as any),
                   })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary outline-none focus:ring-2 focus:ring-primary"
                 />
                 <Error error={(errors as any).jobTitle?.message} />
               </div>
@@ -479,12 +483,11 @@ export default function UserProfilePage() {
                 >
                   Email Address
                 </Text>
-                <input
+                <Input
                   type="email"
                   {...register("email", {
                     onChange: () => clearErrors("email"),
                   })}
-                  className="w-full px-3.5 py-2 text-sm rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary outline-none focus:ring-2 focus:ring-primary"
                 />
                 <Error error={errors.email?.message} />
               </div>

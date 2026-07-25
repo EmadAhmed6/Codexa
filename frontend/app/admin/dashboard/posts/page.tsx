@@ -16,13 +16,18 @@ import {
   Loader2,
   Heart,
   MessageSquare,
+  Share2,
   Search,
   ArrowLeft,
   ExternalLink,
   Layers,
+  User as UserIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
+import Tooltip from "@/_components/Tooltip";
+import UserListTooltip from "@/_components/UserListTooltip";
+import AuthorProfileTooltip from "@/_components/AuthorProfileTooltip";
 
 export default function AdminPostsPage() {
   const { data: currentUser, isLoading: isAuthLoading } = useGetAuthMeQuery();
@@ -55,11 +60,23 @@ export default function AdminPostsPage() {
           <div className="w-16 h-16 rounded-3xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center mb-6">
             <ShieldAlert className="h-8 w-8" />
           </div>
-          <Text as="h1" size="2xl" font="extraBold" color="primary" className="mb-2">
+          <Text
+            as="h1"
+            size="2xl"
+            font="extraBold"
+            color="primary"
+            className="mb-2"
+          >
             Access Denied
           </Text>
-          <Text as="p" size="xs" color="secondary" className="mb-6 leading-relaxed">
-            You do not have administrative privileges to access the Admin Dashboard.
+          <Text
+            as="p"
+            size="xs"
+            color="secondary"
+            className="mb-6 leading-relaxed"
+          >
+            You do not have administrative privileges to access the Admin
+            Dashboard.
           </Text>
           <Link href="/">
             <Button className="rounded-xl bg-primary text-primary-foreground text-xs font-semibold cursor-pointer">
@@ -93,6 +110,17 @@ export default function AdminPostsPage() {
     (acc, p) => acc + (p.likesCount || p.likes?.length || 0),
     0,
   );
+  const totalShares = allPostsList.reduce(
+    (acc, p) =>
+      acc +
+      (p.sharesCount !== undefined
+        ? p.sharesCount
+        : Array.isArray(p.shares)
+          ? p.shares.length
+          : 0),
+    0,
+  );
+  const totalReactions = totalLikes + totalShares;
   const categoriesCount = new Set(allPostsList.map((p) => p.category)).size;
 
   const handleConfirmDeletePost = async () => {
@@ -116,7 +144,13 @@ export default function AdminPostsPage() {
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
-            <Text as="h1" size="3xl" font="extraBold" color="primary" className="tracking-tight">
+            <Text
+              as="h1"
+              size="3xl"
+              font="extraBold"
+              color="primary"
+              className="tracking-tight"
+            >
               Admin Control Center
             </Text>
             <Text as="p" size="xs" color="secondary">
@@ -144,7 +178,8 @@ export default function AdminPostsPage() {
                   Articles & Posts Management
                 </Text>
                 <Text as="p" size="xs" color="secondary">
-                  Monitor published articles, categories, reactions, and delete posts
+                  Monitor published articles, categories, reactions, and delete
+                  posts
                 </Text>
               </div>
 
@@ -185,7 +220,7 @@ export default function AdminPostsPage() {
                     Total Reactions
                   </Text>
                   <Text as="h3" size="2xl" font="black" color="primary">
-                    {totalLikes}
+                    {totalReactions}
                   </Text>
                 </div>
               </div>
@@ -233,74 +268,117 @@ export default function AdminPostsPage() {
                     <tbody className="divide-y divide-borderPrimary/30 text-textPrimary font-medium">
                       {filteredPosts.map((postItem) => {
                         const authorObj =
-                          typeof postItem.user === "object" ? postItem.user : null;
-                        const likes =
-                          postItem.likesCount || postItem.likes?.length || 0;
-                        const commentsCount =
-                          postItem.commentsCount || postItem.comments?.length || 0;
+                          typeof postItem.user === "object"
+                            ? postItem.user
+                            : null;
+                        const authorId =
+                          typeof postItem.user === "string"
+                            ? postItem.user
+                            : authorObj?._id;
+                        const authorUsername =
+                          authorObj?.username || "Unknown Author";
+
+                        const likes = postItem.likes?.length || 0;
+                        const sharesCount = postItem.shares?.length || 0;
+                        const commentsCount = postItem.comments?.length || 0;
 
                         return (
                           <tr
                             key={postItem._id}
-                            className="hover:bg-bgSecondary/80 transition-colors"
+                            className="hover:bg-bgSecondary/80 transition-colors min-w-50"
                           >
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center gap-3">
+                              <Link
+                                href={`/posts/${postItem._id}`}
+                                className="group/article flex items-center gap-3 max-w-xs cursor-pointer"
+                              >
                                 {postItem.image?.url ? (
                                   <img
                                     src={postItem.image.url}
                                     alt={postItem.title}
-                                    className="h-10 w-14 rounded-lg object-cover border border-borderPrimary shrink-0"
+                                    className="h-10 w-14 rounded-lg object-cover border border-borderPrimary group-hover/article:border-primary/50 group-hover/article:scale-105 transition-all duration-200 shrink-0"
                                   />
                                 ) : (
-                                  <div className="h-10 w-14 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                  <div className="h-10 w-14 rounded-lg bg-primary/10 group-hover/article:bg-primary/20 flex items-center justify-center text-primary transition-colors shrink-0">
                                     <FileText className="h-5 w-5" />
                                   </div>
                                 )}
-                                <div className="max-w-xs overflow-hidden">
-                                  <Link
-                                    href={`/posts/${postItem._id}`}
-                                    className="block hover:text-primary transition-colors truncate"
+                                <div className="overflow-hidden">
+                                  <Text
+                                    as="span"
+                                    size="xs"
+                                    font="bold"
+                                    color="primary"
+                                    className="truncate block group-hover/article:text-primary group-hover/article:underline transition-colors"
                                   >
-                                    <Text
-                                      as="span"
-                                      size="xs"
-                                      font="bold"
-                                      color="primary"
-                                      className="truncate block"
-                                    >
-                                      {postItem.title}
-                                    </Text>
-                                  </Link>
+                                    {postItem.title}
+                                  </Text>
                                   <Text
                                     as="span"
                                     size="xs"
                                     color="secondary"
-                                    className="text-[10px] block truncate"
+                                    className="text-[10px] block truncate group-hover/article:text-textPrimary/80 transition-colors opacity-80"
                                   >
                                     {postItem.description}
                                   </Text>
                                 </div>
-                              </div>
+                              </Link>
                             </td>
 
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center gap-2">
-                                {authorObj?.profilePicture?.url ? (
-                                  <img
-                                    src={authorObj.profilePicture.url}
-                                    alt={authorObj.username}
-                                    className="h-6 w-6 rounded-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold">
-                                    {authorObj?.username?.[0] || "U"}
+                              {authorId ? (
+                                <Tooltip
+                                  position="top"
+                                  content={
+                                    <AuthorProfileTooltip
+                                      user={authorObj}
+                                      userId={authorId}
+                                    />
+                                  }
+                                >
+                                  <Link
+                                    href={`/profile/${authorId}`}
+                                    className="group/author inline-flex items-center gap-2 max-w-44 px-2.5 py-1.5 rounded-xl hover:bg-primary/10 transition-all cursor-pointer border border-transparent hover:border-primary/20"
+                                  >
+                                    {authorObj?.profilePicture?.url ? (
+                                      <img
+                                        src={authorObj.profilePicture.url}
+                                        alt={authorUsername}
+                                        className="h-6 w-6 rounded-full object-cover border border-borderPrimary/50 group-hover/author:scale-110 transition-transform shrink-0"
+                                      />
+                                    ) : (
+                                      <div className="h-6 w-6 rounded-full bg-primary/10 group-hover/author:bg-primary/20 flex items-center justify-center text-primary text-[10px] font-bold transition-colors shrink-0">
+                                        {authorUsername?.[0]?.toUpperCase() ||
+                                          "U"}
+                                      </div>
+                                    )}
+                                    <Text
+                                      as="span"
+                                      size="xs"
+                                      font="semiBold"
+                                      color="primary"
+                                      className="group-hover/author:text-primary group-hover/author:underline transition-colors truncate"
+                                    >
+                                      {authorUsername}
+                                    </Text>
+                                  </Link>
+                                </Tooltip>
+                              ) : (
+                                <div className="inline-flex items-center gap-2 px-2.5 py-1.5 max-w-44">
+                                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold shrink-0">
+                                    U
                                   </div>
-                                )}
-                                <Text as="span" size="xs" font="semiBold" color="primary">
-                                  {authorObj?.username || "Unknown Author"}
-                                </Text>
-                              </div>
+                                  <Text
+                                    as="span"
+                                    size="xs"
+                                    font="semiBold"
+                                    color="primary"
+                                    className="truncate"
+                                  >
+                                    Unknown Author
+                                  </Text>
+                                </div>
+                              )}
                             </td>
 
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -310,28 +388,67 @@ export default function AdminPostsPage() {
                             </td>
 
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center gap-3 text-[11px]">
-                                <span className="flex items-center gap-1 text-rose-500">
-                                  <Heart className="h-3.5 w-3.5" />
-                                  {likes}
-                                </span>
-                                <span className="flex items-center gap-1 text-sky-500">
-                                  <MessageSquare className="h-3.5 w-3.5" />
-                                  {commentsCount}
-                                </span>
+                              <div className="flex items-center gap-2.5 text-[11px]">
+                                <Tooltip
+                                  position="bottom"
+                                  content={
+                                    <UserListTooltip
+                                      users={postItem.likes}
+                                      type="like"
+                                    />
+                                  }
+                                >
+                                  <span className="flex items-center gap-1 text-rose-500 hover:bg-rose-500/10 px-2 py-1 rounded-lg transition-colors cursor-pointer font-semibold border border-transparent hover:border-rose-500/20">
+                                    <Heart className="h-3.5 w-3.5 fill-rose-500/20" />
+                                    {likes}
+                                  </span>
+                                </Tooltip>
+
+                                <Tooltip position="bottom" content="View Comments">
+                                  <Link
+                                    href={`/posts/${postItem._id}#comments`}
+                                    className="flex items-center gap-1 text-sky-500 hover:bg-sky-500/10 px-2 py-1 rounded-lg transition-colors font-semibold border border-transparent hover:border-sky-500/20"
+                                  >
+                                    <MessageSquare className="h-3.5 w-3.5" />
+                                    {commentsCount}
+                                  </Link>
+                                </Tooltip>
+
+                                <Tooltip
+                                  position="bottom"
+                                  content={
+                                    <UserListTooltip
+                                      users={postItem.shares}
+                                      type="share"
+                                    />
+                                  }
+                                >
+                                  <span className="flex items-center gap-1 text-emerald-500 hover:bg-emerald-500/10 px-2 py-1 rounded-lg transition-colors cursor-pointer font-semibold border border-transparent hover:border-emerald-500/20">
+                                    <Share2 className="h-3.5 w-3.5" />
+                                    {sharesCount}
+                                  </span>
+                                </Tooltip>
                               </div>
                             </td>
 
                             <td className="px-6 py-4 whitespace-nowrap">
                               {postItem.createdAt ? (
                                 <Text as="span" size="xs" color="secondary">
-                                  {new Date(postItem.createdAt).toLocaleDateString(
-                                    "en-US",
-                                    { month: "short", day: "numeric", year: "numeric" },
-                                  )}
+                                  {new Date(
+                                    postItem.createdAt,
+                                  ).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })}
                                 </Text>
                               ) : (
-                                <Text as="span" size="xs" color="secondary" className="italic opacity-50">
+                                <Text
+                                  as="span"
+                                  size="xs"
+                                  color="secondary"
+                                  className="italic opacity-50"
+                                >
                                   —
                                 </Text>
                               )}
@@ -339,35 +456,39 @@ export default function AdminPostsPage() {
 
                             <td className="px-6 py-4 whitespace-nowrap text-right">
                               <div className="flex items-center justify-end gap-2">
-                                <Link href={`/posts/${postItem._id}`}>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 w-8 p-0 rounded-lg cursor-pointer"
-                                  >
-                                    <ExternalLink className="h-3.5 w-3.5 text-textSecondary" />
-                                  </Button>
-                                </Link>
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() =>
-                                    setSelectedPostToDelete({
-                                      id: postItem._id,
-                                      title: postItem.title,
-                                    })
-                                  }
-                                  disabled={
-                                    deletePostMutation.isPending &&
-                                    selectedPostToDelete?.id === postItem._id
-                                  }
-                                  className="rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
+                                <Tooltip
+                                  position="top"
+                                  content="View Post Article"
                                 >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                  <Text as="span" size="xs" font="semiBold" color="white">
-                                    Delete
-                                  </Text>
-                                </Button>
+                                  <Link href={`/posts/${postItem._id}`}>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-8 w-8 p-0 rounded-lg cursor-pointer hover:border-primary hover:text-primary"
+                                    >
+                                      <ExternalLink className="h-3.5 w-3.5 text-textSecondary hover:text-primary" />
+                                    </Button>
+                                  </Link>
+                                </Tooltip>
+                                <Tooltip position="top" content="Delete Post">
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() =>
+                                      setSelectedPostToDelete({
+                                        id: postItem._id,
+                                        title: postItem.title,
+                                      })
+                                    }
+                                    disabled={
+                                      deletePostMutation.isPending &&
+                                      selectedPostToDelete?.id === postItem._id
+                                    }
+                                    className="group/delete h-8 w-8 p-0 rounded-xl flex items-center justify-center cursor-pointer bg-rose-500/15 text-rose-500 border border-rose-500/30 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all hover:scale-105"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5 text-rose-500 group-hover/delete:text-white transition-colors" />
+                                  </Button>
+                                </Tooltip>
                               </div>
                             </td>
                           </tr>

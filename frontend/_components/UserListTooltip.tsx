@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { User as UserIcon, Heart, Share2 } from "lucide-react";
 import { Text } from "@/_components/Text";
 import { PostUserSummary } from "@/_features/posts/types/Post";
@@ -48,43 +49,72 @@ export default function UserListTooltip({ users, type }: UserListTooltipProps) {
         </Text>
       </div>
 
-      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-        {displayUsers.map((u, idx) => (
-          <div key={u._id || idx} className="flex items-center gap-2">
-            {u.profilePicture?.url ? (
-              <img
-                src={u.profilePicture.url}
-                alt={u.username || "User"}
-                className="h-6 w-6 rounded-full object-cover border border-borderPrimary shrink-0"
-              />
-            ) : (
-              <div className="h-6 w-6 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0">
-                <UserIcon className="h-3 w-3" />
+      <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+        {displayUsers.map((u, idx) => {
+          const userId = u._id;
+          if (!userId) {
+            return (
+              <div key={idx} className="flex items-center gap-2 p-1.5 rounded-lg">
+                {u.profilePicture?.url ? (
+                  <img
+                    src={u.profilePicture.url}
+                    alt={u.username || "User"}
+                    className="h-6 w-6 rounded-full object-cover border border-borderPrimary shrink-0"
+                  />
+                ) : (
+                  <div className="h-6 w-6 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                    <UserIcon className="h-3 w-3" />
+                  </div>
+                )}
+                <Text as="span" size="xs" font="bold" color="primary" className="truncate leading-tight text-[11px]">
+                  {u.username || "User"}
+                </Text>
               </div>
-            )}
-            <div className="flex flex-col truncate">
-              <Text
-                as="span"
-                size="xs"
-                font="bold"
-                color="primary"
-                className="truncate leading-tight text-[11px]"
-              >
-                {u.username || "User"}
-              </Text>
-              {u.jobTitle && (
+            );
+          }
+
+          return (
+            <Link
+              key={userId || idx}
+              href={`/profile/${userId}`}
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-primary/10 transition-colors group/user cursor-pointer"
+            >
+              {u.profilePicture?.url ? (
+                <img
+                  src={u.profilePicture.url}
+                  alt={u.username || "User"}
+                  className="h-6 w-6 rounded-full object-cover border border-borderPrimary/60 shrink-0 group-hover/user:scale-105 transition-transform"
+                />
+              ) : (
+                <div className="h-6 w-6 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0 group-hover/user:bg-primary/25 transition-colors">
+                  <UserIcon className="h-3 w-3" />
+                </div>
+              )}
+              <div className="flex flex-col truncate">
                 <Text
                   as="span"
                   size="xs"
-                  color="secondary"
-                  className="truncate text-[10px] opacity-80"
+                  font="bold"
+                  color="primary"
+                  className="truncate leading-tight text-[11px] group-hover/user:text-primary group-hover/user:underline"
                 >
-                  {u.jobTitle}
+                  {u.username || "User"}
                 </Text>
-              )}
-            </div>
-          </div>
-        ))}
+                {u.jobTitle && (
+                  <Text
+                    as="span"
+                    size="xs"
+                    color="secondary"
+                    className="truncate text-[10px] opacity-80"
+                  >
+                    {u.jobTitle}
+                  </Text>
+                )}
+              </div>
+            </Link>
+          );
+        })}
       </div>
 
       {remainingCount > 0 && (

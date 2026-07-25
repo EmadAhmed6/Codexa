@@ -11,7 +11,6 @@ import {
   validateForgotPassword,
   validateVerifyOtp,
 } from "../user/user.model.js";
-import { unsubscribe } from "diagnostics_channel";
 
 const sendEmail = async (to: string, subject: string, html: string) => {
   const transporter = nodemailer.createTransport({
@@ -30,7 +29,6 @@ const sendEmail = async (to: string, subject: string, html: string) => {
 };
 
 // REGISTER USER
-let otpStore: Record<string, number> = {};
 const register = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateRegisterUser(req.body);
@@ -50,27 +48,36 @@ const register = asyncHandler(
     const genSalt = await bcrypt.genSalt(10);
     req.body.password = await bcrypt.hash(req.body.password, genSalt);
 
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
+
     const newUser = new User({
       username: req.body.username,
       email: req.body.email,
       password: req.body.password,
       isVerified: false,
+      otp: generatedOtp,
+      otpExpired,
     });
 
     const finalUser = await newUser.save();
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    otpStore[finalUser.email] = otp;
     await sendEmail(
       finalUser.email,
       "Verify Your Email",
       `<div>
         <h3>Welcome ${finalUser.username}</h3>
-        <p>Your Verification Code is: <b>${otp}</b></p>
+        <p>Your Verification Code is: <b>${generatedOtp}</b></p>
       </div>`,
     );
 
     const token = finalUser.generateToken();
-    const { password, ...others } = finalUser.toObject();
+    const {
+      password,
+      otp: _,
+      otpExpired: __,
+      ...others
+    } = finalUser.toObject();
+
     res.status(200).json({
       success: true,
       data: {
@@ -96,20 +103,23 @@ const verifyEmailOTP = asyncHandler(
       return;
     }
     const { email, otp } = req.body;
-    if (!otpStore[email] || otpStore[email] !== Number(otp)) {
-      res
-        .status(400)
-        .json({ success: false, message: "Invalid or expired token" });
-      return;
-    }
     const user = await User.findOne({ email });
     if (!user) {
       res.status(404).json({ success: false, message: "Email was not found" });
       return;
     }
+    if (user.otp !== otp || !user.otpExpired || user.otpExpired < new Date()) {
+      res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired token" });
+      return;
+    }
+
     user.isVerified = true;
+    user.otp = undefined;
+    user.otpExpired = undefined;
     await user.save();
-    const { password, ...others } = user.toObject();
+    const { password, otp: __, otpExpired: _, ...others } = user.toObject();
     res.status(200).json({
       success: true,
       data: { message: "Account verified successfully", ...others },
@@ -168,7 +178,11 @@ const sendForgotPasswodLink = asyncHandler(
       res.status(404).json({ message: "User was not found" });
       return;
     }
-    const secret = process.env.JWT_SECRET_KEY + user.password;
+    const secret = process.env.JWT_SECRET_KEY;
+    if (!secret) {
+      res.status(500).json({ message: "Server configuration error" });
+      return;
+    }
     const token = jwt.sign({ email, id: user.id }, secret, {
       expiresIn: "10m",
     });
@@ -204,7 +218,11 @@ const resetPassword = asyncHandler(
       res.status(404).json({ message: "User was not found" });
       return;
     }
-    const secret = process.env.JWT_SECRET_KEY + user.password;
+    const secret = process.env.JWT_SECRET_KEY;
+    if (!secret) {
+      res.status(500).json({ message: "Server configuration error" });
+      return;
+    }
     try {
       jwt.verify(req.params.token as string, secret as string);
 
@@ -240,14 +258,32 @@ const getMe = asyncHandler(async (req: Request, res: Response) => {
       populate: [
         {
           path: "user",
-          select: ["_id", "username", "profilePicture"],
+          select: ["_id", "username", "profilePicture", "jobTitle"],
+        },
+        {
+          path: "likes",
+          select: ["_id", "username", "profilePicture", "jobTitle"],
+        },
+        {
+          path: "shares",
+          select: ["_id", "username", "profilePicture", "jobTitle"],
         },
         {
           path: "sharedPost",
-          populate: {
-            path: "user",
-            select: ["_id", "username", "profilePicture"],
-          },
+          populate: [
+            {
+              path: "user",
+              select: ["_id", "username", "profilePicture", "jobTitle"],
+            },
+            {
+              path: "likes",
+              select: ["_id", "username", "profilePicture", "jobTitle"],
+            },
+            {
+              path: "shares",
+              select: ["_id", "username", "profilePicture", "jobTitle"],
+            },
+          ],
         },
       ],
     });

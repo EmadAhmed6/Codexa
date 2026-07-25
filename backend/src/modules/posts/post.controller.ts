@@ -79,6 +79,7 @@ const createPost = asyncHandler(
       res.status(401).json({ success: false, message: "Not authorized" });
       return;
     }
+
     await User.findByIdAndUpdate(req.user.id, {
       $inc: { postsCount: 1 },
     });
@@ -92,7 +93,12 @@ const createPost = asyncHandler(
     });
 
     const finalPost = await newPost.save();
-    await finalPost.populate("user", ["_id", "username", "profilePicture", "jobTitle"]);
+    await finalPost.populate("user", [
+      "_id",
+      "username",
+      "profilePicture",
+      "jobTitle",
+    ]);
     res.status(201).json({ success: true, data: finalPost });
     return;
   },
@@ -276,13 +282,15 @@ const sharePost = asyncHandler(async (req: Request, res: Response) => {
   });
 
   const savedSharedPost = await sharedPostRecord.save();
+
   await Post.findByIdAndUpdate(postId, {
     $inc: { sharesCount: 1 },
     $push: { shares: new Types.ObjectId(req.user.id) },
   });
-  await Post.findByIdAndUpdate(req.user.id, {
+  await User.findByIdAndUpdate(req.user.id, {
     $inc: { postsCount: 1 },
   });
+
   res.status(201).json({
     success: true,
     data: { message: "Post shared successfully", savedSharedPost },

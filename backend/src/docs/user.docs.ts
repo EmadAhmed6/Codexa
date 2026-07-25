@@ -16,14 +16,15 @@
  * @swagger
  * /users:
  *   get:
- *     summary: Get all users
+ *     summary: Get all users (Rate Limited - 100 req/15min)
+ *     description: Retrieve list of all users on the platform. Protected by API rate limiter.
  *     tags:
  *       - Users
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List of users
+ *         description: List of users retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -38,6 +39,8 @@
  *                     $ref: '#/components/schemas/User'
  *       401:
  *         description: Not authorized
+ *       429:
+ *         description: Too many requests, please try again later
  */
 
 // GET    /users/{id}
@@ -45,7 +48,8 @@
  * @swagger
  * /users/{id}:
  *   get:
- *     summary: Get user by ID
+ *     summary: Get user profile by ID (with populated posts, likes, and shares)
+ *     description: Retrieve user profile by MongoDB ObjectId with deep populated posts, likes, and shares.
  *     tags:
  *       - Users
  *     security:
@@ -83,7 +87,8 @@
  * @swagger
  * /users/{id}:
  *   put:
- *     summary: Update user
+ *     summary: Update user profile
+ *     description: Update username, job title, email, or password of a user account.
  *     tags:
  *       - Users
  *     security:
@@ -106,8 +111,11 @@
  *               username:
  *                 type: string
  *                 minLength: 3
- *                 maxLength: 10
+ *                 maxLength: 20
  *                 example: Ahmed
+ *               jobTitle:
+ *                 type: string
+ *                 example: Full Stack Engineer
  *               email:
  *                 type: string
  *                 format: email
@@ -115,7 +123,7 @@
  *               password:
  *                 type: string
  *                 format: password
- *                 example: NewPassword123
+ *                 example: NewPassword123!
  *     responses:
  *       200:
  *         description: User updated successfully
@@ -137,13 +145,14 @@
  *         description: User not found
  */
 
-// Delete    /users/{id}
+// DELETE /users/{id}
 
 /**
  * @swagger
  * /users/{id}:
  *   delete:
  *     summary: Delete user
+ *     description: Delete a user account from database.
  *     tags:
  *       - Users
  *     security:
@@ -169,18 +178,20 @@
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: User deleted successfully
+ *                   example: User has been deleted successfully
  *       401:
  *         description: Not authorized
  *       404:
  *         description: User was not found
  */
 
+// POST /users/{id}/upload
 /**
  * @swagger
  * /users/{id}/upload:
  *   post:
  *     summary: Upload user profile picture
+ *     description: Upload user profile picture to Cloudinary. Automatically destroys legacy profile picture asset if present.
  *     tags:
  *       - Users
  *     security:
@@ -226,8 +237,6 @@
  *         description: User was not found
  */
 
-
-// POST   /users/{id}/upload
 /**
  * @swagger
  * components:
@@ -241,6 +250,9 @@
  *         username:
  *           type: string
  *           example: Ahmed
+ *         jobTitle:
+ *           type: string
+ *           example: Full Stack Engineer
  *         email:
  *           type: string
  *           format: email
@@ -250,7 +262,7 @@
  *           example: false
  *         isVerified:
  *           type: boolean
- *           example: false
+ *           example: true
  *         postsCount:
  *           type: number
  *           example: 3

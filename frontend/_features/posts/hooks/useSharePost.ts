@@ -6,8 +6,10 @@ export const useSharePost = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: sharePost,
-    onSuccess: () => {
+    onSuccess: (data, postId) => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", postId] });
+      queryClient.invalidateQueries({ queryKey: ["post"] });
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
       queryClient.invalidateQueries({ queryKey: ["authMe"] });
       toast.success("Post shared to your feed!");

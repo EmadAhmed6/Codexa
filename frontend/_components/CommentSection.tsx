@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   MessageSquare,
   Send,
@@ -34,6 +35,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { Text } from "@/_components/Text";
+import Tooltip from "@/_components/Tooltip";
+import UserListTooltip from "@/_components/UserListTooltip";
 
 interface CommentSectionProps {
   postId: string;
@@ -261,32 +264,66 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                 {/* Author Info */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    {comment.user?.profilePicture?.url ? (
-                      <img
-                        src={comment.user.profilePicture.url}
-                        alt={comment.user.username}
-                        className="h-7 w-7 rounded-full object-cover border border-borderPrimary"
-                      />
+                    {comment.user?._id ? (
+                      <Link
+                        href={`/profile/${comment.user._id}`}
+                        className="flex items-center gap-2.5 group/commentAuthor hover:opacity-80 transition-opacity"
+                      >
+                        {comment.user?.profilePicture?.url ? (
+                          <img
+                            src={comment.user.profilePicture.url}
+                            alt={comment.user.username}
+                            className="h-7 w-7 rounded-full object-cover border border-borderPrimary"
+                          />
+                        ) : (
+                          <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <UserIcon className="h-4 w-4" />
+                          </div>
+                        )}
+                        <div>
+                          <Text
+                            as="span"
+                            size="xs"
+                            font="bold"
+                            color="primary"
+                            className="group-hover/commentAuthor:text-primary group-hover/commentAuthor:underline"
+                          >
+                            {comment.user?.username || "Anonymous"}
+                          </Text>
+                          {comment.createdAt && (
+                            <Text
+                              as="span"
+                              size="xs"
+                              color="secondary"
+                              className="text-[10px] ml-2"
+                            >
+                              {formatRelativeTime(comment.createdAt)}
+                            </Text>
+                          )}
+                        </div>
+                      </Link>
                     ) : (
-                      <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                        <UserIcon className="h-4 w-4" />
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                          <UserIcon className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <Text as="span" size="xs" font="bold" color="primary">
+                            Anonymous
+                          </Text>
+                          {comment.createdAt && (
+                            <Text
+                              as="span"
+                              size="xs"
+                              color="secondary"
+                              className="text-[10px] ml-2"
+                            >
+                              {formatRelativeTime(comment.createdAt)}
+                            </Text>
+                          )}
+                        </div>
                       </div>
                     )}
-                    <div>
-                      <Text as="span" size="xs" font="bold" color="primary">
-                        {comment.user?.username || "Anonymous"}
-                      </Text>
-                      {comment.createdAt && (
-                        <Text
-                          as="span"
-                          size="xs"
-                          color="secondary"
-                          className="text-[10px] ml-2"
-                        >
-                          {formatRelativeTime(comment.createdAt)}
-                        </Text>
-                      )}
-                    </div>
                   </div>
 
                   {/* Owner Controls */}
@@ -369,35 +406,45 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                   </div>
                 )}
 
-                {/* Like Button for Comment */}
+                {/* Like Button for Comment with UserListTooltip */}
                 <div className="flex items-center gap-4 pt-1">
-                  <button
-                    onClick={() =>
-                      token && likeCommentMutation.mutate(comment._id)
+                  <Tooltip
+                    position="top"
+                    content={
+                      <UserListTooltip
+                        users={comment.likes as any}
+                        type="like"
+                      />
                     }
-                    disabled={likeCommentMutation.isPending}
-                    className={cn(
-                      "flex items-center gap-1 text-[11px] font-semibold transition-colors cursor-pointer",
-                      isLiked
-                        ? "text-rose-500"
-                        : "text-textSecondary hover:text-rose-500",
-                    )}
                   >
-                    <Heart
+                    <button
+                      onClick={() =>
+                        token && likeCommentMutation.mutate(comment._id)
+                      }
+                      disabled={likeCommentMutation.isPending}
                       className={cn(
-                        "h-3.5 w-3.5",
-                        isLiked && "fill-rose-500 text-rose-500",
+                        "flex items-center gap-1 text-[11px] font-semibold transition-colors cursor-pointer p-1 rounded-md hover:bg-rose-500/10",
+                        isLiked
+                          ? "text-rose-500"
+                          : "text-textSecondary hover:text-rose-500",
                       )}
-                    />
-                    <Text
-                      as="span"
-                      size="xs"
-                      font="semiBold"
-                      className={isLiked ? "text-rose-500" : "text-textSecondary"}
                     >
-                      {likesCount}
-                    </Text>
-                  </button>
+                      <Heart
+                        className={cn(
+                          "h-3.5 w-3.5",
+                          isLiked && "fill-rose-500 text-rose-500",
+                        )}
+                      />
+                      <Text
+                        as="span"
+                        size="xs"
+                        font="semiBold"
+                        className={isLiked ? "text-rose-500" : "text-textSecondary"}
+                      >
+                        {likesCount}
+                      </Text>
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
             );

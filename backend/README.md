@@ -37,37 +37,36 @@ This project implements JSON Web Tokens (JWT) for secure authentication, role-ba
 - **Language:** TypeScript (Configured for ESM - ES2022)
 - **Database:** MongoDB via Mongoose ODM
 - **Validation:** Zod
-- **Security:** Bcrypt.js, Helmet, CORS
-- **Media Uploads:** Multer with Cloudinary API
-- **Mail Delivery:** Nodemailer (For forgot/reset password flows)
+- **Security:** Bcrypt.js, Helmet, CORS, Express-Rate-Limit (Auth & API limiters)
+- **Media Uploads:** Multer with Cloudinary API (Includes automatic Cloudinary asset deletion)
+- **Mail Delivery:** Nodemailer (For registration OTP and password reset flows)
 
 ---
 
 ## ✨ Key Features
 
-- 🔐 **Secure User Authentication & Access Control**
-  - Registration with automatic OTP code dispatch for email verification.
-  - Secure verification step to validate account email addresses using one-time passwords (OTP).
-  - User login with auto-generated JWT tokens.
+- 🔐 **Secure User Authentication & Rate-Limited Access Control**
+  - Registration with automatic OTP generation & expiration (`otp`, `otpExpired`) stored directly in MongoDB.
+  - Email verification (`/auth/verify-otp`) validating directly against database OTP state.
+  - Rate-limited login (`authLimiter`: 5 req/min) and password reset pipelines (`/auth/forgot-password`).
   - Bulletproof password hashing using `bcryptjs` with 10 salt rounds.
-  - Complete password reset request pipeline using signed tokens and email delivery (`nodemailer`).
+  - Signed token password reset pipeline via email (`nodemailer`).
   - Hierarchical authorization middlewares (`verifyToken`, `verifyAuthorizedToken`, `verifyAdminToken`).
-- 📝 **Advanced Post Management**
-  - Full CRUD capabilities for creating, reading, updating, and deleting posts.
-  - Dynamic image uploads (thumbnail/cover) to Cloudinary via Express middleware using `multer`.
-  - Post sharing: Create shared posts referencing original posts and tracking shares.
-  - Social interactions: Post like/unlike toggling with automatic likes counter tracking.
+- 📝 **Advanced Post Management & Deep Populates**
+  - Full CRUD capabilities for posts with thumbnail cover image uploads to Cloudinary.
+  - Deep population of `user`, `likes`, and `shares` containing complete profile fields (`_id`, `username`, `profilePicture`, `jobTitle`).
+  - Post sharing: Creates shared post references, updates original post `shares` & `sharesCount`, and increments author `postsCount`.
+  - Social interactions: Instant like/unlike toggling with automatic counter updates.
 - 💬 **Flexible Commenting & Feedback System**
-  - Embedded commenting functionality linked dynamically to posts.
-  - Media support for comments with dedicated Cloudinary image uploads.
-  - Social interactions: Comment like/unlike tracking.
-- 🛡️ **Data Integrity & Validation**
-  - Strict input sanitation and schema constraints using Joi.
-  - Real-time validation for requests (body parameters, credentials, structure).
-- 🚀 **RESTful Design Patterns**
-  - Logical API response formats returning consistent, pure JSON structures.
-  - Global middleware-based error handling & 404 handler.
-  - TypeScript-safe request and response payload typing.
+  - Embedded comment threads linked to blog posts with automatic `$inc: { commentsCount: -1 }` on deletion.
+  - Image attachments for comments with dedicated Cloudinary uploads.
+  - Comment likes with full user profile populates for rich popovers.
+- 🛡️ **Cloud Storage & Data Sanitation**
+  - Automatic deletion of legacy Cloudinary images upon user profile picture updates.
+  - Strict input sanitation and Zod schema validation across all request endpoints.
+- 🚀 **RESTful Architecture & Rate Protection**
+  - Protected API routes guarded by `apiLimiter` (100 req/15min).
+  - Global middleware error handling, 404 handlers, and full Swagger API documentation (`/api-docs`).
 
 ---
 

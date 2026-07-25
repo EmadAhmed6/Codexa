@@ -25,17 +25,17 @@ Built using a scalable monorepo structure with a **Next.js frontend** and an **E
 ### 🎨 Frontend & Design System
 - **Next.js 16 App Router**: Server-Side Rendering (SSR), Client Components, and dynamic routing (`/posts/[postId]`, `/profile/[id]`, `/admin/dashboard/*`).
 - **Feature-Based Modular Architecture**: Isolated `_features/auth`, `_features/posts`, and `_features/user` directories with independent API handlers and custom React Query hooks.
-- **Unified `<Text />` Typography Engine**: Reusable typography component governing all headings (`h1`-`h3`), paragraphs, labels, and spans across the entire app.
-- **Interactive Tooltip System**: Custom `<Tooltip />` supporting `top`, `bottom`, `left`, `right` positions with smooth animations and dynamic popovers (`<UserListTooltip />`) displaying user avatars, usernames, and job titles on Like/Share hovers.
+- **Unified Typography System**: Reusable `<Text />` engine governing headings, body text, labels, and metadata tags with dark/light mode harmony.
+- **Interactive Hover Tooltips & User Popovers**: Custom `<Tooltip />` featuring 200ms hide delay, hover bridges, pointer interactivity, and dynamic popovers (`<UserListTooltip />` and `<AuthorProfileTooltip />`) displaying user avatars, job titles, and clickable profile links.
+- **Admin Dashboard Control Panel**: Comprehensive administrative management for posts and users with real-time search, icon-only red delete triggers, and detailed author hover cards.
 - **Smart Password Input**: Built-in visibility toggling with eye icons and focus preservation to prevent premature `onBlur` validation errors.
-- **Hydration Mismatch Protection**: SSR-guarded state management ensuring clean hydration without browser extension conflicts.
 
-### ⚙️ Backend & API
-- **Express.js RESTful API**: Structured modular controllers, routes, and Mongoose schemas.
-- **JWT & Cookie Authentication**: Secure token authentication, password hashing with bcrypt, and OTP verification workflows.
-- **Role-Based Access Control (RBAC)**: Admin routes for user and post management.
-- **Cloudinary Integration**: Cloud-based image storage and transformation for post covers and profile avatars.
-- **Complex Mongoose Aggregations & Populates**: Deep population of users, likes, comments, and shares.
+### ⚙️ Backend & API Security
+- **Express.js RESTful API & Swagger Docs**: Structured modular controllers, routes, and auto-generated Swagger UI documentation at `/api-docs`.
+- **Rate-Limited Endpoints (`express-rate-limit`)**: Protection against brute-force attacks via `authLimiter` (5 req/min on login/forgot-password) and `apiLimiter` (100 req/15min).
+- **Persistent Database OTP Verification**: 6-digit verification OTP codes and expiration timestamps stored directly in MongoDB user documents.
+- **Cloudinary Storage & Asset Destruction**: Cloud media upload pipeline with automatic deletion of legacy Cloudinary assets upon avatar updates.
+- **Deep Mongoose Populates**: Full population of user metadata (`_id`, `username`, `profilePicture`, `jobTitle`) across posts, likes, shares, and comment threads.
 
 ---
 

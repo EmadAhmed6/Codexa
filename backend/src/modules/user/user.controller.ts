@@ -24,14 +24,32 @@ const getUserById = asyncHandler(
         populate: [
           {
             path: "user",
-            select: ["_id", "username", "profilePicture"],
+            select: ["_id", "username", "profilePicture", "jobTitle"],
+          },
+          {
+            path: "likes",
+            select: ["_id", "username", "profilePicture", "jobTitle"],
+          },
+          {
+            path: "shares",
+            select: ["_id", "username", "profilePicture", "jobTitle"],
           },
           {
             path: "sharedPost",
-            populate: {
-              path: "user",
-              select: ["_id", "username", "profilePicture"],
-            },
+            populate: [
+              {
+                path: "user",
+                select: ["_id", "username", "profilePicture", "jobTitle"],
+              },
+              {
+                path: "likes",
+                select: ["_id", "username", "profilePicture", "jobTitle"],
+              },
+              {
+                path: "shares",
+                select: ["_id", "username", "profilePicture", "jobTitle"],
+              },
+            ],
           },
         ],
       });
@@ -110,6 +128,11 @@ const uploadUserPicture = asyncHandler(
       res.status(404).json({ success: false, message: "User was not found" });
       return;
     }
+
+    if (user.profilePicture && user.profilePicture.publicId) {
+      await cloudinary.uploader.destroy(user.profilePicture.publicId);
+    }
+    
     if (!req.file) {
       res.status(400).json({ success: false, message: "No file provided" });
       return;

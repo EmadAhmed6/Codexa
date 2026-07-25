@@ -24,7 +24,7 @@ const getAllComments = asyncHandler(
 
     const comments = await Comment.find({ postId: new Types.ObjectId(postId) })
       .populate("user", ["_id", "username", "profilePicture"])
-      .populate("likes", ["_id", "username", "profilePicture"])
+      .populate("likes", ["_id", "username", "profilePicture", "jobTitle"])
       .skip((pageNumber - 1) * commentsPerPost)
       .limit(commentsPerPost)
       .sort({ createdAt: -1 });
@@ -122,6 +122,9 @@ const deleteComment = asyncHandler(
     const comment = await Comment.findById(new Types.ObjectId(commentId));
     if (comment) {
       await Comment.findByIdAndDelete(new Types.ObjectId(commentId));
+      await Comment.findByIdAndUpdate(comment.postId, {
+        $inc: { commentsCount: -1 },
+      });
       res.status(200).json({
         success: true,
         message: "Comment has been deleted successfully",
@@ -172,7 +175,7 @@ const likeComment = asyncHandler(
         ? { $pull: { likes: userId }, $inc: { commentLikesCount: -1 } }
         : { $push: { likes: userId }, $inc: { commentLikesCount: 1 } },
       { new: true },
-    ).populate("likes", ["_id", "username"]);
+    ).populate("likes", ["_id", "username", "profilePicture", "jobTitle"]);
 
     res.status(200).json({ success: true, data: updatedComment });
     return;

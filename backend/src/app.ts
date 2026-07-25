@@ -9,20 +9,21 @@ import helmet from "helmet";
 import cors from "cors";
 import swaggerui from "swagger-ui-express";
 import spacs from "./config/swagger.js";
+import { apiLimiter } from "./middlewares/limiter.js";
 dotenv.config();
 const app = express();
 
 connectToDB();
 
 app.use(helmet());
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors({ origin: process.env.FRONTEND_URL }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", auth);
-app.use("/users", users);
-app.use("/posts", posts);
+app.use("/users", apiLimiter, users);
+app.use("/posts", apiLimiter, posts);
 
 app.use("/api-docs", swaggerui.serve, swaggerui.setup(spacs));
 

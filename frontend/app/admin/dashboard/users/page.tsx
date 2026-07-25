@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
+import Tooltip from "@/_components/Tooltip";
 
 export default function AdminUsersPage() {
   const { data: currentUser, isLoading: isAuthLoading } = useGetAuthMeQuery();
@@ -55,11 +56,23 @@ export default function AdminUsersPage() {
           <div className="w-16 h-16 rounded-3xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center mb-6">
             <ShieldAlert className="h-8 w-8" />
           </div>
-          <Text as="h1" size="2xl" font="extraBold" color="primary" className="mb-2">
+          <Text
+            as="h1"
+            size="2xl"
+            font="extraBold"
+            color="primary"
+            className="mb-2"
+          >
             Access Denied
           </Text>
-          <Text as="p" size="xs" color="secondary" className="mb-6 leading-relaxed">
-            You do not have administrative privileges to access the Admin Dashboard.
+          <Text
+            as="p"
+            size="xs"
+            color="secondary"
+            className="mb-6 leading-relaxed"
+          >
+            You do not have administrative privileges to access the Admin
+            Dashboard.
           </Text>
           <Link href="/">
             <Button className="rounded-xl bg-primary text-primary-foreground text-xs font-semibold cursor-pointer">
@@ -112,7 +125,13 @@ export default function AdminUsersPage() {
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
-            <Text as="h1" size="3xl" font="extraBold" color="primary" className="tracking-tight">
+            <Text
+              as="h1"
+              size="3xl"
+              font="extraBold"
+              color="primary"
+              className="tracking-tight"
+            >
               Admin Control Center
             </Text>
             <Text as="p" size="xs" color="secondary">
@@ -279,7 +298,12 @@ export default function AdminUsersPage() {
                                 </Text>
                               </div>
                             ) : (
-                              <Text as="span" size="xs" color="secondary" className="italic opacity-50">
+                              <Text
+                                as="span"
+                                size="xs"
+                                color="secondary"
+                                className="italic opacity-50"
+                              >
                                 —
                               </Text>
                             )}
@@ -289,12 +313,22 @@ export default function AdminUsersPage() {
                             {userItem.jobTitle ? (
                               <div className="flex items-center gap-1.5 text-primary">
                                 <Briefcase className="h-3.5 w-3.5" />
-                                <Text as="span" size="xs" font="medium" color="primary">
+                                <Text
+                                  as="span"
+                                  size="xs"
+                                  font="medium"
+                                  color="primary"
+                                >
                                   {userItem.jobTitle}
                                 </Text>
                               </div>
                             ) : (
-                              <Text as="span" size="xs" color="secondary" className="italic opacity-50">
+                              <Text
+                                as="span"
+                                size="xs"
+                                color="secondary"
+                                className="italic opacity-50"
+                              >
                                 —
                               </Text>
                             )}
@@ -318,40 +352,62 @@ export default function AdminUsersPage() {
                               <div className="flex items-center gap-1.5">
                                 <Calendar className="h-3.5 w-3.5 text-textSecondary/70" />
                                 <Text as="span" size="xs" color="secondary">
-                                  {new Date(userItem.createdAt).toLocaleDateString(
-                                    "en-US",
-                                    { month: "short", day: "numeric", year: "numeric" },
-                                  )}
+                                  {new Date(
+                                    userItem.createdAt,
+                                  ).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })}
                                 </Text>
                               </div>
                             ) : (
-                              <Text as="span" size="xs" color="secondary" className="italic opacity-50">
+                              <Text
+                                as="span"
+                                size="xs"
+                                color="secondary"
+                                className="italic opacity-50"
+                              >
                                 —
                               </Text>
                             )}
                           </td>
 
                           <td className="px-6 py-4 whitespace-nowrap text-right">
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() =>
-                                setSelectedUserToDelete({
-                                  id: userItem._id,
-                                  username: userItem.username,
-                                })
-                              }
-                              disabled={
-                                deleteUserMutation.isPending &&
-                                selectedUserToDelete?.id === userItem._id
-                              }
-                              className="rounded-xl text-xs flex items-center gap-1.5 cursor-pointer ml-auto"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                              <Text as="span" size="xs" font="semiBold" color="white">
-                                Delete User
-                              </Text>
-                            </Button>
+                            <div className="flex items-center justify-end gap-2">
+                              {userItem._id && (
+                                <Tooltip position="top" content="View User Profile">
+                                  <Link href={`/profile/${userItem._id}`}>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-8 w-8 p-0 rounded-xl cursor-pointer hover:border-primary hover:text-primary transition-all hover:scale-105"
+                                    >
+                                      <UserIcon className="h-3.5 w-3.5 text-textSecondary hover:text-primary" />
+                                    </Button>
+                                  </Link>
+                                </Tooltip>
+                              )}
+                              <Tooltip position="top" content="Delete User">
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() =>
+                                    setSelectedUserToDelete({
+                                      id: userItem._id,
+                                      username: userItem.username,
+                                    })
+                                  }
+                                  disabled={
+                                    deleteUserMutation.isPending &&
+                                    selectedUserToDelete?.id === userItem._id
+                                  }
+                                  className="group/delete h-8 w-8 p-0 rounded-xl flex items-center justify-center cursor-pointer bg-rose-500/15 text-rose-500 border border-rose-500/30 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all hover:scale-105"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5 text-rose-500 group-hover/delete:text-white transition-colors" />
+                                </Button>
+                              </Tooltip>
+                            </div>
                           </td>
                         </tr>
                       ))}

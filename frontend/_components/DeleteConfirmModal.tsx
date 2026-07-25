@@ -89,21 +89,20 @@ export default function DeleteConfirmModal({
               </Button>
               <Button
                 type="button"
-                variant="destructive"
                 onClick={onConfirm}
                 disabled={isPending}
-                className="rounded-xl px-5 text-xs font-semibold flex items-center gap-2 cursor-pointer"
+                className="rounded-xl px-5 text-xs font-semibold flex items-center gap-2 cursor-pointer bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20"
               >
                 {isPending ? (
                   <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
                     <Text as="span" size="xs" font="semiBold" color="white">
                       Deleting...
                     </Text>
                   </>
                 ) : (
                   <>
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-3.5 w-3.5 text-white" />
                     <Text as="span" size="xs" font="semiBold" color="white">
                       {confirmText}
                     </Text>

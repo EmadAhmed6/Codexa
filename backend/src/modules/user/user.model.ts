@@ -52,6 +52,14 @@ const userSchema = new Schema<IUser>(
       type: Number,
       default: 0,
     },
+    otp: {
+      type: String,
+      default: null,
+    },
+    otpExpired: {
+      type: Date,
+      default: null,
+    },
     profilePicture: {
       type: {
         url: String,

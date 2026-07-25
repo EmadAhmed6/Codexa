@@ -31,34 +31,41 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 
 ---
 
+### Rate Limiting & Security
+- **Auth Limiter (`/auth/login`, `/auth/forgot-password`)**: Restricted to **5 requests per minute** to prevent brute-force attacks.
+- **API Limiter (`/users/*`, `/posts/*`)**: Restricted to **100 requests per 15 minutes** to ensure server availability and protection against denial-of-service attempts.
+
+---
+
 ## Endpoints Overview Table
 
-| # | Method | Endpoint | Description | Auth |
-| :--- | :--- | :--- | :--- | :---: |
-| 1 | POST | `/auth/register` | Register a new user account | ❌ |
-| 2 | POST | `/auth/login` | Authenticate user and retrieve JWT token | ❌ |
-| 3 | POST | `/auth/verify-otp` | Verify user email using OTP code | ❌ |
-| 4 | POST | `/auth/forgot-password` | Send password reset link to user's email | ❌ |
-| 5 | POST | `/auth/reset-password/:userId/:token` | Validate reset token and update password | ❌ |
-| 6 | GET | `/users` | Retrieve list of all users | 🔒 |
-| 7 | GET | `/users/:id` | Retrieve detailed profile of a single user by ID | 🔒 |
-| 8 | PUT | `/users/:id` | Update account details (Username, Email, Password) | 🔒 |
-| 9 | POST | `/users/:id/upload` | Upload or update user profile picture | 🔒 |
-| 10 | DELETE | `/users/:id` | Delete user account from the database | 🔒 |
-| 11 | GET | `/posts` | Retrieve all blog posts with paginated comments | 🔒 |
-| 12 | POST | `/posts` | Create a new blog post with metadata | 🔒 |
-| 13 | GET | `/posts/:postId` | Retrieve detailed view of a single post by ID | 🔒 |
-| 14 | PUT | `/posts/:postId` | Update title, description, category, or image of a post | 🔒 |
-| 15 | DELETE | `/posts/:postId` | Delete a post and clear its associated media | 🔒 |
-| 16 | PUT | `/posts/:postId/like` | Toggle like/unlike status on a blog post | 🔒 |
-| 17 | POST | `/posts/:postId/share` | Share an existing blog post | 🔒 |
-| 18 | POST | `/posts/:postId/upload` | Upload thumbnail/cover image to Cloudinary for a specific post | 🔒 |
-| 19 | GET | `/posts/:postId/comments` | Retrieve list of comments for a specific post | 🔒 |
-| 20 | POST | `/posts/:postId/comments` | Post a new comment under a specific post | 🔒 |
-| 21 | PUT | `/posts/:postId/comments/:commentId` | Update text content of a comment | 🔒 |
-| 22 | DELETE | `/posts/:postId/comments/:commentId` | Remove a comment from a post | 🔒 |
-| 23 | PUT | `/posts/:postId/comments/:commentId/like` | Toggle like/unlike status on a comment | 🔒 |
-| 24 | POST | `/posts/:postId/comments/:commentId/upload` | Upload comment image to Cloudinary | 🔒 |
+| # | Method | Endpoint | Description | Auth | Rate Limit |
+| :--- | :--- | :--- | :--- | :---: | :---: |
+| 1 | POST | `/auth/register` | Register a new user account with DB OTP | ❌ | — |
+| 2 | POST | `/auth/login` | Authenticate user and retrieve JWT token | ❌ | 🔒 5 req/min |
+| 3 | POST | `/auth/verify-otp` | Verify user email using 6-digit DB OTP code | ❌ | — |
+| 4 | POST | `/auth/forgot-password` | Send password reset link to user's email | ❌ | 🔒 5 req/min |
+| 5 | POST | `/auth/reset-password/:userId/:token` | Validate reset token and update password | ❌ | — |
+| 6 | GET | `/auth/me` | Retrieve currently authenticated user profile | 🔒 | — |
+| 7 | GET | `/users` | Retrieve list of all users | 🔒 | 🔒 100 req/15min |
+| 8 | GET | `/users/:id` | Retrieve detailed user profile (with populated posts, likes, shares) | 🔒 | 🔒 100 req/15min |
+| 9 | PUT | `/users/:id` | Update account details (Username, Job Title, Email, Password) | 🔒 | 🔒 100 req/15min |
+| 10 | POST | `/users/:id/upload` | Upload user profile picture (cleans up old Cloudinary media) | 🔒 | 🔒 100 req/15min |
+| 11 | DELETE | `/users/:id` | Delete user account from the database | 🔒 | 🔒 100 req/15min |
+| 12 | GET | `/posts` | Retrieve all blog posts with populated user, likes, and shares | 🔒 | 🔒 100 req/15min |
+| 13 | POST | `/posts` | Create a new blog post with metadata | 🔒 | 🔒 100 req/15min |
+| 14 | GET | `/posts/:postId` | Retrieve detailed view of a single post by ID | 🔒 | 🔒 100 req/15min |
+| 15 | PUT | `/posts/:postId` | Update title, description, category, or image of a post | 🔒 | 🔒 100 req/15min |
+| 16 | DELETE | `/posts/:postId` | Delete a post and clear its associated media | 🔒 | 🔒 100 req/15min |
+| 17 | PUT | `/posts/:postId/like` | Toggle like/unlike status on a blog post | 🔒 | 🔒 100 req/15min |
+| 18 | POST | `/posts/:postId/share` | Share an existing post & update shares & posts count | 🔒 | 🔒 100 req/15min |
+| 19 | POST | `/posts/:postId/upload` | Upload thumbnail/cover image to Cloudinary for a post | 🔒 | 🔒 100 req/15min |
+| 20 | GET | `/posts/:postId/comments` | Retrieve comments for a post (with populated user profiles) | 🔒 | 🔒 100 req/15min |
+| 21 | POST | `/posts/:postId/comments` | Post a new comment under a post | 🔒 | 🔒 100 req/15min |
+| 22 | PUT | `/posts/:postId/comments/:commentId` | Update text content of a comment | 🔒 | 🔒 100 req/15min |
+| 23 | DELETE | `/posts/:postId/comments/:commentId` | Remove comment & decrement commentsCount on post | 🔒 | 🔒 100 req/15min |
+| 24 | PUT | `/posts/:postId/comments/:commentId/like` | Toggle like/unlike on a comment (populates user profiles) | 🔒 | 🔒 100 req/15min |
+| 25 | POST | `/posts/:postId/comments/:commentId/upload` | Upload comment image to Cloudinary | 🔒 | 🔒 100 req/15min |
 
 ---
 

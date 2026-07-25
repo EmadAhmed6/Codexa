@@ -56,13 +56,14 @@ import { Text } from "@/_components/Text";
 ---
 
 ### 3. Interactive Tooltips & User Popovers
-Codexa features a custom, reusable Tooltip engine (`_components/Tooltip.tsx`) supporting four positions (`top`, `bottom`, `left`, `right`) with Framer Motion zoom animations.
+Codexa features a custom, reusable Tooltip engine (`_components/Tooltip.tsx`) supporting four positions (`top`, `bottom`, `left`, `right`) with 200ms hide delay, pointer-events interactivity, and an invisible hover bridge that keeps tooltips open smoothly while hovering into popovers.
 
-- **`<Tooltip position="top" content="...">`**: Provides immediate text labels for icon buttons.
-- **`<UserListTooltip users={post.likes} type="like" />`**: Renders an interactive popover listing users who liked or shared an article (including avatars, usernames, and job titles).
+- **`<Tooltip position="top" content="...">`**: Provides immediate text labels for icon buttons and navigation elements.
+- **`<UserListTooltip users={post.likes} type="like" />`**: Renders an interactive popover listing users who liked or shared an article (including avatars, usernames, job titles, and clickable links to profile pages `/profile/${userId}`).
+- **`<AuthorProfileTooltip user={authorObj} userId={authorId} />`**: Displays a detailed user card in Admin Tables on author hover (showing avatar, username, admin badge, job title, email, and user ID).
 
 ```tsx
-<Tooltip position="top" content={<UserListTooltip users={post.likes} type="like" />}>
+<Tooltip position="bottom" content={<UserListTooltip users={post.likes} type="like" />}>
   <button onClick={handleLike}>
     <Heart className="h-4 w-4" />
     <span>{likesCount}</span>
@@ -80,10 +81,10 @@ The base `<Input />` component manages password visibility toggling internally:
 
 ---
 
-### 5. Separate Admin Dashboard Routes
+### 5. Dedicated Admin Dashboard Routes
 The Admin Dashboard is built with dedicated Next.js App Router pages:
-- **`/admin/dashboard/users`**: User statistics, search, user management table, delete modal.
-- **`/admin/dashboard/posts`**: Article statistics, search, post management table, delete modal.
+- **`/admin/dashboard/users`**: User statistics, real-time search, user management table, styled icon-only delete buttons (`<Trash2 />`) with pre-hover red highlights and confirmation modals.
+- **`/admin/dashboard/posts`**: Article statistics, real-time search, post management table with unified clickable article links (image + title hover effects), rich `<AuthorProfileTooltip />` popovers on author hover, reaction tooltips (`position="bottom"`), and delete modals.
 - **`AdminSidebar.tsx`**: Shared sidebar featuring active route highlighting using Next.js `usePathname()`.
 
 ---
