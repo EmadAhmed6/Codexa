@@ -39,6 +39,7 @@ import {
 import Error from "@/_components/Error";
 import { toast } from "sonner";
 import { Text } from "@/_components/Text";
+import { Post } from "@/_features/posts/types/Post";
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -393,7 +394,7 @@ export default function UserProfilePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {displayUserPosts.map((post: any) => (
+              {displayUserPosts.map((post: Post) => (
                 <PostCard key={post._id} post={post} />
               ))}
             </div>
