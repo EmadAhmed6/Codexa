@@ -153,23 +153,27 @@ export default function PostCard({ post }: PostCardProps) {
 
   return (
     <>
-      <article className="group flex flex-col justify-between bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/50 hover:border-primary/40 rounded-2xl p-5 md:p-6 shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative">
+      <article className="group flex flex-col justify-between bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/50 hover:border-primary/40 rounded-2xl p-5 md:p-6 shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
+        {/* Full Card Link Overlay */}
+        <Link
+          href={`/posts/${post._id}`}
+          className="absolute inset-0 z-0"
+          aria-label={post.title || "View Article"}
+        />
+
         {/* Featured Cover Image */}
         {post.image?.url && (
-          <Link
-            href={`/posts/${post._id}`}
-            className="block mb-4 overflow-hidden rounded-xl border border-borderPrimary/30 aspect-video relative group"
-          >
+          <div className="block mb-4 overflow-hidden rounded-xl border border-borderPrimary/30 aspect-video relative z-10 pointer-events-none">
             <img
               src={post.image.url}
-              alt={post.title}
+              alt={post.title || "Cover Image"}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
-          </Link>
+          </div>
         )}
 
         {/* Post Content */}
-        <div className="flex-1 flex flex-col justify-between">
+        <div className="flex-1 flex flex-col justify-between relative z-10 pointer-events-none">
           <div>
             {/* Header Info: Category Badge, Date, & Owner/Admin Controls */}
             <div className="flex items-center justify-between gap-2 mb-3">
@@ -207,7 +211,7 @@ export default function PostCard({ post }: PostCardProps) {
 
                 {/* Edit & Delete Controls */}
                 {isOwnerOrAdmin && (
-                  <div className="flex items-center gap-1 ml-2 border-l border-borderPrimary/40 pl-2">
+                  <div className="flex items-center gap-1 ml-2 border-l border-borderPrimary/40 pl-2 pointer-events-auto">
                     <button
                       onClick={handleOpenEdit}
                       className="p-1 rounded-md text-textSecondary hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
@@ -230,17 +234,15 @@ export default function PostCard({ post }: PostCardProps) {
 
             {/* Title */}
             {post.title && (
-              <Link href={`/posts/${post._id}`}>
-                <Text
-                  as="h2"
-                  size="lg"
-                  font="extraBold"
-                  color="primary"
-                  className="group-hover:text-primary transition-colors line-clamp-2 mb-2 leading-snug md:text-xl"
-                >
-                  {post.title}
-                </Text>
-              </Link>
+              <Text
+                as="h2"
+                size="lg"
+                font="extraBold"
+                color="primary"
+                className="group-hover:text-primary transition-colors line-clamp-2 mb-2 leading-snug md:text-xl"
+              >
+                {post.title}
+              </Text>
             )}
 
             {/* Description Excerpt */}
@@ -261,7 +263,8 @@ export default function PostCard({ post }: PostCardProps) {
             {/* Author Details */}
             <Link
               href={`/profile/${displayAuthor?._id || "me"}`}
-              className="flex items-center gap-2 group/author cursor-pointer"
+              className="flex items-center gap-2 group/author cursor-pointer pointer-events-auto relative z-10"
+              onClick={(e) => e.stopPropagation()}
             >
               {displayAuthor?.profilePicture?.url ? (
                 <img
@@ -298,7 +301,7 @@ export default function PostCard({ post }: PostCardProps) {
             </Link>
 
             {/* Actions: Likes, Comments, Share */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pointer-events-auto relative z-10">
               {/* Like Button */}
               <button
                 onClick={handleLike}
@@ -330,11 +333,17 @@ export default function PostCard({ post }: PostCardProps) {
               {/* Comment Counter */}
               <Link
                 href={`/posts/${post._id}#comments`}
-                className="flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10"
+                className="group/comment flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10 relative z-10"
                 title="Comments"
+                onClick={(e) => e.stopPropagation()}
               >
-                <MessageSquare className="h-4 w-4" />
-                <Text as="span" size="xs" font="semiBold" color="secondary">
+                <MessageSquare className="h-4 w-4 text-textSecondary group-hover/comment:text-primary transition-colors" />
+                <Text
+                  as="span"
+                  size="xs"
+                  font="semiBold"
+                  className="text-textSecondary group-hover/comment:text-primary transition-colors"
+                >
                   {commentsCount}
                 </Text>
               </Link>
@@ -343,11 +352,16 @@ export default function PostCard({ post }: PostCardProps) {
               <button
                 onClick={handleShare}
                 disabled={sharePostMutation.isPending}
-                className="flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10 cursor-pointer"
+                className="group/share flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10 cursor-pointer"
                 title="Share Post"
               >
-                <Share2 className="h-4 w-4" />
-                <Text as="span" size="xs" font="semiBold" color="secondary">
+                <Share2 className="h-4 w-4 text-textSecondary group-hover/share:text-primary transition-colors" />
+                <Text
+                  as="span"
+                  size="xs"
+                  font="semiBold"
+                  className="text-textSecondary group-hover/share:text-primary transition-colors"
+                >
                   {sharesCount}
                 </Text>
               </button>

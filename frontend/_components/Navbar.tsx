@@ -96,23 +96,28 @@ const Navbar = () => {
           )}
 
           {/* Admin Dashboard Quick Button */}
-          {token && user?.isAdmin && (
+          {mounted && token && user?.isAdmin && (
             <Link href="/admin/dashboard/users">
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-xl border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-xs flex items-center gap-1.5 cursor-pointer font-bold hidden sm:flex"
+                className="group rounded-xl border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 hover:text-amber-400 text-xs items-center gap-1.5 cursor-pointer font-bold hidden sm:flex transition-all"
               >
-                <LayoutDashboard className="h-3.5 w-3.5" />
-                <Text as="span" size="xs" font="bold" className="text-amber-500">
+                <LayoutDashboard className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                <Text
+                  as="span"
+                  size="xs"
+                  font="bold"
+                  className="text-amber-500 group-hover:text-amber-400 transition-colors"
+                >
                   Dashboard
                 </Text>
               </Button>
             </Link>
           )}
 
-          {/* User Dropdown / Auth Links */}
-          {token ? (
+          {/* User Dropdown / Auth Links (Check mounted to prevent hydration mismatch) */}
+          {mounted && token ? (
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -184,7 +189,12 @@ const Navbar = () => {
                       className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-amber-500 hover:bg-amber-500/10 transition-colors"
                     >
                       <LayoutDashboard className="h-4 w-4 text-amber-500" />
-                      <Text as="span" size="xs" font="medium" className="text-amber-500">
+                      <Text
+                        as="span"
+                        size="xs"
+                        font="medium"
+                        className="text-amber-500"
+                      >
                         Admin Dashboard
                       </Text>
                     </Link>
@@ -198,7 +208,12 @@ const Navbar = () => {
                     className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer"
                   >
                     <LogOut className="h-4 w-4" />
-                    <Text as="span" size="xs" font="medium" className="text-rose-500">
+                    <Text
+                      as="span"
+                      size="xs"
+                      font="medium"
+                      className="text-rose-500"
+                    >
                       Log Out
                     </Text>
                   </button>

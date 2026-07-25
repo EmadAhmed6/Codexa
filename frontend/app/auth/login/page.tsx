@@ -20,9 +20,11 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLoginMutation();
   const router = useRouter();
+
   const {
     register,
     handleSubmit,
+    reset,
     clearErrors,
     formState: { errors },
   } = useForm<ILogin>({
@@ -37,19 +39,22 @@ export default function LoginPage() {
   const onSubmit = (data: ILogin) => {
     loginMutation.mutate(data, {
       onSuccess: (res) => {
-        const token = res?.data?.token || res?.token;
+        const token = res.data?.token || res.token;
         if (token) {
-          Cookies.set("token", token, { path: "/", expires: 1 });
+          Cookies.set("token", token, { expires: 7, path: "/" });
           if (typeof window !== "undefined") {
             localStorage.setItem("token", token);
           }
+          toast.success("Signed in successfully! Welcome back.");
+          router.push("/");
+          reset();
+        } else {
+          toast.error("Login successful but token missing from server response.");
         }
-        toast.success("Signed in successfully!");
-        router.push("/");
       },
-      onError: (error: any) => {
+      onError: (err: any) => {
         toast.error(
-          error?.response?.data?.message ||
+          err?.response?.data?.message ||
             "Invalid email or password. Please try again.",
         );
       },
@@ -58,8 +63,8 @@ export default function LoginPage() {
 
   return (
     <div className="w-full max-w-md glass-card p-8 md:p-10 transition-all duration-300">
-      {/* Title */}
-      <div className="mb-8 text-center">
+      {/* Header */}
+      <div className="text-center mb-8">
         <Text
           as="h1"
           size="3xl"
@@ -70,14 +75,14 @@ export default function LoginPage() {
           Welcome Back
         </Text>
         <Text size="sm" color="secondary">
-          Enter your credentials to access your writing studio
+          Enter your credentials to access your account
         </Text>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Email Field */}
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email Address</Label>
+          <Label htmlFor="email">Email address</Label>
           <div className="relative">
             <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
               <Mail className="h-4.5 w-4.5" />
@@ -99,6 +104,7 @@ export default function LoginPage() {
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
           </div>
+
           <div className="relative">
             <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
               <Lock className="h-4.5 w-4.5" />
@@ -116,7 +122,6 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              disabled={loginMutation.isPending}
               className="absolute inset-y-0 right-3 flex items-center text-textSecondary hover:text-textPrimary transition-colors cursor-pointer"
               aria-label="Toggle Password Visibility"
             >
@@ -128,15 +133,15 @@ export default function LoginPage() {
             </button>
           </div>
           <Error error={errors.password?.message} />
-          <Link href="/auth/forgot-password">
-            <Text
-              as="span"
-              size="xs"
-              font="semiBold"
-              className="text-primary hover:text-primaryHover hover:underline transition-colors float-right my-3"
-            >
-              Forgot password?
-            </Text>
+        </div>
+
+        {/* Forgot Password Link */}
+        <div className="flex justify-end">
+          <Link
+            href="/auth/forgot-password"
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Forgot password?
           </Link>
         </div>
 
@@ -145,7 +150,7 @@ export default function LoginPage() {
           type="submit"
           disabled={loginMutation.isPending}
           size="lg"
-          className={"w-full"}
+          className="w-full"
         >
           {loginMutation.isPending ? (
             <div className="flex items-center gap-2">
@@ -166,20 +171,16 @@ export default function LoginPage() {
       </form>
 
       {/* Switch to register link */}
-      <div className="mt-8 text-center">
-        <Text as="span" size="sm" color="secondary" className="mr-1.5">
-          Don't have an account?
-        </Text>
-        <Link href="/auth/register">
-          <Text
-            as="span"
-            size="sm"
-            font="semiBold"
-            className="text-primary hover:text-primaryHover hover:underline transition-colors"
+      <div className="mt-2 text-center border-t border-borderPrimary/40 pt-4">
+        <Text size="xs" color="secondary">
+          Don't have an account?{" "}
+          <Link
+            href="/auth/register"
+            className="text-primary hover:underline font-semibold"
           >
             Create one now
-          </Text>
-        </Link>
+          </Link>
+        </Text>
       </div>
     </div>
   );

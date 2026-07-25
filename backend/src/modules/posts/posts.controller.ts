@@ -41,7 +41,7 @@ const getAllPosts = asyncHandler(
 const getPostById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const posts = await Post.findById(req.params.postId)
-      .populate("user", ["_id", "username", "profilePicture"])
+      .populate("user", ["_id", "username", "profilePicture", "jobTitle"])
       .populate("likes", ["_id", "username"])
       .populate({
         path: "comments",

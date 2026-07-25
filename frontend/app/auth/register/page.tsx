@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import Cookies from "js-cookie";
 import { registerSchema, type IRegister } from "@/_features/auth/schemas/auth";
 import { useRegisterMutation } from "@/_features/auth/hooks";
 import { Text } from "@/_components/Text";
@@ -32,17 +31,17 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
+    reset,
     clearErrors,
     formState: { errors },
-    reset,
   } = useForm<IRegister>({
     resolver: zodResolver(registerSchema as any),
     mode: "onBlur",
     defaultValues: {
       username: "",
-      jobTitle: "",
       email: "",
       password: "",
+      jobTitle: "",
     },
   });
 
@@ -55,10 +54,10 @@ export default function RegisterPage() {
         router.push(`/auth/verify-otp?email=${encodeURIComponent(data.email)}`);
         reset();
       },
-      onError: (error: any) => {
+      onError: (err: any) => {
         toast.error(
-          error?.response?.data?.message ||
-            "Failed to create account. Please try again.",
+          err?.response?.data?.message ||
+            "Error registering account. Email or username might already exist.",
         );
       },
     });
@@ -66,8 +65,8 @@ export default function RegisterPage() {
 
   return (
     <div className="w-full max-w-md glass-card p-8 md:p-10 transition-all duration-300">
-      {/* Title */}
-      <div className="mb-8 text-center">
+      {/* Header */}
+      <div className="text-center mb-8">
         <Text
           as="h1"
           size="3xl"
@@ -93,7 +92,7 @@ export default function RegisterPage() {
             <Input
               id="username"
               type="text"
-              placeholder="aura_writer"
+              placeholder="emad_121"
               disabled={registerMutation.isPending}
               className={`pl-11 ${errors.username ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
               {...register("username", {
@@ -114,20 +113,17 @@ export default function RegisterPage() {
             <Input
               id="jobTitle"
               type="text"
-              placeholder="e.g. Frontend Developer"
+              placeholder="Frontend Developer"
               disabled={registerMutation.isPending}
-              className={`pl-11 ${(errors as any).jobTitle ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
-              {...register("jobTitle" as any, {
-                onChange: () => clearErrors("jobTitle" as any),
-              })}
+              className="pl-11"
+              {...register("jobTitle" as any)}
             />
           </div>
-          <Error error={(errors as any).jobTitle?.message} />
         </div>
 
         {/* Email Field */}
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email Address</Label>
+          <Label htmlFor="email">Email address</Label>
           <div className="relative">
             <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
               <Mail className="h-4.5 w-4.5" />
@@ -146,9 +142,7 @@ export default function RegisterPage() {
 
         {/* Password Field */}
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-          </div>
+          <Label htmlFor="password">Password</Label>
           <div className="relative">
             <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
               <Lock className="h-4.5 w-4.5" />
@@ -166,7 +160,6 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              disabled={registerMutation.isPending}
               className="absolute inset-y-0 right-3 flex items-center text-textSecondary hover:text-textPrimary transition-colors cursor-pointer"
               aria-label="Toggle Password Visibility"
             >
@@ -184,21 +177,29 @@ export default function RegisterPage() {
         <Button
           type="submit"
           disabled={registerMutation.isPending}
+          size="lg"
           className="w-full"
         >
           {registerMutation.isPending ? (
-            <span>Creating Account...</span>
+            <div className="flex items-center gap-2">
+              <span className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+              <Text as="span" font="semiBold" color="white">
+                Creating Account...
+              </Text>
+            </div>
           ) : (
-            <>
-              <span>Create Account</span>
-              <ArrowRight className="h-4 w-4" />
-            </>
+            <div className="flex items-center gap-2">
+              <Text as="span" font="semiBold" color="white">
+                Create Account
+              </Text>
+              <ArrowRight className="h-4.5 w-4.5 group-hover/button:translate-x-1 transition-transform" />
+            </div>
           )}
         </Button>
       </form>
 
       {/* Footer Link */}
-      <div className="mt-8 text-center border-t border-borderPrimary/40 pt-6">
+      <div className="mt-2 text-center border-t border-borderPrimary/40 pt-4">
         <Text size="xs" color="secondary">
           Already have an account?{" "}
           <Link

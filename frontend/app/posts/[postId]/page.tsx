@@ -182,7 +182,7 @@ export default function SinglePostPage() {
                 {post.user?.username || "Anonymous Author"}
               </Text>
               <Text as="p" size="xs" font="medium" color="secondary" className="text-[11px]">
-                {post.user?.jobTitle || "Verified Technical Writer"}
+                {post.user?.jobTitle || "Developer"}
               </Text>
             </div>
           </Link>
@@ -296,10 +296,15 @@ export default function SinglePostPage() {
             <button
               onClick={() => sharePostMutation.mutate(postId)}
               disabled={sharePostMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-bgPrimary hover:bg-bgSecondary border border-borderPrimary/40 text-textSecondary hover:text-textPrimary font-semibold text-xs transition-all cursor-pointer"
+              className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-bgPrimary hover:bg-bgSecondary border border-borderPrimary/40 text-textSecondary hover:text-textPrimary font-semibold text-xs transition-all cursor-pointer"
             >
-              <Share2 className="h-4 w-4" />
-              <Text as="span" size="xs" font="semiBold" color="secondary">
+              <Share2 className="h-4 w-4 text-textSecondary group-hover:text-textPrimary transition-colors" />
+              <Text
+                as="span"
+                size="xs"
+                font="semiBold"
+                className="text-textSecondary group-hover:text-textPrimary transition-colors"
+              >
                 Share ({sharesCount})
               </Text>
             </button>
