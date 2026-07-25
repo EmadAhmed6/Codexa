@@ -180,6 +180,21 @@ pnpm dev # or npm run dev
 | `PUT` | `/posts/:postId/like` | Like or unlike post | Private |
 | `POST` | `/posts/:postId/share` | Share an article | Private |
 
+### Comments & Replies Routes (`/posts/:postId/comments`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/posts/:postId/comments` | Get all comments with populated nested replies | Private |
+| `POST` | `/posts/:postId/comments` | Create a comment on a post | Private |
+| `PUT` | `/posts/:postId/comments/:commentId` | Update comment text | Private (Owner/Admin) |
+| `DELETE` | `/posts/:postId/comments/:commentId` | Delete comment and update counts | Private (Owner/Admin) |
+| `POST` | `/posts/:postId/comments/:commentId/upload` | Upload image attachment to a comment | Private (Owner/Admin) |
+| `PUT` | `/posts/:postId/comments/:commentId/like` | Like or unlike a comment | Private |
+| `POST` | `/posts/:postId/comments/:commentId/reply` | Create a reply comment | Private |
+| `PUT` | `/posts/:postId/comments/:commentId/reply/:replyCommentId` | Update a reply comment | Private (Owner/Admin) |
+| `DELETE` | `/posts/:postId/comments/:commentId/reply/:replyCommentId` | Delete a reply comment | Private (Owner/Admin) |
+| `POST` | `/posts/:postId/comments/:commentId/reply/:replyCommentId` | Upload image attachment to a reply comment | Private (Owner/Admin) |
+| `PUT` | `/posts/:postId/comments/:commentId/reply/:replyCommentId/like` | Like or unlike a reply comment | Private |
+
 ### User Routes (`/api/users`)
 | Method | Endpoint | Description | Access |
 | :--- | :--- | :--- | :--- |

@@ -5,6 +5,10 @@ export const likeComment = async (
   commentId: string,
   postId?: string,
 ): Promise<Comment> => {
+  if (!commentId) {
+    throw new Error("Comment ID is required");
+  }
+
   if (postId) {
     try {
       const response = await axiosClient.put<any>(

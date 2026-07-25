@@ -3,13 +3,18 @@
 // ├── PUT    /posts/{postId}/comments/{commentId}
 // ├── DELETE /posts/{postId}/comments/{commentId}
 // ├── PUT    /posts/{postId}/comments/{commentId}/like
-// └── POST   /posts/{postId}/comments/{commentId}/upload
+// ├── POST   /posts/{postId}/comments/{commentId}/upload
+// ├── POST   /posts/{postId}/comments/{commentId}/reply
+// ├── PUT    /posts/{postId}/comments/{commentId}/reply/{replyCommentId}
+// ├── DELETE /posts/{postId}/comments/{commentId}/reply/{replyCommentId}
+// ├── POST   /posts/{postId}/comments/{commentId}/reply/{replyCommentId} (upload image)
+// └── PUT    /posts/{postId}/comments/{commentId}/reply/{replyCommentId}/like
 
 /**
  * @swagger
  * tags:
  *   name: Comments
- *   description: Comments management APIs
+ *   description: Comments and Replies management APIs
  */
 
 /**
@@ -57,6 +62,9 @@
  *                 success:
  *                   type: boolean
  *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Request processed successfully
  *                 data:
  *                   type: array
  *                   items:
@@ -107,6 +115,9 @@
  *                 success:
  *                   type: boolean
  *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Request processed successfully
  *                 data:
  *                   $ref: '#/components/schemas/Comment'
  *       400:
@@ -160,6 +171,9 @@
  *                 success:
  *                   type: boolean
  *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Request processed successfully
  *                 data:
  *                   $ref: '#/components/schemas/Comment'
  *       400:
@@ -252,6 +266,9 @@
  *                 success:
  *                   type: boolean
  *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Request processed successfully
  *                 data:
  *                   $ref: '#/components/schemas/Comment'
  *       401:
@@ -307,29 +324,319 @@
  *                 success:
  *                   type: boolean
  *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Request processed successfully
  *                 data:
  *                   type: object
  *                   properties:
- *                     message:
+ *                     url:
  *                       type: string
- *                       example: Uploaded comment image successfully
- *                     image:
- *                       type: object
- *                       properties:
- *                         url:
- *                           type: string
- *                           format: uri
- *                           example: https://res.cloudinary.com/example/image/upload/comment_attachment.jpg
- *                         publicId:
- *                           type: string
- *                           nullable: true
- *                           example: comment_image_789
+ *                       format: uri
+ *                       example: https://res.cloudinary.com/example/image/upload/comment_attachment.jpg
+ *                     publicId:
+ *                       type: string
+ *                       nullable: true
+ *                       example: comment_image_789
  *       400:
  *         description: No file provided or Comment ID is required
  *       401:
  *         description: Not authorized
  *       404:
  *         description: Comment was not found
+ */
+
+/**
+ * @swagger
+ * /posts/{postId}/comments/{commentId}/reply:
+ *   post:
+ *     summary: Create a reply to a comment
+ *     tags:
+ *       - Comments
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         description: Post ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         description: Parent Comment ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012346
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - text
+ *             properties:
+ *               text:
+ *                 type: string
+ *                 example: This is a reply comment
+ *     responses:
+ *       201:
+ *         description: Reply comment created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Comment'
+ *       400:
+ *         description: Valid Post ID and Parent Comment ID are required
+ *       401:
+ *         description: Not authorized
+ *       404:
+ *         description: Parent comment was not found in this post
+ */
+
+/**
+ * @swagger
+ * /posts/{postId}/comments/{commentId}/reply/{replyCommentId}:
+ *   put:
+ *     summary: Update a reply comment
+ *     tags:
+ *       - Comments
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         description: Post ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         description: Parent Comment ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012346
+ *       - in: path
+ *         name: replyCommentId
+ *         required: true
+ *         description: Reply Comment ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012348
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               text:
+ *                 type: string
+ *                 example: Updated reply comment text
+ *     responses:
+ *       200:
+ *         description: Updated reply comment successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Updated reply comment successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Comment'
+ *       400:
+ *         description: Valid Post ID and Reply Comment ID are required
+ *       401:
+ *         description: Not authorized
+ *       403:
+ *         description: You are not allowed
+ *       404:
+ *         description: Reply comment was not found
+ *   delete:
+ *     summary: Delete a reply comment
+ *     tags:
+ *       - Comments
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         description: Post ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         description: Parent Comment ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012346
+ *       - in: path
+ *         name: replyCommentId
+ *         required: true
+ *         description: Reply Comment ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012348
+ *     responses:
+ *       200:
+ *         description: Deleted reply comment successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Deleted reply comment successfully
+ *       400:
+ *         description: Valid Post ID and Reply Comment ID are required
+ *       401:
+ *         description: Not authorized
+ *       403:
+ *         description: You are not allowed
+ *       404:
+ *         description: Reply comment was not found
+ *   post:
+ *     summary: Upload an image to a reply comment
+ *     tags:
+ *       - Comments
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         description: Post ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         description: Parent Comment ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012346
+ *       - in: path
+ *         name: replyCommentId
+ *         required: true
+ *         description: Reply Comment ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012348
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - image
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Reply comment image uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Reply comment image uploaded successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Comment'
+ *       400:
+ *         description: Image not provided or Invalid reply comment id
+ *       401:
+ *         description: Not authorized
+ *       403:
+ *         description: You are not allowed
+ *       404:
+ *         description: Reply comment was not found
+ */
+
+/**
+ * @swagger
+ * /posts/{postId}/comments/{commentId}/reply/{replyCommentId}/like:
+ *   put:
+ *     summary: Like or unlike a reply comment
+ *     tags:
+ *       - Comments
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         description: Post ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         description: Parent Comment ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012346
+ *       - in: path
+ *         name: replyCommentId
+ *         required: true
+ *         description: Reply Comment ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012348
+ *     responses:
+ *       200:
+ *         description: Reply comment like status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Reply comment liked successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Comment'
+ *       400:
+ *         description: Valid Parent comment id, post id, and reply comment id are required
+ *       401:
+ *         description: Not authorized
+ *       404:
+ *         description: Comment or reply comment was not found
  */
 
 /**
@@ -357,6 +664,15 @@
  *             username:
  *               type: string
  *               example: Ahmed
+ *             profilePicture:
+ *               type: object
+ *               properties:
+ *                 url:
+ *                   type: string
+ *                 publicId:
+ *                   type: string
+ *             jobTitle:
+ *               type: string
  *         image:
  *           type: object
  *           properties:
@@ -377,9 +693,27 @@
  *                 type: string
  *               username:
  *                 type: string
+ *               profilePicture:
+ *                 type: object
+ *               jobTitle:
+ *                 type: string
  *         commentLikesCount:
  *           type: number
  *           example: 3
+ *         parentComment:
+ *           type: string
+ *           nullable: true
+ *           example: 65f1a2b3c4d5e6f789012346
+ *         replyLikesCount:
+ *           type: number
+ *           example: 2
+ *         replyCommentsCount:
+ *           type: number
+ *           example: 1
+ *         replies:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Comment'
  *         createdAt:
  *           type: string
  *           format: date-time

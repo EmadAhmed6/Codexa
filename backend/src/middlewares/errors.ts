@@ -6,11 +6,14 @@ const notFound = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const errorHandler = (
-  err: Error,
+  err: any,
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
+  if (err.name === "CastError") {
+    return res.status(400).json({ message: `Invalid ${err.path || "ID format"}: ${err.value}` });
+  }
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   return res.status(statusCode).json({ message: err.message });
 };

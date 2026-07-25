@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import { Post } from "../modules/posts/post.model.js";
 import { Comment } from "../modules/comment/comment.model.js";
 import type { Request, Response, NextFunction } from "express";
+import { Types } from "mongoose";
 
 interface JWTUserPayload {
   id: string;
@@ -45,7 +46,12 @@ const verifyAuthorizedToken = (
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (req.user.id === req.params.id || req.user.isAdmin) {
+    const id = req.params.id;
+    if (id && (typeof id !== "string" || !Types.ObjectId.isValid(id))) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    if (req.user.id === id || req.user.isAdmin) {
       next();
     } else {
       return res.status(403).json({ message: "You are not allowed" });
@@ -75,7 +81,12 @@ const verifyPostOwner = (req: Request, res: Response, next: NextFunction) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const post = await Post.findById(req.params.postId);
+    const postId = req.params.postId;
+    if (!postId || typeof postId !== "string" || !Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    const post = await Post.findById(postId);
     if (!post) {
       return res.status(404).json({ message: "Post was not found" });
     }
@@ -99,6 +110,10 @@ const verifyCommentOwner = (
     }
 
     const commentId = req.params.commentId;
+    if (!commentId || typeof commentId !== "string" || !Types.ObjectId.isValid(commentId)) {
+      return res.status(400).json({ message: "Invalid comment ID" });
+    }
+
     const comment = await Comment.findById(commentId);
     if (!comment) {
       return res.status(404).json({ message: "Comment was not found" });

@@ -2,11 +2,16 @@ import express from "express";
 const router = express.Router({ mergeParams: true });
 import {
   getAllComments,
-  updateComment,
   createComment,
+  updateComment,
   deleteComment,
   likeComment,
   uploadCommentImage,
+  replyComment,
+  uploadReplyCommentImage,
+  updateReplyComment,
+  likeReply,
+  deleteReplyComment,
 } from "./comment.controller.js";
 import {
   verifyToken,
@@ -34,5 +39,14 @@ router.post(
 );
 
 router.put("/:commentId/like", verifyToken, likeComment);
+router.post("/:commentId/reply", verifyToken, replyComment);
+
+router
+  .route("/:commentId/reply/:replyCommentId")
+  .post(verifyCommentOwner, upload.single("image"), uploadReplyCommentImage)
+  .put(verifyCommentOwner, updateReplyComment)
+  .delete(verifyCommentOwner, deleteReplyComment);
+
+router.put("/:commentId/reply/:replyCommentId/like", verifyToken, likeReply);
 
 export default router;

@@ -13,12 +13,15 @@ interface ICreateComment {
     url: string;
     publicId: string | null;
   };
+  parentComment: string | null;
+  replyCommentsCount: number;
 }
 
 interface IComment extends Omit<ICreateComment, "postId">, Document {
   postId: Types.ObjectId;
   user: Types.ObjectId;
   likes: Types.ObjectId[];
+  replyLikesCount: number;
   commentsCount: Number;
   commentLikesCount: Number;
 }
@@ -33,6 +36,11 @@ const CommentSchema = new Schema<IComment>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    parentComment: {
+      type: Schema.Types.ObjectId,
+      ref: "Comment",
+      default: null,
     },
     text: {
       type: String,
@@ -59,9 +67,27 @@ const CommentSchema = new Schema<IComment>(
       type: Number,
       default: 0,
     },
+    replyLikesCount: {
+      type: Number,
+      default: 0,
+    },
+    replyCommentsCount: {
+      type: Number,
+      default: 0,
+    },
   },
-  { timestamps: true },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+    timestamps: true,
+  },
 );
+
+CommentSchema.virtual("replies", {
+  ref: "Comment",
+  foreignField: "parentComment",
+  localField: "_id",
+});
 
 const validateCreateComment = (comment: ICreateComment) => {
   return CreateCommentSchema.safeParse(comment);

@@ -60,12 +60,17 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 | 17 | PUT | `/posts/:postId/like` | Toggle like/unlike status on a blog post | 🔒 | 🔒 100 req/15min |
 | 18 | POST | `/posts/:postId/share` | Share an existing post & update shares & posts count | 🔒 | 🔒 100 req/15min |
 | 19 | POST | `/posts/:postId/upload` | Upload thumbnail/cover image to Cloudinary for a post | 🔒 | 🔒 100 req/15min |
-| 20 | GET | `/posts/:postId/comments` | Retrieve comments for a post (with populated user profiles) | 🔒 | 🔒 100 req/15min |
+| 20 | GET | `/posts/:postId/comments` | Retrieve comments for a post (with populated user profiles & replies) | 🔒 | 🔒 100 req/15min |
 | 21 | POST | `/posts/:postId/comments` | Post a new comment under a post | 🔒 | 🔒 100 req/15min |
 | 22 | PUT | `/posts/:postId/comments/:commentId` | Update text content of a comment | 🔒 | 🔒 100 req/15min |
 | 23 | DELETE | `/posts/:postId/comments/:commentId` | Remove comment & decrement commentsCount on post | 🔒 | 🔒 100 req/15min |
 | 24 | PUT | `/posts/:postId/comments/:commentId/like` | Toggle like/unlike on a comment (populates user profiles) | 🔒 | 🔒 100 req/15min |
 | 25 | POST | `/posts/:postId/comments/:commentId/upload` | Upload comment image to Cloudinary | 🔒 | 🔒 100 req/15min |
+| 26 | POST | `/posts/:postId/comments/:commentId/reply` | Create a reply under a parent comment | 🔒 | 🔒 100 req/15min |
+| 27 | PUT | `/posts/:postId/comments/:commentId/reply/:replyCommentId` | Update text content of a reply comment | 🔒 | 🔒 100 req/15min |
+| 28 | DELETE | `/posts/:postId/comments/:commentId/reply/:replyCommentId` | Remove reply comment & decrement replyCommentsCount | 🔒 | 🔒 100 req/15min |
+| 29 | POST | `/posts/:postId/comments/:commentId/reply/:replyCommentId` | Upload reply comment image attachment to Cloudinary | 🔒 | 🔒 100 req/15min |
+| 30 | PUT | `/posts/:postId/comments/:commentId/reply/:replyCommentId/like` | Toggle like/unlike on a reply comment | 🔒 | 🔒 100 req/15min |
 
 ---
 
@@ -1433,6 +1438,288 @@ Comment was not found.
 ```json
 {
   "message": "Comment was not found"
+}
+```
+
+---
+
+### POST /posts/:postId/comments/:commentId/reply 🔒
+Post a new reply under a specific parent comment. Increments `replyCommentsCount` on the parent comment.
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `postId` | string | ✅ | ID of the parent post. |
+| `commentId` | string | ✅ | ID of the parent comment being replied to. |
+
+#### Request Body
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `text` | string | ✅ | Reply comment text body. |
+
+#### Responses
+
+##### Response 201
+Reply comment created successfully.
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012348",
+    "postId": "65f1a2b3c4d5e6f789012345",
+    "text": "This is a reply to the parent comment",
+    "user": {
+      "username": "Ahmed",
+      "profilePicture": {
+        "url": "https://res.cloudinary.com/example/image/upload/avatar.jpg",
+        "publicId": "avatar_123"
+      },
+      "jobTitle": "Frontend Engineer"
+    },
+    "parentComment": "65f1a2b3c4d5e6f789012346",
+    "replies": [],
+    "replyLikesCount": 0,
+    "replyCommentsCount": 0,
+    "createdAt": "2026-07-25T21:00:00.000Z",
+    "updatedAt": "2026-07-25T21:00:00.000Z"
+  }
+}
+```
+
+##### Response 400
+Invalid Post ID or Parent Comment ID.
+```json
+{
+  "success": false,
+  "message": "Valid Post ID and Parent Comment ID are required"
+}
+```
+
+##### Response 401
+Not authorized.
+```json
+{
+  "message": "No token provided"
+}
+```
+
+##### Response 404
+Parent comment was not found in this post.
+```json
+{
+  "success": false,
+  "data": {
+    "message": "Parent comment was not found in this post"
+  }
+}
+```
+
+---
+
+### PUT /posts/:postId/comments/:commentId/reply/:replyCommentId 🔒
+Update the text body of an existing reply comment. Restricted to reply comment owner or Admins.
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `postId` | string | ✅ | ID of the parent post. |
+| `commentId` | string | ✅ | ID of the parent comment. |
+| `replyCommentId` | string | ✅ | ID of the reply comment to update. |
+
+#### Request Body
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `text` | string | ✅ | Updated text for the reply comment. |
+
+#### Responses
+
+##### Response 200
+Reply comment updated successfully.
+```json
+{
+  "success": true,
+  "message": "Updated reply comment successfully",
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012348",
+    "text": "Updated reply comment text content",
+    "user": {
+      "username": "Ahmed",
+      "profilePicture": {
+        "url": "https://res.cloudinary.com/example/image/upload/avatar.jpg",
+        "publicId": "avatar_123"
+      },
+      "jobTitle": "Frontend Engineer"
+    }
+  }
+}
+```
+
+##### Response 400
+Invalid IDs or input validation failed.
+```json
+{
+  "success": false,
+  "message": "Valid Post ID and Reply Comment ID are required"
+}
+```
+
+##### Response 401
+Not authorized.
+```json
+{
+  "message": "Invalid token"
+}
+```
+
+##### Response 403
+Forbidden. Requesting user lacks ownership rights.
+```json
+{
+  "message": "You are not allowed"
+}
+```
+
+##### Response 404
+Reply comment was not found.
+
+---
+
+### DELETE /posts/:postId/comments/:commentId/reply/:replyCommentId 🔒
+Delete a reply comment and decrement `replyCommentsCount` on its parent comment. Restricted to reply owner or Admins.
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `postId` | string | ✅ | ID of the parent post. |
+| `commentId` | string | ✅ | ID of the parent comment. |
+| `replyCommentId` | string | ✅ | ID of the reply comment to delete. |
+
+#### Responses
+
+##### Response 200
+Deleted reply comment successfully.
+```json
+{
+  "success": true,
+  "message": "Deleted reply comment successfully"
+}
+```
+
+##### Response 400
+Invalid ID parameters.
+
+##### Response 401
+Not authorized.
+
+##### Response 403
+Forbidden. User lacks ownership rights.
+
+##### Response 404
+Reply comment was not found.
+```json
+{
+  "success": false,
+  "message": "Reply comment was not found"
+}
+```
+
+---
+
+### POST /posts/:postId/comments/:commentId/reply/:replyCommentId 🔒
+Upload an image attachment to a reply comment. Uses multipart form-data (`image`). Restricted to reply comment owner or Admins.
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `postId` | string | ✅ | ID of the parent post. |
+| `commentId` | string | ✅ | ID of the parent comment. |
+| `replyCommentId` | string | ✅ | ID of the target reply comment. |
+
+#### Request Body (Multipart Form-Data)
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `image` | binary file | ✅ | Image file to attach to the reply comment. |
+
+#### Responses
+
+##### Response 200
+Reply comment image uploaded successfully.
+```json
+{
+  "success": true,
+  "message": "Reply comment image uploaded successfully",
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012348",
+    "image": {
+      "url": "https://res.cloudinary.com/example/image/upload/reply_image.jpg",
+      "publicId": "reply_img_123"
+    }
+  }
+}
+```
+
+##### Response 400
+No image file provided or invalid reply comment ID.
+
+##### Response 401
+Not authorized.
+
+##### Response 403
+Forbidden.
+
+##### Response 404
+Reply comment was not found.
+
+---
+
+### PUT /posts/:postId/comments/:commentId/reply/:replyCommentId/like 🔒
+Toggle like or unlike on a reply comment and update `replyLikesCount`.
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `postId` | string | ✅ | ID of the parent post. |
+| `commentId` | string | ✅ | ID of the parent comment. |
+| `replyCommentId` | string | ✅ | ID of the target reply comment. |
+
+#### Responses
+
+##### Response 200
+Reply comment liked or unliked successfully.
+```json
+{
+  "success": true,
+  "message": "Reply comment liked successfully",
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012348",
+    "replyLikesCount": 1,
+    "likes": [
+      {
+        "username": "Ahmed",
+        "profilePicture": {
+          "url": "https://res.cloudinary.com/example/image/upload/avatar.jpg"
+        },
+        "jobTitle": "Frontend Engineer"
+      }
+    ]
+  }
+}
+```
+
+##### Response 400
+Invalid parent comment, post, or reply comment ID.
+
+##### Response 401
+Not authorized.
+
+##### Response 404
+Comment or reply comment was not found.
+```json
+{
+  "success": false,
+  "data": {
+    "message": "Comment was not found"
+  }
 }
 ```
 
