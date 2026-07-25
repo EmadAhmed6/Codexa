@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import {
   User,
   Mail,
   Lock,
-  Eye,
-  EyeOff,
   ArrowRight,
   Briefcase,
 } from "lucide-react";
@@ -24,7 +22,6 @@ import Error from "@/_components/Error";
 import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
-  const [showPassword, setShowPassword] = useState(false);
   const registerMutation = useRegisterMutation();
   const router = useRouter();
 
@@ -86,7 +83,7 @@ export default function RegisterPage() {
         <div className="space-y-1.5">
           <Label htmlFor="username">Username</Label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
+            <span className="absolute inset-y-0 left-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
               <User className="h-4.5 w-4.5" />
             </span>
             <Input
@@ -107,7 +104,7 @@ export default function RegisterPage() {
         <div className="space-y-1.5">
           <Label htmlFor="jobTitle">Job Title (Optional)</Label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
+            <span className="absolute inset-y-0 left-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
               <Briefcase className="h-4.5 w-4.5" />
             </span>
             <Input
@@ -125,7 +122,7 @@ export default function RegisterPage() {
         <div className="space-y-1.5">
           <Label htmlFor="email">Email address</Label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
+            <span className="absolute inset-y-0 left-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
               <Mail className="h-4.5 w-4.5" />
             </span>
             <Input
@@ -144,31 +141,19 @@ export default function RegisterPage() {
         <div className="space-y-1.5">
           <Label htmlFor="password">Password</Label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
+            <span className="absolute inset-y-0 left-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
               <Lock className="h-4.5 w-4.5" />
             </span>
             <Input
               id="password"
-              type={showPassword ? "text" : "password"}
+              type="password"
               placeholder="••••••••"
               disabled={registerMutation.isPending}
-              className={`pl-11 pr-11 ${errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
+              className={`pl-11 ${errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
               {...register("password", {
                 onChange: () => clearErrors("password"),
               })}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-3 flex items-center text-textSecondary hover:text-textPrimary transition-colors cursor-pointer"
-              aria-label="Toggle Password Visibility"
-            >
-              {showPassword ? (
-                <EyeOff className="h-4.5 w-4.5" />
-              ) : (
-                <Eye className="h-4.5 w-4.5" />
-              )}
-            </button>
           </div>
           <Error error={errors.password?.message} />
         </div>

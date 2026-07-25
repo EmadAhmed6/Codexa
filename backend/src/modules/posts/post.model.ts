@@ -10,6 +10,7 @@ import {
 interface IPost extends ICreatePost, Document {
   user: Types.ObjectId;
   likes: Types.ObjectId[];
+  shares: Types.ObjectId[];
   sharedPost: Types.ObjectId;
   sharesCount: Number;
   commentsCount: Number;
@@ -51,6 +52,12 @@ const PostSchema = new Schema<IPost>(
       },
     },
     likes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    shares: [
       {
         type: Schema.Types.ObjectId,
         ref: "User",

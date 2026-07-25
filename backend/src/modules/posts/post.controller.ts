@@ -12,20 +12,21 @@ import { User } from "../user/user.model.js";
 const getAllPosts = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const pageNumber = Number(req.query.pageNumber) || 1;
-    const postsPerPage = 5;
+    const postsPerPage = 6;
     const posts = await Post.find()
-      .populate("user", ["_id", "username", "profilePicture"])
-      .populate("likes", ["_id", "username"])
+      .populate("user", ["_id", "username", "profilePicture", "jobTitle"])
+      .populate("likes", ["_id", "username", "profilePicture", "jobTitle"])
+      .populate("shares", ["_id", "username", "profilePicture", "jobTitle"])
       .populate({
         path: "comments",
         populate: [
           {
             path: "user",
-            select: ["_id", "username"],
+            select: ["_id", "username", "profilePicture", "jobTitle"],
           },
           {
             path: "likes",
-            select: ["_id", "username"],
+            select: ["_id", "username", "profilePicture", "jobTitle"],
           },
         ],
       })
@@ -42,17 +43,18 @@ const getPostById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const posts = await Post.findById(req.params.postId)
       .populate("user", ["_id", "username", "profilePicture", "jobTitle"])
-      .populate("likes", ["_id", "username"])
+      .populate("likes", ["_id", "username", "profilePicture", "jobTitle"])
+      .populate("shares", ["_id", "username", "profilePicture", "jobTitle"])
       .populate({
         path: "comments",
         populate: [
           {
             path: "user",
-            select: ["_id", "username"],
+            select: ["_id", "username", "profilePicture", "jobTitle"],
           },
           {
             path: "likes",
-            select: ["_id", "username"],
+            select: ["_id", "username", "profilePicture", "jobTitle"],
           },
         ],
       });
@@ -90,7 +92,7 @@ const createPost = asyncHandler(
     });
 
     const finalPost = await newPost.save();
-    await finalPost.populate("user", ["_id", "username"]);
+    await finalPost.populate("user", ["_id", "username", "profilePicture", "jobTitle"]);
     res.status(201).json({ success: true, data: finalPost });
     return;
   },
@@ -107,6 +109,20 @@ const updatePost = asyncHandler(
       });
       return;
     }
+
+    const post = await Post.findById(req.params.postId);
+    if (!post) {
+      res.status(404).json({ success: false, message: "Post was not found" });
+      return;
+    }
+
+    if (!req.user || req.user.id !== post.user.toString()) {
+      res
+        .status(403)
+        .json({ success: false, message: "You are not authorized" });
+      return;
+    }
+
     const updatedPost = await Post.findByIdAndUpdate(
       req.params.postId,
       {
@@ -114,18 +130,13 @@ const updatePost = asyncHandler(
           title: req.body.title,
           description: req.body.description,
           category: req.body.category,
-          image: req.body.image,
         },
       },
-      { new: true, runValidators: true },
-    );
-    if (updatedPost) {
-      res.status(200).json({ success: true, data: updatedPost });
-      return;
-    } else {
-      res.status(404).json({ success: false, message: "Post was not found" });
-      return;
-    }
+      { new: true },
+    ).populate("user", ["_id", "username", "profilePicture", "jobTitle"]);
+
+    res.status(200).json({ success: true, data: updatedPost });
+    return;
   },
 );
 
@@ -133,68 +144,76 @@ const updatePost = asyncHandler(
 const deletePost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const post = await Post.findById(req.params.postId);
-    if (!req.user) {
-      res
-        .status(401)
-        .json({ success: false, data: { message: "Not authorized" } });
-      return;
-    }
-    if (post) {
-      await Post.findByIdAndDelete(req.params.postId);
-      await User.findByIdAndUpdate(req.user.id, { $inc: { postsCount: -1 } });
-      res
-        .status(200)
-        .json({ success: true, message: "Post has been deleted successfully" });
-    } else {
-      res.status(404).json({ success: false, message: "Post was not found" });
-    }
-  },
-);
-
-// UPLOAD IMAGE POST
-const uploadPostImage = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const postId = req.params.postId;
-    if (!postId || typeof postId !== "string") {
-      res.status(400).json({ success: false, message: "Post ID is required" });
-      return;
-    }
-    if (!req.file) {
-      res.status(400).json({ success: false, message: "No file provided" });
-      return;
-    }
-
-    const post = await Post.findById(postId);
     if (!post) {
       res.status(404).json({ success: false, message: "Post was not found" });
       return;
     }
 
-    if (post.image?.publicId) {
+    const isOwner = req.user && req.user.id === post.user.toString();
+    const isAdmin = req.user && req.user.isAdmin;
+    if (!isOwner && !isAdmin) {
+      res
+        .status(403)
+        .json({ success: false, message: "You are not authorized" });
+      return;
+    }
+
+    if (post.image && post.image.publicId) {
       await cloudinary.uploader.destroy(post.image.publicId);
     }
 
-    const result = await cloudinary.uploader.upload(req.file.path);
+    await Post.findByIdAndDelete(req.params.postId);
 
-    post.image = {
-      url: result.secure_url,
-      publicId: result.public_id,
-    };
-    await post.save();
-
-    fs.unlinkSync(req.file.path);
-
-    res.status(200).json({
-      success: true,
-      data: post,
+    await User.findByIdAndUpdate(post.user, {
+      $inc: { postsCount: -1 },
     });
+
+    res
+      .status(200)
+      .json({ success: true, message: "Post deleted successfully" });
     return;
   },
 );
-// LIKE POST
+
+// UPLOAD POST IMAGE
+const uploadPostImage = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    if (!req.file) {
+      res.status(400).json({ success: false, message: "No image file" });
+      return;
+    }
+
+    const imagePath = req.file.path;
+    const result = await cloudinary.uploader.upload(imagePath, {
+      folder: "posts",
+    });
+
+    const updatedPost = await Post.findByIdAndUpdate(
+      req.params.postId,
+      {
+        $set: {
+          image: {
+            url: result.secure_url,
+            publicId: result.public_id,
+          },
+        },
+      },
+      { new: true },
+    );
+
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
+    }
+
+    res.status(200).json({ success: true, data: updatedPost });
+    return;
+  },
+);
+
+// LIKE / UNLIKE POST
 const likePost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const postId = req.params.postId;
+    const { postId } = req.params;
     const userId = req.user?.id;
     if (!userId) {
       res
@@ -222,7 +241,7 @@ const likePost = asyncHandler(
             $inc: { postLikesCount: 1 } as any,
           },
       { new: true },
-    ).populate("likes", ["_id", "username"]);
+    ).populate("likes", ["_id", "username", "profilePicture", "jobTitle"]);
 
     res.status(200).json({ success: true, data: updatedPost });
     return;
@@ -259,6 +278,7 @@ const sharePost = asyncHandler(async (req: Request, res: Response) => {
   const savedSharedPost = await sharedPostRecord.save();
   await Post.findByIdAndUpdate(postId, {
     $inc: { sharesCount: 1 },
+    $push: { shares: new Types.ObjectId(req.user.id) },
   });
   await Post.findByIdAndUpdate(req.user.id, {
     $inc: { postsCount: 1 },

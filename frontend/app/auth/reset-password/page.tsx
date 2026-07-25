@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
-import { Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react";
+import { Lock, ArrowRight, ShieldCheck } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -48,10 +48,6 @@ export default function ResetPasswordPage({
     (routeParams?.token as string) ||
     searchParams.get("token") ||
     "";
-
-  // Visibility states
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // UX states
   const [isSuccess, setIsSuccess] = useState(false);
@@ -179,32 +175,19 @@ export default function ResetPasswordPage({
         <div className="space-y-1.5">
           <Label htmlFor="password">Password</Label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
+            <span className="absolute inset-y-0 left-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
               <Lock className="h-4.5 w-4.5" />
             </span>
             <Input
               id="password"
-              type={showPassword ? "text" : "password"}
+              type="password"
               placeholder="••••••••"
               disabled={resetMutation.isPending}
-              className={`pl-11 pr-11 ${errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
+              className={`pl-11 ${errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
               {...register("password", {
                 onChange: () => clearErrors("password"),
               })}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              disabled={resetMutation.isPending}
-              className="absolute inset-y-0 right-3 flex items-center text-textSecondary hover:text-textPrimary transition-colors cursor-pointer"
-              aria-label="Toggle Password Visibility"
-            >
-              {showPassword ? (
-                <EyeOff className="h-4.5 w-4.5" />
-              ) : (
-                <Eye className="h-4.5 w-4.5" />
-              )}
-            </button>
           </div>
           <Error error={errors.password?.message} />
         </div>
@@ -213,32 +196,19 @@ export default function ResetPasswordPage({
         <div className="space-y-1.5">
           <Label htmlFor="confirmPassword">Confirm Password</Label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
+            <span className="absolute inset-y-0 left-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
               <Lock className="h-4.5 w-4.5" />
             </span>
             <Input
               id="confirmPassword"
-              type={showConfirmPassword ? "text" : "password"}
+              type="password"
               placeholder="••••••••"
               disabled={resetMutation.isPending}
-              className={`pl-11 pr-11 ${errors.confirmPassword ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
+              className={`pl-11 ${errors.confirmPassword ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
               {...register("confirmPassword", {
                 onChange: () => clearErrors("confirmPassword"),
               })}
             />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              disabled={resetMutation.isPending}
-              className="absolute inset-y-0 right-3 flex items-center text-textSecondary hover:text-textPrimary transition-colors cursor-pointer"
-              aria-label="Toggle Password Visibility"
-            >
-              {showConfirmPassword ? (
-                <EyeOff className="h-4.5 w-4.5" />
-              ) : (
-                <Eye className="h-4.5 w-4.5" />
-              )}
-            </button>
           </div>
           <Error error={errors.confirmPassword?.message} />
         </div>

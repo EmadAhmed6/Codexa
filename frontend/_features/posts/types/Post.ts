@@ -27,6 +27,7 @@ export interface Comment {
   user: {
     _id: string;
     username: string;
+    jobTitle?: string;
     profilePicture?: {
       url?: string;
     };
@@ -35,10 +36,19 @@ export interface Comment {
     url?: string;
     publicId?: string;
   };
-  likes?: (string | { _id: string; username?: string })[];
+  likes?: (string | { _id: string; username?: string; profilePicture?: { url?: string }; jobTitle?: string })[];
   commentLikesCount?: number;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface PostUserSummary {
+  _id: string;
+  username?: string;
+  jobTitle?: string;
+  profilePicture?: {
+    url?: string;
+  };
 }
 
 export interface Post {
@@ -58,9 +68,9 @@ export interface Post {
     url?: string;
     publicId?: string;
   };
-  likes?: (string | { _id: string; username?: string })[];
+  likes?: (string | PostUserSummary)[];
   likesCount?: number;
-  shares?: (string | { _id: string })[];
+  shares?: (string | PostUserSummary)[];
   sharesCount?: number;
   comments?: Comment[];
   commentsCount?: number;
@@ -76,4 +86,3 @@ export interface PostsResponse {
   page?: number;
   totalPages?: number;
 }
-

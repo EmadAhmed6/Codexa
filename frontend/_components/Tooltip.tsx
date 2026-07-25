@@ -1,0 +1,67 @@
+"use client";
+
+import React, { useState } from "react";
+import { cn } from "@/lib/utils";
+
+export type TooltipPosition = "top" | "bottom" | "left" | "right";
+
+interface TooltipProps {
+  content: React.ReactNode;
+  position?: TooltipPosition;
+  children: React.ReactNode;
+  className?: string;
+  tooltipClassName?: string;
+}
+
+export default function Tooltip({
+  content,
+  position = "top",
+  children,
+  className,
+  tooltipClassName,
+}: TooltipProps) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  if (!content) return <>{children}</>;
+
+  const positionClasses: Record<TooltipPosition, string> = {
+    top: "bottom-full left-1/2 -translate-x-1/2 mb-2.5",
+    bottom: "top-full left-1/2 -translate-x-1/2 mt-2.5",
+    left: "right-full top-1/2 -translate-y-1/2 mr-2.5",
+    right: "left-full top-1/2 -translate-y-1/2 ml-2.5",
+  };
+
+  const arrowClasses: Record<TooltipPosition, string> = {
+    top: "top-full left-1/2 -translate-x-1/2 -mt-1 border-t-bgSecondary border-x-transparent border-b-transparent",
+    bottom: "bottom-full left-1/2 -translate-x-1/2 -mb-1 border-b-bgSecondary border-x-transparent border-t-transparent",
+    left: "left-full top-1/2 -translate-y-1/2 -ml-1 border-l-bgSecondary border-y-transparent border-r-transparent",
+    right: "right-full top-1/2 -translate-y-1/2 -mr-1 border-r-bgSecondary border-y-transparent border-l-transparent",
+  };
+
+  return (
+    <div
+      className={cn("relative inline-flex items-center group", className)}
+      onMouseEnter={() => setIsVisible(true)}
+      onMouseLeave={() => setIsVisible(false)}
+    >
+      {children}
+
+      {isVisible && (
+        <div
+          className={cn(
+            "absolute z-50 pointer-events-none transition-all duration-150 animate-in fade-in zoom-in-95",
+            positionClasses[position],
+            tooltipClassName
+          )}
+        >
+          <div className="relative bg-bgSecondary border border-borderPrimary/80 rounded-xl shadow-2xl p-2.5 min-w-max max-w-xs text-xs text-textPrimary">
+            {content}
+            <div
+              className={cn("absolute w-0 h-0 border-4", arrowClasses[position])}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

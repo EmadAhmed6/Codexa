@@ -9,7 +9,7 @@ import {
   likePost,
   uploadPostImage,
   sharePost,
-} from "./posts.controller.js";
+} from "./post.controller.js";
 import {
   verifyToken,
   verifyAdminToken,

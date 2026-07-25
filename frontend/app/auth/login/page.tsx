@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,6 @@ import Error from "@/_components/Error";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLoginMutation();
   const router = useRouter();
 
@@ -84,7 +83,7 @@ export default function LoginPage() {
         <div className="space-y-1.5">
           <Label htmlFor="email">Email address</Label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
+            <span className="absolute inset-y-0 left-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
               <Mail className="h-4.5 w-4.5" />
             </span>
             <Input
@@ -106,31 +105,19 @@ export default function LoginPage() {
           </div>
 
           <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
+            <span className="absolute inset-y-0 left-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
               <Lock className="h-4.5 w-4.5" />
             </span>
             <Input
               id="password"
-              type={showPassword ? "text" : "password"}
+              type="password"
               placeholder="••••••••"
               disabled={loginMutation.isPending}
-              className={`pl-11 pr-11 ${errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
+              className={`pl-11 ${errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
               {...register("password", {
                 onChange: () => clearErrors("password"),
               })}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-3 flex items-center text-textSecondary hover:text-textPrimary transition-colors cursor-pointer"
-              aria-label="Toggle Password Visibility"
-            >
-              {showPassword ? (
-                <EyeOff className="h-4.5 w-4.5" />
-              ) : (
-                <Eye className="h-4.5 w-4.5" />
-              )}
-            </button>
           </div>
           <Error error={errors.password?.message} />
         </div>

@@ -24,6 +24,8 @@ import EditPostModal from "./EditPostModal";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 import { formatRelativeTime } from "@/lib/utils";
 import { Text } from "@/_components/Text";
+import Tooltip from "@/_components/Tooltip";
+import UserListTooltip from "@/_components/UserListTooltip";
 
 interface PostCardProps {
   post: Post;
@@ -212,21 +214,26 @@ export default function PostCard({ post }: PostCardProps) {
                 {/* Edit & Delete Controls */}
                 {isOwnerOrAdmin && (
                   <div className="flex items-center gap-1 ml-2 border-l border-borderPrimary/40 pl-2 pointer-events-auto">
-                    <button
-                      onClick={handleOpenEdit}
-                      className="p-1 rounded-md text-textSecondary hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
-                      title="Edit Article"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={handleDelete}
-                      disabled={deletePostMutation.isPending}
-                      className="p-1 rounded-md text-textSecondary hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                      title="Delete Article"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    <Tooltip position="top" content="Edit Article">
+                      <button
+                        onClick={handleOpenEdit}
+                        className="p-1 rounded-md text-textSecondary hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                        title="Edit Article"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                    </Tooltip>
+
+                    <Tooltip position="top" content="Delete Article">
+                      <button
+                        onClick={handleDelete}
+                        disabled={deletePostMutation.isPending}
+                        className="p-1 rounded-md text-textSecondary hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                        title="Delete Article"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </Tooltip>
                   </div>
                 )}
               </div>
@@ -302,69 +309,78 @@ export default function PostCard({ post }: PostCardProps) {
 
             {/* Actions: Likes, Comments, Share */}
             <div className="flex items-center gap-2 pointer-events-auto relative z-10">
-              {/* Like Button */}
-              <button
-                onClick={handleLike}
-                disabled={likePostMutation.isPending}
-                className={`flex items-center gap-1.5 text-xs font-bold transition-all p-1.5 rounded-lg cursor-pointer ${
-                  isLiked
-                    ? "text-rose-500 bg-rose-500/10"
-                    : "text-textSecondary hover:text-rose-500 hover:bg-rose-500/10"
-                }`}
-                title="Like Post"
+              {/* Like Button with User List Tooltip */}
+              <Tooltip
+                position="top"
+                content={<UserListTooltip users={post.likes} type="like" />}
               >
-                <Heart
-                  className={`h-4 w-4 transition-transform active:scale-125 ${
+                <button
+                  onClick={handleLike}
+                  disabled={likePostMutation.isPending}
+                  className={`flex items-center gap-1.5 text-xs font-bold transition-all p-1.5 rounded-lg cursor-pointer ${
                     isLiked
-                      ? "fill-rose-500 text-rose-500"
-                      : "text-textSecondary fill-transparent"
+                      ? "text-rose-500 bg-rose-500/10"
+                      : "text-textSecondary hover:text-rose-500 hover:bg-rose-500/10"
                   }`}
-                />
-                <Text
-                  as="span"
-                  size="xs"
-                  font="bold"
-                  className={isLiked ? "text-rose-500" : "text-textSecondary"}
                 >
-                  {displayLikesCount}
-                </Text>
-              </button>
+                  <Heart
+                    className={`h-4 w-4 transition-transform active:scale-125 ${
+                      isLiked
+                        ? "fill-rose-500 text-rose-500"
+                        : "text-textSecondary fill-transparent"
+                    }`}
+                  />
+                  <Text
+                    as="span"
+                    size="xs"
+                    font="bold"
+                    className={isLiked ? "text-rose-500" : "text-textSecondary"}
+                  >
+                    {displayLikesCount}
+                  </Text>
+                </button>
+              </Tooltip>
 
               {/* Comment Counter */}
-              <Link
-                href={`/posts/${post._id}#comments`}
-                className="group/comment flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10 relative z-10"
-                title="Comments"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MessageSquare className="h-4 w-4 text-textSecondary group-hover/comment:text-primary transition-colors" />
-                <Text
-                  as="span"
-                  size="xs"
-                  font="semiBold"
-                  className="text-textSecondary group-hover/comment:text-primary transition-colors"
+              <Tooltip position="top" content="View Comments">
+                <Link
+                  href={`/posts/${post._id}#comments`}
+                  className="group/comment flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10 relative z-10"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  {commentsCount}
-                </Text>
-              </Link>
+                  <MessageSquare className="h-4 w-4 text-textSecondary group-hover/comment:text-primary transition-colors" />
+                  <Text
+                    as="span"
+                    size="xs"
+                    font="semiBold"
+                    className="text-textSecondary group-hover/comment:text-primary transition-colors"
+                  >
+                    {commentsCount}
+                  </Text>
+                </Link>
+              </Tooltip>
 
-              {/* Share Counter */}
-              <button
-                onClick={handleShare}
-                disabled={sharePostMutation.isPending}
-                className="group/share flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10 cursor-pointer"
-                title="Share Post"
+              {/* Share Counter with User List Tooltip */}
+              <Tooltip
+                position="top"
+                content={<UserListTooltip users={post.shares} type="share" />}
               >
-                <Share2 className="h-4 w-4 text-textSecondary group-hover/share:text-primary transition-colors" />
-                <Text
-                  as="span"
-                  size="xs"
-                  font="semiBold"
-                  className="text-textSecondary group-hover/share:text-primary transition-colors"
+                <button
+                  onClick={handleShare}
+                  disabled={sharePostMutation.isPending}
+                  className="group/share flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10 cursor-pointer"
                 >
-                  {sharesCount}
-                </Text>
-              </button>
+                  <Share2 className="h-4 w-4 text-textSecondary group-hover/share:text-primary transition-colors" />
+                  <Text
+                    as="span"
+                    size="xs"
+                    font="semiBold"
+                    className="text-textSecondary group-hover/share:text-primary transition-colors"
+                  >
+                    {sharesCount}
+                  </Text>
+                </button>
+              </Tooltip>
             </div>
           </div>
         </div>

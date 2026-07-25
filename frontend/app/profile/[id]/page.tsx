@@ -195,7 +195,13 @@ export default function UserProfilePage() {
                     ) : (
                       <>
                         <Camera className="h-6 w-6 mb-1" />
-                        <Text as="span" size="xs" font="bold" color="white" className="text-[10px] uppercase">
+                        <Text
+                          as="span"
+                          size="xs"
+                          font="bold"
+                          color="white"
+                          className="text-[10px] uppercase"
+                        >
                           Upload
                         </Text>
                       </>
@@ -225,10 +231,15 @@ export default function UserProfilePage() {
                       >
                         {userToDisplay?.username || "Developer"}
                       </Text>
-                      {userToDisplay?.isAdmin && (
+                      {userToDisplay?.isAdmin ? (
                         <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1">
                           <ShieldCheck className="h-3.5 w-3.5" />
                           Admin
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30 flex items-center gap-1">
+                          <UserIcon className="h-3.5 w-3.5" />
+                          User
                         </span>
                       )}
                     </div>
@@ -259,7 +270,12 @@ export default function UserProfilePage() {
                           className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground text-xs flex items-center gap-1.5 cursor-pointer font-semibold"
                         >
                           <PlusCircle className="h-3.5 w-3.5" />
-                          <Text as="span" size="xs" font="semiBold" color="white">
+                          <Text
+                            as="span"
+                            size="xs"
+                            font="semiBold"
+                            color="white"
+                          >
                             Create Article
                           </Text>
                         </Button>
@@ -270,7 +286,12 @@ export default function UserProfilePage() {
                           className="rounded-xl border-borderPrimary text-xs flex items-center gap-1.5 cursor-pointer"
                         >
                           <Edit className="h-3.5 w-3.5" />
-                          <Text as="span" size="xs" font="semiBold" color="primary">
+                          <Text
+                            as="span"
+                            size="xs"
+                            font="semiBold"
+                            color="primary"
+                          >
                             Edit Profile
                           </Text>
                         </Button>
@@ -299,14 +320,18 @@ export default function UserProfilePage() {
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-bgPrimary/80 border border-borderPrimary/40">
                     <FileText className="h-4 w-4 text-primary" />
                     <Text as="span" size="xs" font="semiBold" color="primary">
-                      {userToDisplay?.postsCount ?? displayUserPosts.length}{" "}
-                      Articles
+                      {displayUserPosts.length} Articles
                     </Text>
                   </div>
                   {userToDisplay?.createdAt && (
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-bgPrimary/80 border border-borderPrimary/40">
                       <Calendar className="h-4 w-4 text-primary/70" />
-                      <Text as="span" size="xs" font="semiBold" color="secondary">
+                      <Text
+                        as="span"
+                        size="xs"
+                        font="semiBold"
+                        color="secondary"
+                      >
                         Joined{" "}
                         {new Date(userToDisplay.createdAt).toLocaleDateString(
                           "en-US",
@@ -365,17 +390,6 @@ export default function UserProfilePage() {
                   ? "Create your first post to get started."
                   : "This user hasn't published any articles yet."}
               </Text>
-              {isOwnProfile && (
-                <Button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground text-xs font-semibold cursor-pointer"
-                >
-                  <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
-                  <Text as="span" size="xs" font="semiBold" color="white">
-                    Create First Article
-                  </Text>
-                </Button>
-              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -493,7 +507,9 @@ export default function UserProfilePage() {
                   className="rounded-xl bg-primary text-primary-foreground text-xs"
                 >
                   <Text as="span" size="xs" font="semiBold" color="white">
-                    {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
+                    {updateUserMutation.isPending
+                      ? "Saving..."
+                      : "Save Changes"}
                   </Text>
                 </Button>
               </div>

@@ -17,6 +17,7 @@ import Cookies from "js-cookie";
 import { useGetAuthMeQuery, useLogout } from "@/_features/auth/hooks";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/_components/Text";
+import Tooltip from "@/_components/Tooltip";
 
 const Navbar = () => {
   const { theme, setTheme } = useTheme();
@@ -67,6 +68,7 @@ const Navbar = () => {
         <form
           onSubmit={handleSearchSubmit}
           className="flex-1 max-w-md relative"
+          suppressHydrationWarning
         >
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-textSecondary" />
           <input
@@ -75,6 +77,7 @@ const Navbar = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm rounded-xl bg-bgSecondary/80 border border-borderPrimary/60 text-textPrimary placeholder:text-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+            suppressHydrationWarning
           />
         </form>
 
@@ -82,41 +85,48 @@ const Navbar = () => {
         <div className="flex items-center gap-2.5 shrink-0">
           {/* Theme Switcher */}
           {mounted && (
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 rounded-xl bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/40 text-textSecondary hover:text-textPrimary transition-all cursor-pointer"
-              aria-label="Toggle Theme"
+            <Tooltip
+              position="bottom"
+              content={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
-              {theme === "dark" ? (
-                <Sun className="h-4 w-4 text-amber-400" />
-              ) : (
-                <Moon className="h-4 w-4 text-slate-600" />
-              )}
-            </button>
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="p-2 rounded-xl bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/40 text-textSecondary hover:text-textPrimary transition-all cursor-pointer"
+                aria-label="Toggle Theme"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-4 w-4 text-amber-400" />
+                ) : (
+                  <Moon className="h-4 w-4 text-slate-600" />
+                )}
+              </button>
+            </Tooltip>
           )}
 
           {/* Admin Dashboard Quick Button */}
           {mounted && token && user?.isAdmin && (
-            <Link href="/admin/dashboard/users">
-              <Button
-                variant="outline"
-                size="sm"
-                className="group rounded-xl border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 hover:text-amber-400 text-xs items-center gap-1.5 cursor-pointer font-bold hidden sm:flex transition-all"
-              >
-                <LayoutDashboard className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
-                <Text
-                  as="span"
-                  size="xs"
-                  font="bold"
-                  className="text-amber-500 group-hover:text-amber-400 transition-colors"
+            <Tooltip position="bottom" content="Admin Control Dashboard">
+              <Link href="/admin/dashboard/users">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="group rounded-xl border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 hover:text-amber-400 text-xs items-center gap-1.5 cursor-pointer font-bold hidden sm:flex transition-all"
                 >
-                  Dashboard
-                </Text>
-              </Button>
-            </Link>
+                  <LayoutDashboard className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                  <Text
+                    as="span"
+                    size="xs"
+                    font="bold"
+                    className="text-amber-500 group-hover:text-amber-400 transition-colors"
+                  >
+                    Dashboard
+                  </Text>
+                </Button>
+              </Link>
+            </Tooltip>
           )}
 
-          {/* User Dropdown / Auth Links (Check mounted to prevent hydration mismatch) */}
+          {/* User Dropdown / Auth Links */}
           {mounted && token ? (
             <div className="relative">
               <button

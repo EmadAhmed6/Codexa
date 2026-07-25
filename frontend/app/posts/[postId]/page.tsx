@@ -28,6 +28,8 @@ import { Button } from "@/components/ui/button";
 import Cookies from "js-cookie";
 import { formatRelativeTime } from "@/lib/utils";
 import { Text } from "@/_components/Text";
+import Tooltip from "@/_components/Tooltip";
+import UserListTooltip from "@/_components/UserListTooltip";
 
 export default function SinglePostPage() {
   const params = useParams();
@@ -143,16 +145,18 @@ export default function SinglePostPage() {
       <Navbar />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-        {/* Back Link */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <Text as="span" size="xs" font="semiBold" color="secondary">
-            Back to Feed
-          </Text>
-        </Link>
+        {/* Back Link with Tooltip */}
+        <Tooltip position="right" content="Return to Feed">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <Text as="span" size="xs" font="semiBold" color="secondary">
+              Back to Feed
+            </Text>
+          </Link>
+        </Tooltip>
 
         {/* Author Header Bar (Top) */}
         <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-bgSecondary/60 border border-borderPrimary/40 mb-6">
@@ -190,29 +194,34 @@ export default function SinglePostPage() {
           {/* Owner / Admin Actions (Edit & Delete) */}
           {isOwnerOrAdmin && (
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditModalOpen(true)}
-                className="rounded-xl text-xs flex items-center gap-1.5 cursor-pointer border-borderPrimary"
-              >
-                <Edit2 className="h-3.5 w-3.5" />
-                <Text as="span" size="xs" font="semiBold" color="primary">
-                  Edit
-                </Text>
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDeletePost}
-                disabled={deletePostMutation.isPending}
-                className="rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                <Text as="span" size="xs" font="semiBold" color="white">
-                  Delete
-                </Text>
-              </Button>
+              <Tooltip position="bottom" content="Edit Article">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="rounded-xl text-xs flex items-center gap-1.5 cursor-pointer border-borderPrimary"
+                >
+                  <Edit2 className="h-3.5 w-3.5" />
+                  <Text as="span" size="xs" font="semiBold" color="primary">
+                    Edit
+                  </Text>
+                </Button>
+              </Tooltip>
+
+              <Tooltip position="bottom" content="Delete Article">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeletePost}
+                  disabled={deletePostMutation.isPending}
+                  className="rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <Text as="span" size="xs" font="semiBold" color="white">
+                    Delete
+                  </Text>
+                </Button>
+              </Tooltip>
             </div>
           )}
         </div>
@@ -271,43 +280,53 @@ export default function SinglePostPage() {
         {/* Article Bottom Actions */}
         <div className="flex items-center justify-between p-4 rounded-2xl bg-bgSecondary/40 border border-borderPrimary/40 mb-10">
           <div className="flex items-center gap-4">
-            <button
-              onClick={handleLike}
-              disabled={likePostMutation.isPending}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-xs transition-all cursor-pointer ${
-                isLiked
-                  ? "bg-rose-500 text-white shadow-md shadow-rose-500/20"
-                  : "bg-rose-500/10 hover:bg-rose-500/20 text-rose-500"
-              }`}
+            <Tooltip
+              position="top"
+              content={<UserListTooltip users={post.likes} type="like" />}
             >
-              <Heart
-                className={`h-4 w-4 ${isLiked ? "fill-white text-white" : "fill-rose-500/20"}`}
-              />
-              <Text
-                as="span"
-                size="xs"
-                font="semiBold"
-                className={isLiked ? "text-white" : "text-rose-500"}
+              <button
+                onClick={handleLike}
+                disabled={likePostMutation.isPending}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-xs transition-all cursor-pointer ${
+                  isLiked
+                    ? "bg-rose-500 text-white shadow-md shadow-rose-500/20"
+                    : "bg-rose-500/10 hover:bg-rose-500/20 text-rose-500"
+                }`}
               >
-                Like Article ({likesCount})
-              </Text>
-            </button>
+                <Heart
+                  className={`h-4 w-4 ${isLiked ? "fill-white text-white" : "fill-rose-500/20"}`}
+                />
+                <Text
+                  as="span"
+                  size="xs"
+                  font="semiBold"
+                  className={isLiked ? "text-white" : "text-rose-500"}
+                >
+                  Like Article ({likesCount})
+                </Text>
+              </button>
+            </Tooltip>
 
-            <button
-              onClick={() => sharePostMutation.mutate(postId)}
-              disabled={sharePostMutation.isPending}
-              className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-bgPrimary hover:bg-bgSecondary border border-borderPrimary/40 text-textSecondary hover:text-textPrimary font-semibold text-xs transition-all cursor-pointer"
+            <Tooltip
+              position="top"
+              content={<UserListTooltip users={post.shares} type="share" />}
             >
-              <Share2 className="h-4 w-4 text-textSecondary group-hover:text-textPrimary transition-colors" />
-              <Text
-                as="span"
-                size="xs"
-                font="semiBold"
-                className="text-textSecondary group-hover:text-textPrimary transition-colors"
+              <button
+                onClick={() => sharePostMutation.mutate(postId)}
+                disabled={sharePostMutation.isPending}
+                className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-bgPrimary hover:bg-bgSecondary border border-borderPrimary/40 text-textSecondary hover:text-textPrimary font-semibold text-xs transition-all cursor-pointer"
               >
-                Share ({sharesCount})
-              </Text>
-            </button>
+                <Share2 className="h-4 w-4 text-textSecondary group-hover:text-textPrimary transition-colors" />
+                <Text
+                  as="span"
+                  size="xs"
+                  font="semiBold"
+                  className="text-textSecondary group-hover:text-textPrimary transition-colors"
+                >
+                  Share ({sharesCount})
+                </Text>
+              </button>
+            </Tooltip>
           </div>
         </div>
 

@@ -8,10 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreatePost } from "@/_features/posts/hooks";
 import { uploadPostImage } from "@/_features/posts/api";
-import {
-  postFormSchema,
-  type IPostForm,
-} from "@/_features/posts/schemas/post";
+import { postFormSchema, type IPostForm } from "@/_features/posts/schemas/post";
 import Error from "@/_components/Error";
 import { toast } from "sonner";
 import { Text } from "@/_components/Text";
@@ -137,32 +134,6 @@ export default function CreatePostModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Category */}
-          <div>
-            <Text
-              as="label"
-              size="xs"
-              font="semiBold"
-              color="secondary"
-              className="block uppercase tracking-wider mb-2"
-            >
-              Category
-            </Text>
-            <select
-              {...register("category", {
-                onChange: () => clearErrors("category"),
-              })}
-              className="w-full px-4 py-2.5 rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all cursor-pointer"
-            >
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-            <Error error={errors.category?.message} />
-          </div>
-
           {/* Title */}
           <div>
             <div className="flex justify-between items-center mb-2">
@@ -175,7 +146,12 @@ export default function CreatePostModal({
               >
                 Title
               </Text>
-              <Text as="span" size="xs" color="secondary" className="text-[11px]">
+              <Text
+                as="span"
+                size="xs"
+                color="secondary"
+                className="text-[11px]"
+              >
                 {watchTitle.length}/32
               </Text>
             </div>
@@ -202,7 +178,12 @@ export default function CreatePostModal({
               >
                 Content & Description
               </Text>
-              <Text as="span" size="xs" color="secondary" className="text-[11px]">
+              <Text
+                as="span"
+                size="xs"
+                color="secondary"
+                className="text-[11px]"
+              >
                 {watchDescription.length}/250
               </Text>
             </div>
@@ -216,7 +197,32 @@ export default function CreatePostModal({
             />
             <Error error={errors.description?.message} />
           </div>
-
+          
+          {/* Category */}
+          <div>
+            <Text
+              as="label"
+              size="xs"
+              font="semiBold"
+              color="secondary"
+              className="block uppercase tracking-wider mb-2"
+            >
+              Category
+            </Text>
+            <select
+              {...register("category", {
+                onChange: () => clearErrors("category"),
+              })}
+              className="w-full px-4 py-2.5 rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all cursor-pointer"
+            >
+              {CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+            <Error error={errors.category?.message} />
+          </div>
           {/* Featured Image */}
           <div>
             <Text
@@ -253,7 +259,12 @@ export default function CreatePostModal({
                   <Text as="span" size="xs" font="semiBold" color="primary">
                     Click to upload cover image
                   </Text>
-                  <Text as="span" size="xs" color="secondary" className="text-[11px] mt-1">
+                  <Text
+                    as="span"
+                    size="xs"
+                    color="secondary"
+                    className="text-[11px] mt-1"
+                  >
                     PNG, JPG, WebP up to 5MB
                   </Text>
                   <input
