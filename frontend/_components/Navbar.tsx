@@ -18,6 +18,7 @@ import { useGetAuthMeQuery, useLogout } from "@/_features/auth/hooks";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/_components/Text";
 import Tooltip from "@/_components/Tooltip";
+import Image from "next/image";
 
 const Navbar = () => {
   const { theme, setTheme } = useTheme();
@@ -48,17 +49,13 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-          <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/25 group-hover:scale-105 transition-all">
-            <span className="text-primary-foreground font-black text-lg select-none">
-              C
-            </span>
-          </div>
+          <Image src="/logo.png" alt="Logo" width={34} height={34} />
           <Text
             as="span"
             size="xl"
             font="extraBold"
             color="primary"
-            className="tracking-tight hidden sm:inline-block"
+            className="hidden sm:inline-block"
           >
             Codexa
           </Text>
@@ -87,7 +84,11 @@ const Navbar = () => {
           {mounted && (
             <Tooltip
               position="bottom"
-              content={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              content={
+                theme === "dark"
+                  ? "Switch to Light Mode"
+                  : "Switch to Dark Mode"
+              }
             >
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
