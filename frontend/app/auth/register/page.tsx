@@ -2,13 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import {
-  User,
-  Mail,
-  Lock,
-  ArrowRight,
-  Briefcase,
-} from "lucide-react";
+import { User, Mail, Lock, ArrowRight, Briefcase } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -100,24 +94,6 @@ export default function RegisterPage() {
           <Error error={errors.username?.message} />
         </div>
 
-        {/* Job Title Field (Optional) */}
-        <div className="space-y-1.5">
-          <Label htmlFor="jobTitle">Job Title (Optional)</Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
-              <Briefcase className="h-4.5 w-4.5" />
-            </span>
-            <Input
-              id="jobTitle"
-              type="text"
-              placeholder="Frontend Developer"
-              disabled={registerMutation.isPending}
-              className="pl-11"
-              {...register("jobTitle" as any)}
-            />
-          </div>
-        </div>
-
         {/* Email Field */}
         <div className="space-y-1.5">
           <Label htmlFor="email">Email address</Label>
@@ -136,7 +112,23 @@ export default function RegisterPage() {
           </div>
           <Error error={errors.email?.message} />
         </div>
-
+        {/* Job Title Field (Optional) */}
+        <div className="space-y-1.5">
+          <Label htmlFor="jobTitle">Job Title (Optional)</Label>
+          <div className="relative">
+            <span className="absolute inset-y-0 left-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
+              <Briefcase className="h-4.5 w-4.5" />
+            </span>
+            <Input
+              id="jobTitle"
+              type="text"
+              placeholder="Frontend Developer"
+              disabled={registerMutation.isPending}
+              className="pl-11"
+              {...register("jobTitle" as any)}
+            />
+          </div>
+        </div>
         {/* Password Field */}
         <div className="space-y-1.5">
           <Label htmlFor="password">Password</Label>
