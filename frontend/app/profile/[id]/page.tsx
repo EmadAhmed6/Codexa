@@ -313,7 +313,7 @@ export default function UserProfilePage() {
                           as="span"
                           size="xs"
                           font="semiBold"
-                          className="text-rose-700  group-hover/delBtn:text-white transition-colors"
+                          className="text-rose-700 group-hover/delBtn:text-white transition-colors"
                         >
                           {isOwnProfile ? "Delete Account" : "Delete User"}
                         </Text>
@@ -333,12 +333,7 @@ export default function UserProfilePage() {
                   {userToDisplay?.createdAt && (
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-bgPrimary/80 border border-borderPrimary/40">
                       <Calendar className="h-4 w-4 text-primary/70" />
-                      <Text
-                        as="span"
-                        size="xs"
-                        font="semiBold"
-                        color="primary"
-                      >
+                      <Text as="span" size="xs" font="semiBold" color="primary">
                         Joined{" "}
                         {new Date(userToDisplay.createdAt).toLocaleDateString(
                           "en-US",

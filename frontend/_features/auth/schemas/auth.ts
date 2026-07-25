@@ -16,7 +16,7 @@ export const registerSchema = z.object({
     .string()
     .min(1, "Username is required")
     .min(3, "Username must be at least 3 characters long")
-    .max(10, "Username must not exceed 10 characters"),
+    .max(50, "Username must not exceed 10 characters"),
   jobTitle: z
     .string()
     .max(50, "Job title must not exceed 50 characters")

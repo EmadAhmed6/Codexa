@@ -128,133 +128,136 @@ const Navbar = () => {
           )}
 
           {/* User Dropdown / Auth Links */}
-          {mounted && token ? (
-            <div className="relative">
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 p-1.5 rounded-xl bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/40 transition-all cursor-pointer"
-              >
-                {user?.profilePicture?.url ? (
-                  <img
-                    src={user.profilePicture.url}
-                    alt={user.username}
-                    className="h-7 w-7 rounded-lg object-cover"
-                  />
-                ) : (
-                  <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                    <UserIcon className="h-4 w-4" />
-                  </div>
-                )}
-                <Text
-                  as="span"
-                  size="xs"
-                  font="bold"
-                  color="primary"
-                  className="hidden md:inline-block max-w-25 truncate"
+          {mounted && (
+            token ? (
+              <div className="relative">
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 p-1.5 rounded-xl bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/40 transition-all cursor-pointer"
+                  suppressHydrationWarning
                 >
-                  {user?.username || "Account"}
-                </Text>
-                <ChevronDown className="h-3.5 w-3.5 text-textSecondary hidden md:inline-block" />
-              </button>
-
-              {dropdownOpen && (
-                <div
-                  onMouseLeave={() => setDropdownOpen(false)}
-                  className="absolute right-0 mt-2 w-48 rounded-2xl bg-bgSecondary border border-borderPrimary shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
-                >
-                  <div className="px-4 py-2 border-b border-borderPrimary/40">
-                    <Text
-                      as="p"
-                      size="xs"
-                      font="bold"
-                      color="primary"
-                      className="truncate"
-                    >
-                      {user?.username || "User"}
-                    </Text>
-                    <Text
-                      as="p"
-                      size="xs"
-                      color="secondary"
-                      className="text-[11px] truncate"
-                    >
-                      {user?.email || ""}
-                    </Text>
-                  </div>
-
-                  <Link
-                    href={`/profile/${user?._id || "me"}`}
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-textPrimary hover:bg-bgPrimary transition-colors"
+                  {user?.profilePicture?.url ? (
+                    <img
+                      src={user.profilePicture.url}
+                      alt={user.username}
+                      className="h-7 w-7 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                      <UserIcon className="h-4 w-4" />
+                    </div>
+                  )}
+                  <Text
+                    as="span"
+                    size="xs"
+                    font="bold"
+                    color="primary"
+                    className="hidden md:inline-block max-w-25 truncate"
                   >
-                    <UserIcon className="h-4 w-4 text-primary" />
-                    <Text as="span" size="xs" font="medium" color="primary">
-                      My Profile
-                    </Text>
-                  </Link>
+                    {user?.username || "Account"}
+                  </Text>
+                  <ChevronDown className="h-3.5 w-3.5 text-textSecondary hidden md:inline-block" />
+                </button>
 
-                  {user?.isAdmin && (
+                {dropdownOpen && (
+                  <div
+                    onMouseLeave={() => setDropdownOpen(false)}
+                    className="absolute right-0 mt-2 w-48 rounded-2xl bg-bgSecondary border border-borderPrimary shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                  >
+                    <div className="px-4 py-2 border-b border-borderPrimary/40">
+                      <Text
+                        as="p"
+                        size="xs"
+                        font="bold"
+                        color="primary"
+                        className="truncate"
+                      >
+                        {user?.username || "User"}
+                      </Text>
+                      <Text
+                        as="p"
+                        size="xs"
+                        color="secondary"
+                        className="text-[11px] truncate"
+                      >
+                        {user?.email || ""}
+                      </Text>
+                    </div>
+
                     <Link
-                      href="/admin/dashboard/users"
+                      href={`/profile/${user?._id || "me"}`}
                       onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-amber-500 hover:bg-amber-500/10 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-textSecondary hover:text-textPrimary hover:bg-bgPrimary transition-colors"
                     >
-                      <LayoutDashboard className="h-4 w-4 text-amber-500" />
+                      <UserIcon className="h-4 w-4 text-primary" />
+                      <Text as="span" size="xs" font="medium" color="primary">
+                        My Profile
+                      </Text>
+                    </Link>
+
+                    {user?.isAdmin && (
+                      <Link
+                        href="/admin/dashboard/users"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-amber-500 hover:bg-amber-500/10 transition-colors"
+                      >
+                        <LayoutDashboard className="h-4 w-4 text-amber-500" />
+                        <Text
+                          as="span"
+                          size="xs"
+                          font="medium"
+                          className="text-amber-500"
+                        >
+                          Admin Dashboard
+                        </Text>
+                      </Link>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        logout();
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer"
+                    >
+                      <LogOut className="h-4 w-4" />
                       <Text
                         as="span"
                         size="xs"
                         font="medium"
-                        className="text-amber-500"
+                        className="text-rose-500"
                       >
-                        Admin Dashboard
+                        Log Out
                       </Text>
-                    </Link>
-                  )}
-
-                  <button
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      logout();
-                    }}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer"
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link href="/auth/login">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="rounded-xl text-xs cursor-pointer"
                   >
-                    <LogOut className="h-4 w-4" />
-                    <Text
-                      as="span"
-                      size="xs"
-                      font="medium"
-                      className="text-rose-500"
-                    >
-                      Log Out
+                    <Text as="span" size="xs" font="semiBold" color="primary">
+                      Sign In
                     </Text>
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link href="/auth/login">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-xl text-xs cursor-pointer"
-                >
-                  <Text as="span" size="xs" font="semiBold" color="primary">
-                    Sign In
-                  </Text>
-                </Button>
-              </Link>
-              <Link href="/auth/register">
-                <Button
-                  size="sm"
-                  className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground text-xs cursor-pointer"
-                >
-                  <Text as="span" size="xs" font="semiBold" color="white">
-                    Sign Up
-                  </Text>
-                </Button>
-              </Link>
-            </div>
+                  </Button>
+                </Link>
+                <Link href="/auth/register">
+                  <Button
+                    size="sm"
+                    className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground text-xs cursor-pointer"
+                  >
+                    <Text as="span" size="xs" font="semiBold" color="white">
+                      Sign Up
+                    </Text>
+                  </Button>
+                </Link>
+              </div>
+            )
           )}
         </div>
       </div>
