@@ -279,75 +279,6 @@
 
 /**
  * @swagger
- * /posts/{postId}/comments/{commentId}/upload:
- *   post:
- *     summary: Upload an image to a comment
- *     tags:
- *       - Comments
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: postId
- *         required: true
- *         description: Post ID
- *         schema:
- *           type: string
- *           example: 65f1a2b3c4d5e6f789012345
- *       - in: path
- *         name: commentId
- *         required: true
- *         description: Comment ID
- *         schema:
- *           type: string
- *           example: 65f1a2b3c4d5e6f789012346
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - image
- *             properties:
- *               image:
- *                 type: string
- *                 format: binary
- *     responses:
- *       200:
- *         description: Comment image uploaded successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Request processed successfully
- *                 data:
- *                   type: object
- *                   properties:
- *                     url:
- *                       type: string
- *                       format: uri
- *                       example: https://res.cloudinary.com/example/image/upload/comment_attachment.jpg
- *                     publicId:
- *                       type: string
- *                       nullable: true
- *                       example: comment_image_789
- *       400:
- *         description: No file provided or Comment ID is required
- *       401:
- *         description: Not authorized
- *       404:
- *         description: Comment was not found
- */
-
-/**
- * @swagger
  * /posts/{postId}/comments/{commentId}/reply:
  *   post:
  *     summary: Create a reply to a comment
@@ -516,71 +447,7 @@
  *         description: Not authorized
  *       403:
  *         description: You are not allowed
- *       404:
- *         description: Reply comment was not found
- *   post:
- *     summary: Upload an image to a reply comment
- *     tags:
- *       - Comments
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: postId
- *         required: true
- *         description: Post ID
- *         schema:
- *           type: string
- *           example: 65f1a2b3c4d5e6f789012345
- *       - in: path
- *         name: commentId
- *         required: true
- *         description: Parent Comment ID
- *         schema:
- *           type: string
- *           example: 65f1a2b3c4d5e6f789012346
- *       - in: path
- *         name: replyCommentId
- *         required: true
- *         description: Reply Comment ID
- *         schema:
- *           type: string
- *           example: 65f1a2b3c4d5e6f789012348
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - image
- *             properties:
- *               image:
- *                 type: string
- *                 format: binary
- *     responses:
- *       200:
- *         description: Reply comment image uploaded successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Reply comment image uploaded successfully
- *                 data:
- *                   $ref: '#/components/schemas/Comment'
- *       400:
- *         description: Image not provided or Invalid reply comment id
- *       401:
- *         description: Not authorized
- *       403:
- *         description: You are not allowed
- *       404:
+ *    404:
  *         description: Reply comment was not found
  */
 
@@ -673,7 +540,7 @@
  *                   type: string
  *             jobTitle:
  *               type: string
- *         image:
+ *         commentImage:
  *           type: object
  *           properties:
  *             url:

@@ -6,13 +6,8 @@ import {
   updateComment,
   deleteComment,
   likeComment,
-  uploadCommentImage,
-  replyComment,
-  uploadReplyCommentImage,
-  updateReplyComment,
-  likeReply,
-  deleteReplyComment,
 } from "./comment.controller.js";
+import replies from "./reply/reply.routes.js";
 import {
   verifyToken,
   verifyAdminToken,
@@ -24,29 +19,15 @@ import upload from "../../middlewares/multer.js";
 router
   .route("/")
   .get(verifyToken, getAllComments)
-  .post(verifyToken, createComment);
+  .post(verifyToken, upload.single("commentImage"), createComment);
+
+router.put("/:commentId/like", verifyToken, likeComment);
 
 router
   .route("/:commentId")
-  .put(verifyCommentOwner, updateComment)
+  .put(verifyCommentOwner, upload.single("commentImage"), updateComment)
   .delete(verifyCommentOwner, deleteComment);
 
-router.post(
-  "/:commentId/upload",
-  verifyCommentOwner,
-  upload.single("image"),
-  uploadCommentImage,
-);
-
-router.put("/:commentId/like", verifyToken, likeComment);
-router.post("/:commentId/reply", verifyToken, replyComment);
-
-router
-  .route("/:commentId/reply/:replyCommentId")
-  .post(verifyCommentOwner, upload.single("image"), uploadReplyCommentImage)
-  .put(verifyCommentOwner, updateReplyComment)
-  .delete(verifyCommentOwner, deleteReplyComment);
-
-router.put("/:commentId/reply/:replyCommentId/like", verifyToken, likeReply);
+router.use("/:commentId/replies", verifyToken, replies);
 
 export default router;

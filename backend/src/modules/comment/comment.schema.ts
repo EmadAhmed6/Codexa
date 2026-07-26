@@ -3,7 +3,7 @@ import { z } from "zod";
 const CreateCommentSchema = z.object({
   postId: z.string(),
   text: z.string().trim().min(1),
-  image: z
+  commentImage: z
     .object({
       url: z.string().url(),
       publicId: z.string().nullable(),
@@ -14,3 +14,4 @@ const CreateCommentSchema = z.object({
 const UpdateCommentSchema = CreateCommentSchema.partial();
 export { CreateCommentSchema, UpdateCommentSchema };
 export type IUpdateComment = z.infer<typeof UpdateCommentSchema>;
+export type ICreateComment = z.infer<typeof CreateCommentSchema>;

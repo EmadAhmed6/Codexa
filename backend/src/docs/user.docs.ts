@@ -185,57 +185,7 @@
  *         description: User was not found
  */
 
-// POST /users/{id}/upload
-/**
- * @swagger
- * /users/{id}/upload:
- *   post:
- *     summary: Upload user profile picture
- *     description: Upload user profile picture to Cloudinary. Automatically destroys legacy profile picture asset if present.
- *     tags:
- *       - Users
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: User ID
- *         schema:
- *           type: string
- *           example: 65f1a2b3c4d5e6f789012345
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - profilePicture
- *             properties:
- *               profilePicture:
- *                 type: string
- *                 format: binary
- *     responses:
- *       200:
- *         description: Profile picture uploaded successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/User'
- *       400:
- *         description: No file provided
- *       401:
- *         description: Not authorized
- *       404:
- *         description: User was not found
- */
+// DELETE /users/{id}
 
 /**
  * @swagger

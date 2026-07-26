@@ -50,6 +50,7 @@ const UserSchema = z.object({
   jobTitle: z.string().min(3).max(50).optional(),
   otp: z.string().min(6).optional(),
   otpExpired: z.date().optional(),
+  bio: z.string().optional(),
 });
 
 const UpdateUserSchema = UserSchema.partial();

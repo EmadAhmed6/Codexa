@@ -4,7 +4,6 @@ import {
   getUserById,
   updateUser,
   deleteUser,
-  uploadUserPicture,
 } from "./user.controller.js";
 import {
   verifyToken,
@@ -14,18 +13,11 @@ import {
 import upload from "../../middlewares/multer.js";
 const router = express.Router();
 
-router.post(
-  "/:id/upload",
-  verifyAuthorizedToken,
-  upload.single("profilePicture"),
-  uploadUserPicture,
-);
-
 router.route("/").get(verifyToken, getAllUsers);
 router
   .route("/:id")
   .get(verifyToken, getUserById)
-  .put(verifyAuthorizedToken, updateUser)
+  .put(verifyAuthorizedToken, upload.single("profilePicture"), updateUser)
   .delete(verifyAuthorizedToken, deleteUser);
 
 export default router;

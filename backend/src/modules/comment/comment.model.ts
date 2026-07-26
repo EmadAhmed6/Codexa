@@ -4,18 +4,8 @@ import {
   CreateCommentSchema,
   UpdateCommentSchema,
   type IUpdateComment,
+  type ICreateComment,
 } from "./comment.schema.js";
-
-interface ICreateComment {
-  postId: string;
-  text: string;
-  image?: {
-    url: string;
-    publicId: string | null;
-  };
-  parentComment: string | null;
-  replyCommentsCount: number;
-}
 
 interface IComment extends Omit<ICreateComment, "postId">, Document {
   postId: Types.ObjectId;
@@ -24,6 +14,8 @@ interface IComment extends Omit<ICreateComment, "postId">, Document {
   replyLikesCount: number;
   commentsCount: Number;
   commentLikesCount: Number;
+  parentComment: string | null;
+  replyCommentsCount: number;
 }
 const CommentSchema = new Schema<IComment>(
   {
@@ -47,7 +39,7 @@ const CommentSchema = new Schema<IComment>(
       required: true,
       trim: true,
     },
-    image: {
+    commentImage: {
       type: {
         url: { type: String },
         publicId: { type: String, default: null },

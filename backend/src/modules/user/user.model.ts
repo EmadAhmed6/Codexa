@@ -43,6 +43,12 @@ const userSchema = new Schema<IUser>(
       minLength: 2,
       maxLength: 20,
     },
+    bio: {
+      type: String,
+      trim: true,
+      minLength: 2,
+      maxLength: 20,
+    },
     password: {
       type: String,
       required: true,

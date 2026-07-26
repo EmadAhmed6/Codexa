@@ -7,7 +7,6 @@ import {
   deletePost,
   createPost,
   likePost,
-  uploadPostImage,
   sharePost,
 } from "./post.controller.js";
 import {
@@ -17,28 +16,22 @@ import {
   verifyPostOwner,
 } from "../../middlewares/verifyToken.js";
 import upload from "../../middlewares/multer.js";
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
-// Crud
-router.route("/").get(verifyToken, getAllPosts).post(verifyToken, createPost);
+router
+.route("/")
+  .get(verifyToken, getAllPosts)
+  .post(verifyToken, upload.single("postImage"), createPost);
 
 router.post("/:postId/share", verifyToken, sharePost);
 
 router
   .route("/:postId")
   .get(verifyToken, getPostById)
-  .put(verifyPostOwner, updatePost)
+  .put(verifyPostOwner, upload.single("postImage"), updatePost)
   .delete(verifyPostOwner, deletePost);
 
 router.put("/:postId/like", verifyToken, likePost);
-
-// Upload Image
-router.post(
-  "/:postId/upload",
-  verifyPostOwner,
-  upload.single("image"),
-  uploadPostImage,
-);
 
 router.use("/:postId/comments", verifyToken, comments);
 

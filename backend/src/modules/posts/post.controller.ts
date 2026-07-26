@@ -84,11 +84,26 @@ const createPost = asyncHandler(
       $inc: { postsCount: 1 },
     });
 
+    let postImage: { url: string; publicId: string | null } = {
+      url: "",
+      publicId: "",
+    };
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path);
+      postImage = {
+        url: result.secure_url,
+        publicId: result.public_id,
+      };
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+    }
+
     const newPost = new Post({
       title: req.body.title,
       description: req.body.description,
       category: req.body.category,
-      image: req.body.image,
+      postImage: req.file ? postImage : undefined,
       user: req.user?.id,
     });
 
@@ -122,13 +137,21 @@ const updatePost = asyncHandler(
       return;
     }
 
-    if (!req.user || req.user.id !== post.user.toString()) {
-      res
-        .status(403)
-        .json({ success: false, message: "You are not authorized" });
-      return;
+    let postImage: { url: string; publicId: string | null } | undefined =
+      undefined;
+    if (req.file) {
+      if (post.postImage?.publicId) {
+        await cloudinary.uploader.destroy(post.postImage.publicId);
+      }
+      const result = await cloudinary.uploader.upload(req.file.path);
+      postImage = {
+        url: result.secure_url,
+        publicId: result.public_id,
+      };
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
     }
-
     const updatedPost = await Post.findByIdAndUpdate(
       req.params.postId,
       {
@@ -136,6 +159,7 @@ const updatePost = asyncHandler(
           title: req.body.title,
           description: req.body.description,
           category: req.body.category,
+          postImage: req.file ? postImage : undefined,
         },
       },
       { new: true },
@@ -155,17 +179,8 @@ const deletePost = asyncHandler(
       return;
     }
 
-    const isOwner = req.user && req.user.id === post.user.toString();
-    const isAdmin = req.user && req.user.isAdmin;
-    if (!isOwner && !isAdmin) {
-      res
-        .status(403)
-        .json({ success: false, message: "You are not authorized" });
-      return;
-    }
-
-    if (post.image && post.image.publicId) {
-      await cloudinary.uploader.destroy(post.image.publicId);
+    if (post.postImage && post.postImage.publicId) {
+      await cloudinary.uploader.destroy(post.postImage.publicId);
     }
 
     await Post.findByIdAndDelete(req.params.postId);
@@ -177,41 +192,6 @@ const deletePost = asyncHandler(
     res
       .status(200)
       .json({ success: true, message: "Post deleted successfully" });
-    return;
-  },
-);
-
-// UPLOAD POST IMAGE
-const uploadPostImage = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    if (!req.file) {
-      res.status(400).json({ success: false, message: "No image file" });
-      return;
-    }
-
-    const imagePath = req.file.path;
-    const result = await cloudinary.uploader.upload(imagePath, {
-      folder: "posts",
-    });
-
-    const updatedPost = await Post.findByIdAndUpdate(
-      req.params.postId,
-      {
-        $set: {
-          image: {
-            url: result.secure_url,
-            publicId: result.public_id,
-          },
-        },
-      },
-      { new: true },
-    );
-
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
-    }
-
-    res.status(200).json({ success: true, data: updatedPost });
     return;
   },
 );
@@ -276,7 +256,7 @@ const sharePost = asyncHandler(async (req: Request, res: Response) => {
     description:
       description?.trim() || originalPost?.description || "Shared Article",
     category: originalPost?.category,
-    image: originalPost?.image,
+    postImage: originalPost?.postImage,
     user: req.user.id,
     sharedPost: originalPost?._id,
   });
@@ -304,7 +284,6 @@ export {
   createPost,
   updatePost,
   deletePost,
-  uploadPostImage,
   likePost,
   sharePost,
 };

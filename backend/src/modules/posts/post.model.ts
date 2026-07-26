@@ -40,7 +40,7 @@ const PostSchema = new Schema<IPost>(
       type: String,
       required: true,
     },
-    image: {
+    postImage: {
       type: {
         url: { type: String },
         publicId: { type: String, default: null },

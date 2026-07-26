@@ -53,7 +53,11 @@ const getUserById = asyncHandler(
           },
         ],
       });
-    res.status(200).json({ success: true, data: user });
+    res.status(200).json({
+      success: true,
+      message: "Request processed successfully",
+      data: user,
+    });
     return;
   },
 );
@@ -75,6 +79,17 @@ const updateUser = asyncHandler(
       req.body.password = await bcrypt.hash(req.body.password, salt);
     }
 
+    let userImage: { url: string; publicId: string | null } | undefined =
+      undefined;
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path);
+      userImage = {
+        url: result.secure_url,
+        publicId: result.public_id,
+      };
+      fs.unlinkSync(req.file.path);
+    }
+
     const user = await User.findByIdAndUpdate(
       req.params.id,
       {
@@ -83,6 +98,8 @@ const updateUser = asyncHandler(
           email: req.body.email,
           password: req.body.password,
           jobTitle: req.body.jobTitle,
+          profilePicture: userImage,
+          bio: req.body.bio,
         },
       },
       { new: true, runValidators: true },
@@ -93,7 +110,11 @@ const updateUser = asyncHandler(
       res.status(404).json({ success: false, message: "User not found" });
       return;
     }
-    res.status(200).json({ success: true, data: user });
+    res.status(200).json({
+      success: true,
+      message: "Request processed successfully",
+      data: user,
+    });
     return;
   },
 );
@@ -115,48 +136,4 @@ const deleteUser = asyncHandler(
   },
 );
 
-// Upload User Profile Picture
-const uploadUserPicture = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const id = req.user?.id;
-    if (!id) {
-      res.status(401).json({ success: false, message: "Not authorized" });
-      return;
-    }
-    const user = await User.findById(id);
-    if (!user) {
-      res.status(404).json({ success: false, message: "User was not found" });
-      return;
-    }
-
-    if (user.profilePicture && user.profilePicture.publicId) {
-      await cloudinary.uploader.destroy(user.profilePicture.publicId);
-    }
-    
-    if (!req.file) {
-      res.status(400).json({ success: false, message: "No file provided" });
-      return;
-    }
-
-    const result = await cloudinary.uploader.upload(req.file.path);
-
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          profilePicture: {
-            url: result.secure_url,
-            publicId: result.public_id,
-          },
-        },
-      },
-      { new: true },
-    ).select("-password");
-
-    fs.unlinkSync(req.file.path);
-    res.status(200).json({ success: true, data: updatedUser });
-    return;
-  },
-);
-
-export { getAllUsers, getUserById, updateUser, deleteUser, uploadUserPicture };
+export { getAllUsers, getUserById, updateUser, deleteUser };

@@ -48,29 +48,26 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 | 5 | POST | `/auth/reset-password/:userId/:token` | Validate reset token and update password | ❌ | — |
 | 6 | GET | `/auth/me` | Retrieve currently authenticated user profile | 🔒 | — |
 | 7 | GET | `/users` | Retrieve list of all users | 🔒 | 🔒 100 req/15min |
-| 8 | GET | `/users/:id` | Retrieve detailed user profile (with populated posts, likes, shares) | 🔒 | 🔒 100 req/15min |
-| 9 | PUT | `/users/:id` | Update account details (Username, Job Title, Email, Password) | 🔒 | 🔒 100 req/15min |
-| 10 | POST | `/users/:id/upload` | Upload user profile picture (cleans up old Cloudinary media) | 🔒 | 🔒 100 req/15min |
-| 11 | DELETE | `/users/:id` | Delete user account from the database | 🔒 | 🔒 100 req/15min |
-| 12 | GET | `/posts` | Retrieve all blog posts with populated user, likes, and shares | 🔒 | 🔒 100 req/15min |
-| 13 | POST | `/posts` | Create a new blog post with metadata | 🔒 | 🔒 100 req/15min |
+| 8 | GET | `/users/:id` | Retrieve detailed user profile | 🔒 | 🔒 100 req/15min |
+| 9 | PUT | `/users/:id` | Update profile details and profilePicture image | 🔒 | 🔒 100 req/15min |
+| 10 | DELETE | `/users/:id` | Delete user account from the database | 🔒 | 🔒 100 req/15min |
+| 11 | GET | `/posts` | Retrieve all blog posts with populated user, likes, and shares | 🔒 | 🔒 100 req/15min |
+| 12 | POST | `/posts` | Create a new blog post with postImage metadata | 🔒 | 🔒 100 req/15min |
+| 13 | POST | `/posts/:postId/share` | Share an existing post & update shares count | 🔒 | 🔒 100 req/15min |
 | 14 | GET | `/posts/:postId` | Retrieve detailed view of a single post by ID | 🔒 | 🔒 100 req/15min |
-| 15 | PUT | `/posts/:postId` | Update title, description, category, or image of a post | 🔒 | 🔒 100 req/15min |
+| 15 | PUT | `/posts/:postId` | Update title, description, category, or postImage of a post | 🔒 | 🔒 100 req/15min |
 | 16 | DELETE | `/posts/:postId` | Delete a post and clear its associated media | 🔒 | 🔒 100 req/15min |
 | 17 | PUT | `/posts/:postId/like` | Toggle like/unlike status on a blog post | 🔒 | 🔒 100 req/15min |
-| 18 | POST | `/posts/:postId/share` | Share an existing post & update shares & posts count | 🔒 | 🔒 100 req/15min |
-| 19 | POST | `/posts/:postId/upload` | Upload thumbnail/cover image to Cloudinary for a post | 🔒 | 🔒 100 req/15min |
-| 20 | GET | `/posts/:postId/comments` | Retrieve comments for a post (with populated user profiles & replies) | 🔒 | 🔒 100 req/15min |
-| 21 | POST | `/posts/:postId/comments` | Post a new comment under a post | 🔒 | 🔒 100 req/15min |
-| 22 | PUT | `/posts/:postId/comments/:commentId` | Update text content of a comment | 🔒 | 🔒 100 req/15min |
-| 23 | DELETE | `/posts/:postId/comments/:commentId` | Remove comment & decrement commentsCount on post | 🔒 | 🔒 100 req/15min |
-| 24 | PUT | `/posts/:postId/comments/:commentId/like` | Toggle like/unlike on a comment (populates user profiles) | 🔒 | 🔒 100 req/15min |
-| 25 | POST | `/posts/:postId/comments/:commentId/upload` | Upload comment image to Cloudinary | 🔒 | 🔒 100 req/15min |
-| 26 | POST | `/posts/:postId/comments/:commentId/reply` | Create a reply under a parent comment | 🔒 | 🔒 100 req/15min |
-| 27 | PUT | `/posts/:postId/comments/:commentId/reply/:replyCommentId` | Update text content of a reply comment | 🔒 | 🔒 100 req/15min |
-| 28 | DELETE | `/posts/:postId/comments/:commentId/reply/:replyCommentId` | Remove reply comment & decrement replyCommentsCount | 🔒 | 🔒 100 req/15min |
-| 29 | POST | `/posts/:postId/comments/:commentId/reply/:replyCommentId` | Upload reply comment image attachment to Cloudinary | 🔒 | 🔒 100 req/15min |
-| 30 | PUT | `/posts/:postId/comments/:commentId/reply/:replyCommentId/like` | Toggle like/unlike on a reply comment | 🔒 | 🔒 100 req/15min |
+| 18 | GET | `/posts/:postId/comments` | Retrieve comments for a post | 🔒 | 🔒 100 req/15min |
+| 19 | POST | `/posts/:postId/comments` | Post a new comment (with optional commentImage) | 🔒 | 🔒 100 req/15min |
+| 20 | PUT | `/posts/:postId/comments/:commentId/like` | Toggle like/unlike on a comment | 🔒 | 🔒 100 req/15min |
+| 21 | PUT | `/posts/:postId/comments/:commentId` | Update text or commentImage of a comment | 🔒 | 🔒 100 req/15min |
+| 22 | DELETE | `/posts/:postId/comments/:commentId` | Remove comment & decrement commentsCount on post | 🔒 | 🔒 100 req/15min |
+| 23 | GET | `/posts/:postId/comments/:commentId/replies` | Get all replies for a parent comment | 🔒 | 🔒 100 req/15min |
+| 24 | POST | `/posts/:postId/comments/:commentId/replies` | Create a reply under a parent comment (with optional replyImage) | 🔒 | 🔒 100 req/15min |
+| 25 | PUT | `/posts/:postId/comments/:commentId/replies/:replyCommentId` | Update text content or replyImage of a reply comment | 🔒 | 🔒 100 req/15min |
+| 26 | DELETE | `/posts/:postId/comments/:commentId/replies/:replyCommentId` | Remove reply comment & decrement replyCommentsCount | 🔒 | 🔒 100 req/15min |
+| 27 | PUT | `/posts/:postId/comments/:commentId/replies/:replyCommentId/like` | Toggle like/unlike on a reply comment | 🔒 | 🔒 100 req/15min |
 
 ---
 
@@ -468,76 +465,7 @@ The user target profile was not found.
 }
 ```
 
----
 
-### POST /users/:id/upload 🔒
-Upload and change user profile picture. Restricts access to account owner or Admin. Upload uses multipart binary stream.
-
-#### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `id` | string | ✅ | The user ID. |
-
-#### Request Body (Multipart Form-Data)
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `profilePicture` | binary file | ✅ | The image file to be uploaded. |
-
-#### Responses
-
-##### Response 200
-Image uploaded and user profile picture updated successfully.
-```json
-{
-  "success": true,
-  "data": {
-    "_id": "65f1a2b3c4d5e6f789012345",
-    "username": "Ahmed",
-    "email": "ahmed@example.com",
-    "isAdmin": false,
-    "isVerified": true,
-    "postsCount": 0,
-    "profilePicture": {
-      "url": "https://res.cloudinary.com/example/image/upload/new_profile.jpg",
-      "publicId": "profile_picture_567"
-    },
-    "createdAt": "2026-07-20T18:27:31.000Z",
-    "updatedAt": "2026-07-20T21:27:10.000Z"
-  }
-}
-```
-
-##### Response 400
-No binary file provided in the request payload.
-```json
-{
-  "message": "No file provided"
-}
-```
-
-##### Response 401
-Not authorized.
-```json
-{
-  "message": "Invalid token"
-}
-```
-
-##### Response 403
-Forbidden. Requesting user is not the owner or Admin.
-```json
-{
-  "message": "You are not allowed"
-}
-```
-
-##### Response 404
-User account was not found.
-```json
-{
-  "message": "User was not found"
-}
-```
 
 ---
 
@@ -613,7 +541,7 @@ List of posts returned successfully.
         "_id": "65f1a2b3c4d5e6f789012347",
         "username": "Ahmed"
       },
-      "image": {
+      "postImage": {
         "url": "https://example.com/image.jpg",
         "publicId": "blog_image_123"
       },
@@ -653,7 +581,7 @@ Create a new blog post.
 | `title` | string | ✅ | Title of the blog post (Min length: 2, Max length: 32). |
 | `description` | string | ✅ | Content text details of the post (Min length: 10, Max length: 250). |
 | `category` | string | ✅ | Category category/genre for grouping posts. |
-| `image` | object | ❌ | Nested image properties object containing `url` and `publicId`. |
+| `postImage` | object | ❌ | Nested image properties object containing `url` and `publicId`. |
 
 #### Responses
 
@@ -671,7 +599,7 @@ Post created successfully. Returns the populated post resource.
       "_id": "65f1a2b3c4d5e6f789012347",
       "username": "Ahmed"
     },
-    "image": {
+    "postImage": {
       "url": "",
       "publicId": null
     },
@@ -728,7 +656,7 @@ Post retrieved successfully.
       "_id": "65f1a2b3c4d5e6f789012347",
       "username": "Ahmed"
     },
-    "image": {
+    "postImage": {
       "url": "https://example.com/image.jpg",
       "publicId": "blog_image_123"
     },
@@ -775,7 +703,7 @@ Update post parameters. Access is allowed only to the post author owner or Admin
 | `title` | string | ❌ | Updated title (Min: 2, Max: 32). |
 | `description` | string | ❌ | Updated content description body (Min: 10, Max: 250). |
 | `category` | string | ❌ | Updated category structure. |
-| `image` | object | ❌ | Updated nested image object. |
+| `postImage` | object | ❌ | Updated nested image object. |
 
 #### Responses
 
@@ -790,7 +718,7 @@ Post updated successfully. Returns updated post document.
     "description": "This is my updated blog post description content.",
     "category": "Programming",
     "user": "65f1a2b3c4d5e6f789012347",
-    "image": {
+    "postImage": {
       "url": "https://example.com/image.jpg",
       "publicId": "blog_image_123"
     },
@@ -904,7 +832,7 @@ Post liked status updated. Returns the updated post object showing the new likes
     "description": "This is my first blog post description.",
     "category": "Technology",
     "user": "65f1a2b3c4d5e6f789012347",
-    "image": {
+    "postImage": {
       "url": "https://example.com/image.jpg",
       "publicId": "blog_image_123"
     },
@@ -969,7 +897,7 @@ Post shared successfully.
       "description": "Check this out!",
       "category": "Technology",
       "user": "65f1a2b3c4d5e6f789012347",
-      "image": {
+      "postImage": {
         "url": "https://example.com/image.jpg",
         "publicId": "blog_image_123"
       },
@@ -1001,71 +929,7 @@ Original post was not found.
 }
 ```
 
----
 
-### POST /posts/:postId/upload 🔒
-Upload an image to Cloudinary to be used as a post thumbnail or cover. Multipart binary upload required.
-
-#### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | Database record ID of the post. |
-
-#### Request Body (Multipart Form-Data)
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `image` | binary file | ✅ | The image file payload to upload. |
-
-#### Responses
-
-##### Response 200
-Image uploaded successfully. Returns the updated post object.
-```json
-{
-  "success": true,
-  "data": {
-    "_id": "65f1a2b3c4d5e6f789012345",
-    "title": "My First Blog Post",
-    "description": "This is my first blog post description.",
-    "category": "Technology",
-    "user": "65f1a2b3c4d5e6f789012347",
-    "image": {
-      "url": "https://res.cloudinary.com/example/image/upload/post_thumbnail.jpg",
-      "publicId": "post_thumbnail_987"
-    },
-    "likes": [],
-    "sharesCount": 0,
-    "postLikesCount": 0,
-    "commentsCount": 0,
-    "createdAt": "2026-07-20T18:27:29.000Z",
-    "updatedAt": "2026-07-24T21:35:00.000Z"
-  }
-}
-```
-
-##### Response 400
-No file provided in the request payload or missing Post ID.
-```json
-{
-  "message": "No file provided"
-}
-```
-
-##### Response 401
-Not authorized.
-```json
-{
-  "message": "Invalid token"
-}
-```
-
-##### Response 404
-Post was not found.
-```json
-{
-  "message": "Post was not found"
-}
-```
 
 ---
 
@@ -1101,7 +965,7 @@ Comments retrieved successfully.
         "_id": "65f1a2b3c4d5e6f789012347",
         "username": "Ahmed"
       },
-      "image": {
+      "commentImage": {
         "url": "https://res.cloudinary.com/example/image/upload/comment.jpg",
         "publicId": "comment_image_123"
       },
@@ -1144,6 +1008,7 @@ Create and post a new comment under a specific post.
 | Field | Type | Required | Description |
 | :--- | :--- | :---: | :--- |
 | `text` | string | ✅ | Text content of the comment. |
+| `commentImage` | object | ❌ | Optional comment image attachment. |
 
 #### Responses
 
@@ -1160,7 +1025,7 @@ Comment created successfully. Returns the populated comment payload.
       "_id": "65f1a2b3c4d5e6f789012347",
       "username": "Ahmed"
     },
-    "image": {
+    "commentImage": {
       "url": "",
       "publicId": null
     },
@@ -1202,7 +1067,8 @@ Update the text body of an existing comment. Access restricted to comment author
 #### Request Body
 | Field | Type | Required | Description |
 | :--- | :--- | :---: | :--- |
-| `text` | string | ✅ | Updated comment body text content. |
+| `text` | string | ❌ | Updated comment body text content. |
+| `commentImage` | binary file | ❌ | Updated comment image file attachment. |
 
 #### Responses
 
@@ -1219,7 +1085,7 @@ Comment text updated successfully.
       "_id": "65f1a2b3c4d5e6f789012347",
       "username": "Ahmed"
     },
-    "image": {
+    "commentImage": {
       "url": "https://res.cloudinary.com/example/image/upload/comment.jpg",
       "publicId": "comment_image_123"
     },
@@ -1343,7 +1209,7 @@ Comment like status updated successfully.
       "_id": "65f1a2b3c4d5e6f789012347",
       "username": "Ahmed"
     },
-    "image": {
+    "commentImage": {
       "url": "https://res.cloudinary.com/example/image/upload/comment.jpg",
       "publicId": "comment_image_123"
     },
@@ -1390,7 +1256,7 @@ Upload an image to attach to a comment. Restricted to the comment owner or Admin
 #### Request Body (Multipart Form-Data)
 | Field | Type | Required | Description |
 | :--- | :--- | :---: | :--- |
-| `image` | binary file | ✅ | The image file to be uploaded. |
+| `commentImage` | binary file | ✅ | The image file to be uploaded. |
 
 #### Responses
 
@@ -1401,7 +1267,7 @@ Comment image uploaded successfully.
   "success": true,
   "data": {
     "message": "Uploaded comment image successfully",
-    "image": {
+    "commentImage": {
       "url": "https://res.cloudinary.com/example/image/upload/comment_attachment.jpg",
       "publicId": "comment_image_789"
     }
@@ -1443,7 +1309,54 @@ Comment was not found.
 
 ---
 
-### POST /posts/:postId/comments/:commentId/reply 🔒
+### GET /posts/:postId/comments/:commentId/replies 🔒
+Retrieve all replies for a specific parent comment.
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `postId` | string | ✅ | ID of the parent post. |
+| `commentId` | string | ✅ | ID of the parent comment. |
+
+#### Responses
+
+##### Response 200
+Replies retrieved successfully.
+```json
+{
+  "success": true,
+  "message": "Request processed successfully",
+  "data": [
+    {
+      "_id": "65f1a2b3c4d5e6f789012348",
+      "parentComment": "65f1a2b3c4d5e6f789012346",
+      "text": "This is a reply to the parent comment",
+      "user": {
+        "_id": "65f1a2b3c4d5e6f789012347",
+        "username": "Ahmed",
+        "profilePicture": {
+          "url": "https://res.cloudinary.com/example/image/upload/avatar.jpg",
+          "publicId": "avatar_123"
+        },
+        "jobTitle": "Frontend Engineer"
+      },
+      "commentImage": {
+        "url": "",
+        "publicId": null
+      },
+      "likes": [],
+      "replyLikesCount": 0,
+      "replyCommentsCount": 0,
+      "createdAt": "2026-07-25T21:00:00.000Z",
+      "updatedAt": "2026-07-25T21:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### POST /posts/:postId/comments/:commentId/replies 🔒
 Post a new reply under a specific parent comment. Increments `replyCommentsCount` on the parent comment.
 
 #### Path Parameters
@@ -1456,6 +1369,7 @@ Post a new reply under a specific parent comment. Increments `replyCommentsCount
 | Field | Type | Required | Description |
 | :--- | :--- | :---: | :--- |
 | `text` | string | ✅ | Reply comment text body. |
+| `replyImage` | binary file | ❌ | Optional reply image attachment file. |
 
 #### Responses
 
@@ -1477,7 +1391,10 @@ Reply comment created successfully.
       "jobTitle": "Frontend Engineer"
     },
     "parentComment": "65f1a2b3c4d5e6f789012346",
-    "replies": [],
+    "commentImage": {
+      "url": "",
+      "publicId": null
+    },
     "replyLikesCount": 0,
     "replyCommentsCount": 0,
     "createdAt": "2026-07-25T21:00:00.000Z",
@@ -1491,7 +1408,7 @@ Invalid Post ID or Parent Comment ID.
 ```json
 {
   "success": false,
-  "message": "Valid Post ID and Parent Comment ID are required"
+  "message": "Valid Parent Comment ID is required"
 }
 ```
 
@@ -1508,16 +1425,14 @@ Parent comment was not found in this post.
 ```json
 {
   "success": false,
-  "data": {
-    "message": "Parent comment was not found in this post"
-  }
+  "message": "Parent comment was not found"
 }
 ```
 
 ---
 
-### PUT /posts/:postId/comments/:commentId/reply/:replyCommentId 🔒
-Update the text body of an existing reply comment. Restricted to reply comment owner or Admins.
+### PUT /posts/:postId/comments/:commentId/replies/:replyCommentId 🔒
+Update the text body or image of an existing reply comment. Restricted to reply comment owner or Admins.
 
 #### Path Parameters
 | Parameter | Type | Required | Description |
@@ -1529,7 +1444,8 @@ Update the text body of an existing reply comment. Restricted to reply comment o
 #### Request Body
 | Field | Type | Required | Description |
 | :--- | :--- | :---: | :--- |
-| `text` | string | ✅ | Updated text for the reply comment. |
+| `text` | string | ❌ | Updated text for the reply comment. |
+| `replyImage` | binary file | ❌ | Updated reply image file attachment. |
 
 #### Responses
 
@@ -1559,7 +1475,7 @@ Invalid IDs or input validation failed.
 ```json
 {
   "success": false,
-  "message": "Valid Post ID and Reply Comment ID are required"
+  "message": "Valid Reply Comment ID is required"
 }
 ```
 
@@ -1584,7 +1500,7 @@ Reply comment was not found.
 
 ---
 
-### DELETE /posts/:postId/comments/:commentId/reply/:replyCommentId 🔒
+### DELETE /posts/:postId/comments/:commentId/replies/:replyCommentId 🔒
 Delete a reply comment and decrement `replyCommentsCount` on its parent comment. Restricted to reply owner or Admins.
 
 #### Path Parameters
@@ -1621,58 +1537,9 @@ Reply comment was not found.
   "success": false,
   "message": "Reply comment was not found"
 }
-```
-
 ---
 
-### POST /posts/:postId/comments/:commentId/reply/:replyCommentId 🔒
-Upload an image attachment to a reply comment. Uses multipart form-data (`image`). Restricted to reply comment owner or Admins.
-
-#### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | ID of the parent post. |
-| `commentId` | string | ✅ | ID of the parent comment. |
-| `replyCommentId` | string | ✅ | ID of the target reply comment. |
-
-#### Request Body (Multipart Form-Data)
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `image` | binary file | ✅ | Image file to attach to the reply comment. |
-
-#### Responses
-
-##### Response 200
-Reply comment image uploaded successfully.
-```json
-{
-  "success": true,
-  "message": "Reply comment image uploaded successfully",
-  "data": {
-    "_id": "65f1a2b3c4d5e6f789012348",
-    "image": {
-      "url": "https://res.cloudinary.com/example/image/upload/reply_image.jpg",
-      "publicId": "reply_img_123"
-    }
-  }
-}
-```
-
-##### Response 400
-No image file provided or invalid reply comment ID.
-
-##### Response 401
-Not authorized.
-
-##### Response 403
-Forbidden.
-
-##### Response 404
-Reply comment was not found.
-
----
-
-### PUT /posts/:postId/comments/:commentId/reply/:replyCommentId/like 🔒
+### PUT /posts/:postId/comments/:commentId/replies/:replyCommentId/like 🔒
 Toggle like or unlike on a reply comment and update `replyLikesCount`.
 
 #### Path Parameters

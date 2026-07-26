@@ -343,55 +343,7 @@
  *         description: Post was not found
  */
 
-/**
- * @swagger
- * /posts/{postId}/upload:
- *   post:
- *     summary: Upload post image
- *     tags:
- *       - Posts
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: postId
- *         required: true
- *         description: Post ID
- *         schema:
- *           type: string
- *           example: 65f1a2b3c4d5e6f789012345
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - image
- *             properties:
- *               image:
- *                 type: string
- *                 format: binary
- *     responses:
- *       200:
- *         description: Image uploaded successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/Post'
- *       400:
- *         description: No file provided or Post ID missing
- *       401:
- *         description: Not authorized
- *       404:
- *         description: Post was not found
- */
+
 
 /**
  * @swagger
@@ -420,7 +372,7 @@
  *             username:
  *               type: string
  *               example: Ahmed
- *         image:
+ *         postImage:
  *           type: object
  *           properties:
  *             url:

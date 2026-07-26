@@ -4,7 +4,7 @@ const CreatePostSchema = z.object({
   title: z.string().trim().min(1).max(32),
   description: z.string().trim().min(1).max(250),
   category: z.string(),
-  image: z
+  postImage: z
     .object({
       url: z.string().url(),
       publicId: z.string().nullable(),
