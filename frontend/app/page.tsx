@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Cookies from "js-cookie";
 import { Text } from "@/_components/Text";
+import Link from "next/link";
 
 const CATEGORIES = [
   "All",
@@ -184,7 +185,13 @@ function HomeContent() {
             <div className="h-16 w-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4">
               <FileText className="h-8 w-8" />
             </div>
-            <Text as="h3" size="xl" font="bold" color="primary" className="mb-2">
+            <Text
+              as="h3"
+              size="xl"
+              font="bold"
+              color="primary"
+              className="mb-2"
+            >
               No Articles Found
             </Text>
             <Text
@@ -196,14 +203,6 @@ function HomeContent() {
               We couldn't find any published articles matching your current
               filter criteria.
             </Text>
-            <Button
-              onClick={() => router.push("/")}
-              className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground text-xs font-semibold cursor-pointer"
-            >
-              <Text as="span" size="xs" font="semiBold" color="white">
-                Reset Filters
-              </Text>
-            </Button>
           </div>
         )}
 
@@ -222,7 +221,13 @@ function HomeContent() {
             </Text>
           </Button>
 
-          <Text as="span" size="xs" font="bold" color="primary" className="px-2">
+          <Text
+            as="span"
+            size="xs"
+            font="bold"
+            color="primary"
+            className="px-2"
+          >
             {pageNumber}
           </Text>
 
@@ -249,7 +254,13 @@ function HomeContent() {
           title="Create New Post"
         >
           <PlusCircle className="h-5 w-5" />
-          <Text as="span" size="xs" font="bold" color="white" className="hidden sm:inline">
+          <Text
+            as="span"
+            size="xs"
+            font="bold"
+            color="white"
+            className="hidden sm:inline"
+          >
             Create Post
           </Text>
         </button>
@@ -264,13 +275,27 @@ function HomeContent() {
       {/* Footer */}
       <footer className="w-full max-w-7xl mx-auto px-6 py-8 border-t border-borderPrimary/20 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-textSecondary">
         <Text as="p" size="xs" color="secondary">
-          © {new Date().getFullYear()} DevQuill Engineering Blog. Built with
-          Next.js 16 & Tailwind CSS.
+          © {new Date().getFullYear()} Fluxion Social Media app. made by{" "}
+          <Link
+            className="transition-all duration-300"
+            href={"https://emad-site.vercel.app/"}
+            target="_blank"
+          >
+            <Text as="span" size="xs" font="bold" color="primary" className="hover:text-primary hover:underline">
+              Emad Ahmed
+            </Text>
+          </Link>
         </Text>
         <div className="flex gap-4">
-          <Text as="span" size="xs" color="secondary">Terms</Text>
-          <Text as="span" size="xs" color="secondary">Privacy</Text>
-          <Text as="span" size="xs" color="secondary">API Documentation</Text>
+          <Text as="span" size="xs" color="secondary">
+            Terms
+          </Text>
+          <Text as="span" size="xs" color="secondary">
+            Privacy
+          </Text>
+          <Text as="span" size="xs" color="secondary">
+            API Documentation
+          </Text>
         </div>
       </footer>
     </div>

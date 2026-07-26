@@ -16,7 +16,7 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "Codexa",
+  title: "Fluxion",
   description:
     "A secure, sleek, high-contrast, dual-language authentication suite and design system.",
 };

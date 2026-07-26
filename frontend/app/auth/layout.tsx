@@ -44,7 +44,7 @@ export default function AuthLayout({
 
       {/* Footer */}
       <footer className="w-full max-w-7xl mx-auto px-6 py-4 text-center text-xs text-textSecondary/60 select-none z-10">
-        <p>© {new Date().getFullYear()} Codexa. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Fluxion. All rights reserved.</p>
       </footer>
     </div>
   );

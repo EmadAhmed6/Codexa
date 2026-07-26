@@ -47,10 +47,10 @@ const UserSchema = z.object({
       publicId: z.string().nullable(),
     })
     .optional(),
-  jobTitle: z.string().min(3).max(50).optional(),
+  jobTitle: z.string().max(50).optional().or(z.literal("")),
   otp: z.string().min(6).optional(),
   otpExpired: z.date().optional(),
-  bio: z.string().min(1).max(250).optional(),
+  bio: z.string().max(250).optional().or(z.literal("")),
 });
 
 const UpdateUserSchema = UserSchema.partial();

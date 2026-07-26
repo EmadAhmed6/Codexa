@@ -46,7 +46,7 @@ const generateOtpEmailHtml = (username: string, otp: string) => {
             <tr>
               <td align="center" style="padding: 32px 32px 24px 32px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15)); border-bottom: 1px solid #334155;">
                 <div style="display: inline-block; padding: 10px 18px; background: #6366f1; border-radius: 12px; font-weight: 800; font-size: 20px; color: #ffffff; letter-spacing: 1px;">
-                  CODEXA 🚀
+                  FLUXION 🚀
                 </div>
                 <h1 style="margin: 16px 0 0 0; font-size: 22px; font-weight: 700; color: #ffffff;">Email Verification Code</h1>
               </td>
@@ -56,7 +56,7 @@ const generateOtpEmailHtml = (username: string, otp: string) => {
             <tr>
               <td style="padding: 32px; text-align: center;">
                 <p style="margin: 0 0 16px 0; font-size: 15px; color: #cbd5e1; line-height: 1.6;">
-                  Hello <strong style="color: #ffffff;">${username}</strong> 👋, welcome to Codexa!
+                  Hello <strong style="color: #ffffff;">${username}</strong> 👋, welcome to Fluxion!
                 </p>
                 <p style="margin: 0 0 28px 0; font-size: 14px; color: #94a3b8; line-height: 1.5;">
                   Use the 6-digit verification code below to complete your account registration:
@@ -71,7 +71,7 @@ const generateOtpEmailHtml = (username: string, otp: string) => {
                   ⏱️ Code expires in <strong>10 minutes</strong>.
                 </p>
                 <p style="margin: 0; font-size: 12px; color: #64748b;">
-                  If you didn't create an account with Codexa, please safely ignore this email.
+                  If you didn't create an account with Fluxion, please safely ignore this email.
                 </p>
               </td>
             </tr>
@@ -79,7 +79,7 @@ const generateOtpEmailHtml = (username: string, otp: string) => {
             <!-- Footer -->
             <tr>
               <td align="center" style="padding: 20px; background-color: #0f172a; border-top: 1px solid #334155; font-size: 12px; color: #64748b;">
-                © ${new Date().getFullYear()} Codexa Engineering Platform. All rights reserved.
+                © ${new Date().getFullYear()} Fluxion Engineering Platform. All rights reserved.
               </td>
             </tr>
           </table>
@@ -109,7 +109,7 @@ const generateResetPasswordEmailHtml = (username: string, resetLink: string) => 
             <tr>
               <td align="center" style="padding: 32px 32px 24px 32px; background: linear-gradient(135deg, rgba(225, 29, 72, 0.15), rgba(147, 51, 234, 0.15)); border-bottom: 1px solid #334155;">
                 <div style="display: inline-block; padding: 10px 18px; background: #6366f1; border-radius: 12px; font-weight: 800; font-size: 20px; color: #ffffff; letter-spacing: 1px;">
-                  CODEXA 🚀
+                  FLUXION 🚀
                 </div>
                 <h1 style="margin: 16px 0 0 0; font-size: 22px; font-weight: 700; color: #ffffff;">Reset Your Password</h1>
               </td>
@@ -122,7 +122,7 @@ const generateResetPasswordEmailHtml = (username: string, resetLink: string) => 
                   Hello <strong style="color: #ffffff;">${username}</strong>,
                 </p>
                 <p style="margin: 0 0 28px 0; font-size: 14px; color: #94a3b8; line-height: 1.5;">
-                  We received a request to reset the password for your Codexa account. Click the button below to choose a new password:
+                  We received a request to reset the password for your Fluxion account. Click the button below to choose a new password:
                 </p>
 
                 <!-- Reset Password CTA Button -->
@@ -193,7 +193,7 @@ const register = asyncHandler(
     const finalUser = await newUser.save();
     await sendEmail(
       finalUser.email,
-      "Verify Your Email - Codexa",
+      "Verify Your Email - Fluxion",
       generateOtpEmailHtml(finalUser.username, generatedOtp),
     );
 
@@ -317,7 +317,7 @@ const sendForgotPasswodLink = asyncHandler(
     const link = `${frontendUrl}/auth/reset-password/${user.id}/${token}`;
     await sendEmail(
       user.email,
-      "Reset Password Link - Codexa",
+      "Reset Password Link - Fluxion",
       generateResetPasswordEmailHtml(user.username, link),
     );
     res.status(200).json({

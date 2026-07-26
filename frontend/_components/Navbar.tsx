@@ -57,7 +57,7 @@ const Navbar = () => {
             color="primary"
             className="hidden sm:inline-block"
           >
-            Codexa
+            Fluxion
           </Text>
         </Link>
 
@@ -128,8 +128,8 @@ const Navbar = () => {
           )}
 
           {/* User Dropdown / Auth Links */}
-          {mounted && (
-            token ? (
+          {mounted &&
+            (token ? (
               <div className="relative">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -257,8 +257,7 @@ const Navbar = () => {
                   </Button>
                 </Link>
               </div>
-            )
-          )}
+            ))}
         </div>
       </div>
     </header>

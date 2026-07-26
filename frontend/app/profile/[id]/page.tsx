@@ -450,7 +450,7 @@ export default function UserProfilePage() {
                   color="secondary"
                   className="block mb-1"
                 >
-                  Username (3-10 characters)
+                  Username
                 </Text>
                 <Input
                   type="text"

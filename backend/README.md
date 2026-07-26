@@ -1,84 +1,55 @@
-# ✍️ Blog API
+# ⚙️ Fluxion API — Backend RESTful Service
 
-A robust, enterprise-grade RESTful API built for modern blogging platforms. Engineered with **Node.js**, **Express.js**, and **MongoDB (using Mongoose)**, the entire application is fully typed in **TypeScript** to ensure security, stability, and speed.
+A robust, enterprise-grade RESTful API built for the **Fluxion** social media and engineering platform. Built with **Node.js**, **Express.js**, and **MongoDB (Mongoose)**, fully typed in **TypeScript**.
 
-This project implements JSON Web Tokens (JWT) for secure authentication, role-based authorization guards, Joi-based validation, complex data models with relational integrity, dynamic image upload functionality through Cloudinary, and robust nested/hierarchical structure capability.
+Includes JSON Web Token (JWT) authentication, role-based authorization, rate limiting, Zod schema validation, Cloudinary media processing, Nodemailer OTP delivery, nested comment/reply architecture, and Swagger documentation (`/api-docs`).
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack & Dependencies
 
-<p align="left">
-  <a href="https://nodejs.org/">
-    <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />
-  </a>
-  <a href="https://expressjs.com/">
-    <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js" />
-  </a>
-  <a href="https://www.typescriptlang.org/">
-    <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  </a>
-  <a href="https://www.mongodb.com/">
-    <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
-  </a>
-  <a href="https://mongoosejs.com/">
-    <img src="https://img.shields.io/badge/Mongoose-880000?style=for-the-badge&logo=mongoose&logoColor=white" alt="Mongoose" />
-  </a>
-  <a href="https://cloudinary.com/">
-    <img src="https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white" alt="Cloudinary" />
-  </a>
-  <a href="https://jwt.io/">
-    <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=00F9B6" alt="JWT" />
-  </a>
-</p>
-
-- **Runtime Environment:** Node.js (v16+)
+- **Runtime:** Node.js (v18+)
 - **Framework:** Express.js (v5)
-- **Language:** TypeScript (Configured for ESM - ES2022)
+- **Language:** TypeScript (ESM)
 - **Database:** MongoDB via Mongoose ODM
 - **Validation:** Zod
-- **Security:** Bcrypt.js, Helmet, CORS, Express-Rate-Limit (Auth & API limiters)
-- **Media Uploads:** Multer with Cloudinary API (Includes automatic Cloudinary asset deletion)
-- **Mail Delivery:** Nodemailer (For registration OTP and password reset flows)
+- **Security:** Bcrypt.js, Helmet, CORS, Express-Rate-Limit (`authLimiter`, `apiLimiter`)
+- **Media Uploads:** Multer with Cloudinary API
+- **Mail Delivery:** Nodemailer (Registration OTP and Password Reset)
 
 ---
 
-## ✨ Key Features
+## ✨ Core API Capabilities
 
-- 🔐 **Secure User Authentication & Rate-Limited Access Control**
-  - Registration with automatic OTP generation & expiration (`otp`, `otpExpired`) stored directly in MongoDB.
-  - Email verification (`/auth/verify-otp`) validating directly against database OTP state.
-  - Rate-limited login (`authLimiter`: 5 req/min) and password reset pipelines (`/auth/forgot-password`).
-  - Bulletproof password hashing using `bcryptjs` with 10 salt rounds.
-  - Signed token password reset pipeline via email (`nodemailer`).
-  - Hierarchical authorization middlewares (`verifyToken`, `verifyAuthorizedToken`, `verifyAdminToken`).
-- 📝 **Advanced Post Management & Deep Populates**
-  - Full CRUD capabilities for posts with thumbnail cover image uploads to Cloudinary.
-  - Deep population of `user`, `likes`, and `shares` containing complete profile fields (`_id`, `username`, `profilePicture`, `jobTitle`).
-  - Post sharing: Creates shared post references, updates original post `shares` & `sharesCount`, and increments author `postsCount`.
-  - Social interactions: Instant like/unlike toggling with automatic counter updates.
-- 💬 **Flexible Commenting & Feedback System**
-  - Embedded comment threads linked to blog posts with automatic `$inc: { commentsCount: -1 }` on deletion.
-  - Image attachments for comments with dedicated Cloudinary uploads.
-  - Comment likes with full user profile populates for rich popovers.
-- 🛡️ **Cloud Storage & Data Sanitation**
-  - Automatic deletion of legacy Cloudinary images upon user profile picture updates.
-  - Strict input sanitation and Zod schema validation across all request endpoints.
-- 🚀 **RESTful Architecture & Rate Protection**
-  - Protected API routes guarded by `apiLimiter` (100 req/15min).
-  - Global middleware error handling, 404 handlers, and full Swagger API documentation (`/api-docs`).
+### 🔐 1. Authentication & Security
+- **OTP Registration & Email Verification**: Users register and receive a 6-digit OTP via email (`/auth/register`), verified against DB expiration (`/auth/verify-otp`).
+- **Rate-Limited Endpoints**: Login (`authLimiter`: 5 req/min) and API endpoints (`apiLimiter`: 100 req/15min).
+- **Password Reset Pipeline**: Forgot password (`/auth/forgot-password`) sends signed reset links via Nodemailer.
+- **Middlewares**: `verifyToken`, `verifyAuthorizedToken`, `verifyAdminToken`.
+
+### 📝 2. Posts & Atomic Image Management
+- **Single Atomic Multipart Requests**: Post creation (`POST /posts`) and updates (`PUT /posts/:postId`) handle text and `postImage` in a single `Multipart/FormData` request.
+- **Deep User Populates**: Populates `user`, `likes`, `shares` with selected fields (`_id`, `username`, `profilePicture`, `jobTitle`, `bio`).
+- **Social Features**: Like/unlike toggle, post sharing with `sharesCount` tracking.
+
+### 💬 3. Comments & Nested Inline Replies
+- **Comments (`/posts/:postId/comments`)**: Create, update, delete, and like comments with optional `commentImage` attachments.
+- **Inline Replies (`/posts/:postId/comments/:commentId/replies`)**: Full CRUD and like pipeline for replies supporting `replyImage` attachments.
+
+### 👤 4. User Profiles
+- **Profile Details**: Supports `username` (up to 50 chars), `jobTitle` (up to 50 chars), `bio` (up to 250 chars), and profile picture uploads.
+- **Cloudinary Cleanup**: Legacy Cloudinary images are automatically deleted when updated or removed.
 
 ---
 
 ## 📊 Database Entity-Relationship (ER) Diagram
-
-The diagram below outlines the schema relations and virtual links of the database:
 
 ```mermaid
 erDiagram
     USER ||--o{ POST : "creates"
     USER ||--o{ COMMENT : "writes"
     POST ||--o{ COMMENT : "contains"
+    COMMENT ||--o{ COMMENT : "replies"
     USER ||--o{ POST : "likes"
     USER ||--o{ COMMENT : "likes"
 
@@ -87,10 +58,14 @@ erDiagram
         string username
         string email
         string password
+        string jobTitle
+        string bio
         object profilePicture
         boolean isAdmin
         number postsCount
         boolean isVerified
+        string otp
+        datetime otpExpired
         datetime createdAt
         datetime updatedAt
     }
@@ -99,13 +74,13 @@ erDiagram
         ObjectId id PK
         string title
         string description
-        ObjectId user FK
         string category
-        object image
-        ObjectId[] likes FK
-        ObjectId sharedPost FK
-        number sharesCount
+        object postImage
+        ObjectId user FK
+        array likes
+        array shares
         number postLikesCount
+        number sharesCount
         number commentsCount
         datetime createdAt
         datetime updatedAt
@@ -114,11 +89,13 @@ erDiagram
     COMMENT {
         ObjectId id PK
         ObjectId postId FK
+        ObjectId parentComment FK
         ObjectId user FK
         string text
-        object image
-        ObjectId[] likes FK
+        object commentImage
+        array likes
         number commentLikesCount
+        number replyCommentsCount
         datetime createdAt
         datetime updatedAt
     }
@@ -126,213 +103,44 @@ erDiagram
 
 ---
 
-## 📂 Project Architecture
+## 🚦 Environment Setup
 
-```text
-blog-api/
-├── src/
-│   ├── app.ts              # Entrypoint file starting the Server
-│   ├── config/             # Connection and swagger configuration
-│   │   ├── db.ts
-│   │   └── swagger.ts
-│   ├── data.ts             # Mock seed data structures
-│   ├── docs/               # Swagger API JSDoc documentation files
-│   │   ├── auth.docs.ts
-│   │   ├── comments.docs.ts
-│   │   ├── posts.docs.ts
-│   │   └── user.docs.ts
-│   ├── middlewares/        # Custom middlewares (Auth, Upload, Errors)
-│   │   ├── errors.ts       # Global error processing
-│   │   ├── multer.ts       # File upload middleware using disk storage
-│   │   └── verifyToken.ts  # Route guards for token & owner validation
-│   ├── modules/            # Feature-based modular components
-│   │   ├── auth/           # Authentication feature module
-│   │   │   ├── auth.controller.ts
-│   │   │   ├── auth.model.ts
-│   │   │   ├── auth.routes.ts
-│   │   │   └── auth.schema.ts
-│   │   ├── comment/        # Comments feature module
-│   │   │   ├── comment.controller.ts
-│   │   │   ├── comment.model.ts
-│   │   │   ├── comment.routes.ts
-│   │   │   └── comment.schema.ts
-│   │   ├── posts/          # Posts feature module
-│   │   │   ├── post.model.ts
-│   │   │   ├── post.routes.ts
-│   │   │   ├── post.schema.ts
-│   │   │   └── posts.controller.ts
-│   │   └── user/           # User feature module
-│   │       ├── user.controller.ts
-│   │       ├── user.model.ts
-│   │       ├── user.routes.ts
-│   │       └── user.schema.ts
-│   ├── seeder.ts           # Seeding script for bulk updates
-│   ├── types/              # Custom express request global typings
-│   └── utils/              # Third-party configuration helpers
-│       └── cloudinary.ts   # Cloudinary Client integration
-├── dist/                   # Transpiled build output
-├── tsconfig.json           # Compiler rules
-├── package.json            # Scripts & packages manager
-└── .env.example            # Environment template configuration
+Create a `.env` file in the `backend/` directory:
+
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/fluxion
+JWT_SECRET_KEY=your_secret_key
+FRONTEND_URL=http://localhost:3000
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# Nodemailer
+APP_EMAIL_ADDRESS=your_email@gmail.com
+APP_EMAIL_PASSWORD=your_app_password
+```
+
+### Running Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server with live reload
+npm run dev
+
+# Build TypeScript to dist
+npm run build
 ```
 
 ---
 
-## 🚀 Getting Started
+## 📖 API Documentation
 
-Follow these steps to run the project locally.
+Interactive Swagger API docs available at:
+`http://localhost:5000/api-docs`
 
-### Prerequisites
-
-Ensure you have the following installed on your local machine:
-
-- **Node.js** (v16.0.0 or higher)
-- **MongoDB** (Local Community Server or MongoDB Atlas instance)
-
-### Installation
-
-1. **Clone the Repository:**
-
-   ```bash
-   git clone <repository-url>
-   cd "Blog API"
-   ```
-
-2. **Install Dependencies:**
-
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables:**
-   Create a `.env` file in the root directory by duplicating the template:
-   ```bash
-   cp .env.example .env
-   ```
-   Open the `.env` file and populate it with your specific database connections and API credentials (see [Environment Variables](#-environment-variables)).
-
-### Running the Application
-
-- **Development Mode (Hot Reloading via `tsx`):**
-
-  ```bash
-  npm run dev
-  ```
-
-  The server starts at `http://localhost:5000` by default.
-
-- **Build Output (Transpile TypeScript to JavaScript):**
-
-  ```bash
-  npm run build
-  ```
-
-- **Production Mode (Running Compiled JS):**
-
-  ```bash
-  node dist/app.js
-  ```
-
-- **Database Seeding Operations:**
-
-  ```bash
-  # Import mock posts into the database
-  npx tsx src/seeder.ts -import
-
-  # Delete all posts from the database
-  npx tsx src/seeder.ts -destroy
-  ```
-
----
-
-## 🔑 Environment Variables
-
-The project requires several keys for full functionality. A reference is provided in [.env.example](file:///.env.example).
-
-| Variable Name    | Description                                   | Example / Default Value               |
-| :--------------- | :-------------------------------------------- | :------------------------------------ |
-| `PORT`           | Local server port                             | `5000`                                |
-| `MONGO_URI`      | Connection string for MongoDB                 | `mongodb://localhost:27017/blog`      |
-| `JWT_SECRET_KEY` | Secret key used to sign & verify user tokens  | `super_secret_cryptographic_key_here` |
-| `USER_EMAIL`     | Nodemailer sender email account               | `example.user@gmail.com`              |
-| `USER_PASS`      | App password from email provider (e.g. Gmail) | `xxxx xxxx xxxx xxxx`                 |
-| `CLOUD_NAME`     | Cloudinary integration: Cloud Name            | `your_cloudinary_cloud_name`          |
-| `API_KEY`        | Cloudinary integration: API Key               | `your_cloudinary_api_key`             |
-| `API_SECRET`     | Cloudinary integration: API Secret            | `your_cloudinary_api_secret`          |
-
----
-
-## 📡 API Endpoints Summary
-
-All routes are mounted directly on their respective categories without extra prefixes (e.g. `/auth/login`).
-
-### Auth Router (`/auth`)
-
-| Method | Endpoint                              | Authorization | Description                                         |
-| :----- | :------------------------------------ | :------------ | :-------------------------------------------------- |
-| `POST` | `/auth/register`                      | Public        | Registers a new User.                               |
-| `POST` | `/auth/login`                         | Public        | Logs in a User and returns a JWT token.             |
-| `POST` | `/auth/verify-otp`                    | Public        | Verifies user's email address using OTP code.       |
-| `POST` | `/auth/forgot-password`               | Public        | Sends a secure password reset link to user's email. |
-| `POST` | `/auth/reset-password/:userId/:token` | Public        | Validates token and resets user password.           |
-
-### Users Router (`/users`)
-
-| Method   | Endpoint            | Authorization                           | Description                               |
-| :------- | :------------------ | :-------------------------------------- | :---------------------------------------- |
-| `GET`    | `/users`            | Login Required (`verifyToken`)          | Retrieves all users list.                 |
-| `GET`    | `/users/:id`        | Login Required (`verifyToken`)          | Retrieves details of a single user by ID. |
-| `PUT`    | `/users/:id`        | Owner / Admin (`verifyAuthorizedToken`) | Updates account details.                  |
-| `POST`   | `/users/:id/upload` | Owner / Admin + Multer                  | Uploads and updates profile picture.      |
-| `DELETE` | `/users/:id`        | Admin Only (`verifyAdminToken`)         | Deletes user from DB.                     |
-
-### Posts Router (`/posts`)
-
-| Method   | Endpoint          | Authorization                           | Description                                     |
-| :------- | :---------------- | :-------------------------------------- | :---------------------------------------------- |
-| `GET`    | `/posts`          | Login Required (`verifyToken`)          | Returns all posts (populates virtual comments). |
-| `POST`   | `/posts`          | Login Required (`verifyToken`)          | Creates a new blog post.                        |
-| `GET`    | `/posts/:id`      | Login Required (`verifyToken`)          | Retrieves a single post.                        |
-| `PUT`    | `/posts/:id`      | Post Owner / Admin (`verifyPostOwner`)  | Updates post parameters.                        |
-| `DELETE` | `/posts/:id`      | Post Owner / Admin (`verifyPostOwner`)  | Deletes post & clears media assets.             |
-| `PUT`    | `/posts/:id/like` | Login Required (`verifyToken`)          | Toggles like/unlike on a post.                  |
-| `POST`   | `/posts/upload`   | Login Required (`verifyToken`) + Multer | Uploads thumbnail media to Cloudinary.          |
-
-### Comments Router (`/posts/:postId/comments`)
-
-_Mounted as a nested sub-router under Posts for structural integrity._
-| Method | Endpoint | Authorization | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/` | Login Required (`verifyToken`) | List all comments linked to this post. |
-| `POST` | `/` | Login Required (`verifyToken`) | Create a comment under the post. |
-| `PUT` | `/:commentId` | Comment Owner / Admin (`verifyCommentOwner`) | Update text content of a comment. |
-| `DELETE` | `/:commentId` | Comment Owner / Admin (`verifyCommentOwner`) | Delete a comment. |
-| `PUT` | `/:commentId/like` | Login Required (`verifyToken`) | Toggle like/unlike on comment. |
-| `POST` | `/:commentId/upload` | Comment Owner / Admin + Multer | Upload comment image to Cloudinary. |
-
----
-
-## 🛡️ Security & Validation Principles
-
-1. **Joi Schema Guards:** Before reaching database interfaces, all user inputs (Registration, Logins, Profile Updates, Post/Comment creations) are strictly parsed and checked using Joi schemas.
-2. **Resource Ownership Guards:** Specific CRUD actions verify if the requesting User matches the actual owner of the database records (e.g. `verifyPostOwner` or `verifyCommentOwner`). Admin flags bypass ownership checks, allowing moderate privilege.
-3. **Helmet Header Protection:** Implemented `helmet()` middleware to automatically set HTTP headers safeguarding against clickjacking, sniff attacks, cross-site scripting (XSS), etc.
-4. **CORS Configuration:** Fully controlled Cross-Origin Resource Sharing settings (allows requests from specified domains e.g., local client dashboard).
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! If you find any bugs or have feature recommendations, please feel free to open an Issue or submit a Pull Request:
-
-1. Fork the project.
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the Branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
-
----
-
-## 📄 License
-
-Distributed under the **ISC License**. See `LICENSE` or details in the package configuration for more information.
+Full Markdown documentation available in [`API-Docs.md`](file:///c:/Programming/Backend/Projects/Express.js/Codexa/backend/API-Docs.md).

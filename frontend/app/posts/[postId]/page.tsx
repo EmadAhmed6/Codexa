@@ -187,9 +187,11 @@ export default function SinglePostPage() {
                 >
                   {post.user?.username || "Anonymous Author"}
                 </Text>
-                <Text as="p" size="xs" font="medium" color="secondary" className="text-[11px]">
-                  {post.user?.jobTitle || "Developer"}
-                </Text>
+                {post.user?.jobTitle && (
+                  <Text as="p" size="xs" font="medium" color="secondary" className="text-[11px]">
+                    {post.user.jobTitle}
+                  </Text>
+                )}
               </div>
             </Link>
           </UserHoverCard>
