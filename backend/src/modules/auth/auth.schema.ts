@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 const passwordSchema = z
   .string()
   .min(6, "Password must be at least 6 characters")
@@ -12,6 +13,14 @@ const RegisterSchema = z.object({
   email: z.string().email().trim().min(4),
   jobTitle: z.string().min(3).max(50).optional(),
   password: passwordSchema,
+});
+const AuthSchema = z.object({
+  username: z.string().min(3).max(50),
+  email: z.string().email().trim().min(4),
+  jobTitle: z.string().min(3).max(50).optional(),
+  password: passwordSchema,
+  confirmPassword: z.string(),
+  otp: z.string().min(6, { message: "Otp Must be at least 6 digits" }),
 });
 
 const LoginSchema = z.object({
@@ -37,39 +46,19 @@ const ResetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
-const UserSchema = z.object({
-  username: z.string().trim().min(3).max(50),
-  email: z.string().email().trim().min(4),
-  password: passwordSchema,
-  profilePicture: z
-    .object({
-      url: z.string().url(),
-      publicId: z.string().nullable(),
-    })
-    .optional(),
-  jobTitle: z.string().min(3).max(50).optional(),
-  otp: z.string().min(6).optional(),
-  otpExpired: z.date().optional(),
-  bio: z.string().min(1).max(250).optional(),
-});
-
-const UpdateUserSchema = UserSchema.partial();
-
 export {
   RegisterSchema,
   LoginSchema,
   ForgotPasswordSchema,
   ResetPasswordSchema,
   passwordSchema,
+  AuthSchema,
   OtpSchema,
-  UserSchema,
-  UpdateUserSchema,
 };
 
 export type IRegisterUser = z.infer<typeof RegisterSchema>;
 export type ILoginUser = z.infer<typeof LoginSchema>;
 export type IOtp = z.infer<typeof OtpSchema>;
+export type IAuthSchema = z.infer<typeof AuthSchema>;
 export type IForgotPassword = z.infer<typeof ForgotPasswordSchema>;
 export type IResetPassword = z.infer<typeof ResetPasswordSchema>;
-export type IUserSchema = z.infer<typeof UserSchema>;
-export type IUpdateUser = z.infer<typeof UpdateUserSchema>;

@@ -14,7 +14,6 @@ export interface AuthMe {
   username: string;
   jobTitle?: string;
   email: string;
-  bio?: string;
   isAdmin?: boolean;
   isVerified?: boolean;
   postsCount: number;

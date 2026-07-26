@@ -292,9 +292,9 @@ export default function AdminPostsPage() {
                                 href={`/posts/${postItem._id}`}
                                 className="group/article flex items-center gap-3 max-w-xs cursor-pointer"
                               >
-                                {postItem.image?.url ? (
+                                {(postItem.postImage?.url || postItem.image?.url) ? (
                                   <img
-                                    src={postItem.image.url}
+                                    src={postItem.postImage?.url || postItem.image?.url}
                                     alt={postItem.title}
                                     className="h-10 w-14 rounded-lg object-cover border border-borderPrimary group-hover/article:border-primary/50 group-hover/article:scale-105 transition-all duration-200 shrink-0"
                                   />

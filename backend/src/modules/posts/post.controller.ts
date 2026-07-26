@@ -14,19 +14,31 @@ const getAllPosts = asyncHandler(
     const pageNumber = Number(req.query.pageNumber) || 1;
     const postsPerPage = 6;
     const posts = await Post.find()
-      .populate("user", ["_id", "username", "profilePicture", "jobTitle"])
-      .populate("likes", ["_id", "username", "profilePicture", "jobTitle"])
-      .populate("shares", ["_id", "username", "profilePicture", "jobTitle"])
+      .populate("user", [
+        "_id",
+        "username",
+        "profilePicture",
+        "jobTitle",
+        "bio",
+      ])
+      .populate("likes", [
+        "_id",
+        "username",
+        "profilePicture",
+        "jobTitle",
+        "bio",
+      ])
+      .populate("shares", ["_id", "username", "profilePicture"])
       .populate({
         path: "comments",
         populate: [
           {
             path: "user",
-            select: ["_id", "username", "profilePicture", "jobTitle"],
+            select: ["_id", "username", "profilePicture"],
           },
           {
             path: "likes",
-            select: ["_id", "username", "profilePicture", "jobTitle"],
+            select: ["_id", "username", "profilePicture"],
           },
         ],
       })
@@ -42,19 +54,19 @@ const getAllPosts = asyncHandler(
 const getPostById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const posts = await Post.findById(req.params.postId)
-      .populate("user", ["_id", "username", "profilePicture", "jobTitle"])
-      .populate("likes", ["_id", "username", "profilePicture", "jobTitle"])
-      .populate("shares", ["_id", "username", "profilePicture", "jobTitle"])
+      .populate("user", ["_id", "username", "profilePicture"])
+      .populate("likes", ["_id", "username", "profilePicture"])
+      .populate("shares", ["_id", "username", "profilePicture"])
       .populate({
         path: "comments",
         populate: [
           {
             path: "user",
-            select: ["_id", "username", "profilePicture", "jobTitle"],
+            select: ["_id", "username", "profilePicture"],
           },
           {
             path: "likes",
-            select: ["_id", "username", "profilePicture", "jobTitle"],
+            select: ["_id", "username", "profilePicture"],
           },
         ],
       });
@@ -113,6 +125,7 @@ const createPost = asyncHandler(
       "username",
       "profilePicture",
       "jobTitle",
+      "bio",
     ]);
     res.status(201).json({ success: true, data: finalPost });
     return;
@@ -163,7 +176,13 @@ const updatePost = asyncHandler(
         },
       },
       { new: true },
-    ).populate("user", ["_id", "username", "profilePicture", "jobTitle"]);
+    ).populate("user", [
+      "_id",
+      "username",
+      "profilePicture",
+      "jobTitle",
+      "bio",
+    ]);
 
     res.status(200).json({ success: true, data: updatedPost });
     return;
@@ -227,7 +246,7 @@ const likePost = asyncHandler(
             $inc: { postLikesCount: 1 } as any,
           },
       { new: true },
-    ).populate("likes", ["_id", "username", "profilePicture", "jobTitle"]);
+    ).populate("likes", ["_id", "username", "profilePicture"]);
 
     res.status(200).json({ success: true, data: updatedPost });
     return;

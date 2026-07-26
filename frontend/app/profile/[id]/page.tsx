@@ -106,6 +106,7 @@ export default function UserProfilePage() {
     defaultValues: {
       username: userToDisplay?.username || "",
       jobTitle: userToDisplay?.jobTitle || "",
+      bio: (userToDisplay as any)?.bio || "",
       email: userToDisplay?.email || "",
     },
   });
@@ -126,6 +127,7 @@ export default function UserProfilePage() {
     reset({
       username: userToDisplay?.username || "",
       jobTitle: userToDisplay?.jobTitle || "",
+      bio: (userToDisplay as any)?.bio || "",
       email: userToDisplay?.email || "",
     });
     setIsEditModalOpen(true);
@@ -136,6 +138,7 @@ export default function UserProfilePage() {
       await updateUserMutation.mutateAsync({
         username: data.username.trim(),
         jobTitle: data.jobTitle ? data.jobTitle.trim() : "",
+        bio: data.bio ? data.bio.trim() : "",
         email: data.email.trim(),
       });
       setIsEditModalOpen(false);
@@ -260,6 +263,16 @@ export default function UserProfilePage() {
                           {userToDisplay.email}
                         </Text>
                       </div>
+                    )}
+                    {(userToDisplay as any)?.bio && (
+                      <Text
+                        as="p"
+                        size="xs"
+                        color="secondary"
+                        className="mt-2 text-xs leading-relaxed max-w-md italic"
+                      >
+                        "{(userToDisplay as any).bio}"
+                      </Text>
                     )}
                   </div>
 
@@ -466,6 +479,26 @@ export default function UserProfilePage() {
                   })}
                 />
                 <Error error={(errors as any).jobTitle?.message} />
+              </div>
+
+              <div>
+                <Text
+                  as="label"
+                  size="xs"
+                  font="semiBold"
+                  color="secondary"
+                  className="block mb-1"
+                >
+                  Bio (Optional)
+                </Text>
+                <Input
+                  type="text"
+                  placeholder="Tell us about yourself..."
+                  {...register("bio" as any, {
+                    onChange: () => clearErrors("bio" as any),
+                  })}
+                />
+                <Error error={(errors as any).bio?.message} />
               </div>
 
               <div>

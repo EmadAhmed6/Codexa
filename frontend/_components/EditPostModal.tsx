@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { X, Loader2, Edit3 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { X, Loader2, Edit3, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUpdatePost } from "@/_features/posts/hooks";
+import { uploadPostImage } from "@/_features/posts/api";
+import { useQueryClient } from "@tanstack/react-query";
 import { Post } from "@/_features/posts/types/Post";
 import { postFormSchema, type IPostForm } from "@/_features/posts/schemas/post";
 import Error from "@/_components/Error";
@@ -33,7 +35,11 @@ export default function EditPostModal({
   onClose,
   post,
 }: EditPostModalProps) {
+  const queryClient = useQueryClient();
   const updatePostMutation = useUpdatePost();
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const {
     register,
@@ -59,6 +65,8 @@ export default function EditPostModal({
         category: post.category || CATEGORIES[0],
         description: post.description || "",
       });
+      setImagePreview(post.postImage?.url || post.image?.url || null);
+      setImageFile(null);
     }
   }, [post, reset]);
 
@@ -67,19 +75,43 @@ export default function EditPostModal({
 
   if (!isOpen) return null;
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image file size should be less than 5MB.");
+        return;
+      }
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const onSubmit = async (data: IPostForm) => {
     try {
+      setIsUploading(true);
+
       await updatePostMutation.mutateAsync({
         postId: post._id,
         postData: {
           title: data.title.trim(),
           category: data.category,
           description: data.description.trim(),
+          postImageFile: imageFile,
         },
       });
+
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", post._id] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["authMe"] });
+
+      setImageFile(null);
       onClose();
     } catch {
       // Error handled in mutation
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -197,6 +229,50 @@ export default function EditPostModal({
             </select>
             <Error error={errors.category?.message} />
           </div>
+
+          {/* Featured Image */}
+          <div>
+            <Text
+              as="label"
+              size="xs"
+              font="semiBold"
+              color="secondary"
+              className="block uppercase tracking-wider mb-2"
+            >
+              Article Image
+            </Text>
+            {imagePreview ? (
+              <div className="relative rounded-xl overflow-hidden border border-borderPrimary max-h-48 mb-2 group">
+                <img
+                  src={imagePreview}
+                  alt="Post preview"
+                  className="w-full h-44 object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImageFile(null);
+                    setImagePreview(null);
+                  }}
+                  className="absolute top-2 right-2 p-1.5 bg-black/70 rounded-full text-white hover:bg-black transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : null}
+
+            <label className="flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed border-borderPrimary hover:border-primary/50 bg-bgPrimary hover:bg-primary/5 text-textSecondary hover:text-primary transition-all cursor-pointer text-xs font-semibold">
+              <ImageIcon className="h-4 w-4 text-primary" />
+              <span>{imagePreview ? "Change Article Image" : "Upload Article Image"}</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            </label>
+          </div>
+
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-borderPrimary/30">
             <Button
@@ -211,10 +287,10 @@ export default function EditPostModal({
             </Button>
             <Button
               type="submit"
-              disabled={updatePostMutation.isPending}
+              disabled={updatePostMutation.isPending || isUploading}
               className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground font-semibold px-6 cursor-pointer"
             >
-              {updatePostMutation.isPending ? (
+              {updatePostMutation.isPending || isUploading ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <Text as="span" size="xs" font="semiBold" color="white">

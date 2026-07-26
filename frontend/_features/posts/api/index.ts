@@ -12,3 +12,8 @@ export * from "./getComments";
 export * from "./updateComment";
 export * from "./deleteComment";
 export * from "./likeComment";
+export * from "./getReplies";
+export * from "./addReply";
+export * from "./updateReply";
+export * from "./deleteReply";
+export * from "./likeReply";

@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
 import Tooltip from "@/_components/Tooltip";
+import UserHoverCard from "@/_components/UserHoverCard";
 
 export default function AdminUsersPage() {
   const { data: currentUser, isLoading: isAuthLoading } = useGetAuthMeQuery();
@@ -252,41 +253,45 @@ export default function AdminUsersPage() {
                           className="hover:bg-bgSecondary/80 transition-colors"
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <Link
-                              href={`/profile/${userItem._id}`}
-                              className="flex items-center gap-3 group"
-                            >
-                              {userItem.profilePicture?.url ? (
-                                <img
-                                  src={userItem.profilePicture.url}
-                                  alt={userItem.username}
-                                  className="h-9 w-9 rounded-xl object-cover border border-borderPrimary"
-                                />
-                              ) : (
-                                <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                  <UserIcon className="h-4 w-4" />
+                            <UserHoverCard user={userItem as any}>
+                              <Link
+                                href={`/profile/${userItem._id}`}
+                                className="flex items-center gap-3 group"
+                              >
+                                {userItem.profilePicture?.url ? (
+                                  <img
+                                    src={userItem.profilePicture.url}
+                                    alt={userItem.username}
+                                    className="h-9 w-9 rounded-xl object-cover border border-borderPrimary"
+                                  />
+                                ) : (
+                                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                    <UserIcon className="h-4 w-4" />
+                                  </div>
+                                )}
+                                <div>
+                                  <Text
+                                    as="p"
+                                    size="xs"
+                                    font="bold"
+                                    color="primary"
+                                    className="group-hover:text-primary transition-colors"
+                                  >
+                                    {userItem.username}
+                                  </Text>
+                                  {userItem.bio && (
+                                    <Text
+                                      as="p"
+                                      size="xs"
+                                      color="secondary"
+                                      className="text-[10px] italic opacity-80 max-w-40 truncate"
+                                    >
+                                      "{userItem.bio}"
+                                    </Text>
+                                  )}
                                 </div>
-                              )}
-                              <div>
-                                <Text
-                                  as="p"
-                                  size="xs"
-                                  font="bold"
-                                  color="primary"
-                                  className="group-hover:text-primary transition-colors"
-                                >
-                                  {userItem.username}
-                                </Text>
-                                <Text
-                                  as="span"
-                                  size="xs"
-                                  color="secondary"
-                                  className="text-[10px]"
-                                >
-                                  ID: {userItem._id}
-                                </Text>
-                              </div>
-                            </Link>
+                              </Link>
+                            </UserHoverCard>
                           </td>
 
                           <td className="px-6 py-4 whitespace-nowrap">

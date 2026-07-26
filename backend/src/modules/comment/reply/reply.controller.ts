@@ -36,8 +36,20 @@ const getAllReplies = asyncHandler(
     const replies = await Comment.find({
       parentComment: parentCommentId,
     })
-      .populate("user", ["_id", "username", "profilePicture", "jobTitle"])
-      .populate("likes", ["_id", "username", "profilePicture", "jobTitle"]);
+      .populate("user", [
+        "_id",
+        "username",
+        "profilePicture",
+        "jobTitle",
+        "bio",
+      ])
+      .populate("likes", [
+        "_id",
+        "username",
+        "profilePicture",
+        "jobTitle",
+        "bio",
+      ]);
 
     res.status(200).json({
       success: true,
@@ -123,7 +135,7 @@ const replyComment = asyncHandler(
     });
     const finalCommentReply = await Comment.findById(newReply._id).populate(
       "user",
-      ["username", "profilePicture", "jobTitle"],
+      ["_id", "username", "profilePicture", "jobTitle", "bio"],
     );
 
     res.status(201).json({
@@ -177,7 +189,7 @@ const updateReplyComment = asyncHandler(
       if (existingReply.commentImage?.publicId) {
         await cloudinary.uploader.destroy(existingReply.commentImage.publicId);
       }
-      
+
       const result = await cloudinary.uploader.upload(req.file.path);
       replyImage = {
         url: result.secure_url,
@@ -197,7 +209,13 @@ const updateReplyComment = asyncHandler(
         },
       },
       { new: true, runValidators: true },
-    ).populate("user", ["username", "profilePicture", "jobTitle"]);
+    ).populate("user", [
+      "_id",
+      "username",
+      "profilePicture",
+      "jobTitle",
+      "bio",
+    ]);
 
     res.status(200).json({
       success: true,
@@ -316,8 +334,8 @@ const likeReply = asyncHandler(async (req: Request, res: Response) => {
         },
     { new: true, runValidators: true },
   )
-    .populate("likes", ["username", "profilePicture", "jobTitle"])
-    .populate("user", ["username", "profilePicture", "jobTitle"]);
+    .populate("likes", ["_id", "username", "profilePicture"])
+    .populate("user", ["_id", "username", "profilePicture", "jobTitle", "bio"]);
 
   res.status(200).json({
     success: true,

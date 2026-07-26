@@ -77,20 +77,16 @@ export default function CreatePostModal({
     try {
       setIsUploading(true);
 
-      const createdPost = await createPostMutation.mutateAsync({
+      await createPostMutation.mutateAsync({
         title: data.title.trim(),
         category: data.category,
         description: data.description.trim(),
+        postImageFile: imageFile,
       });
 
-      if (imageFile && createdPost?._id) {
-        try {
-          await uploadPostImage(createdPost._id, imageFile);
-          queryClient.invalidateQueries({ queryKey: ["posts"] });
-        } catch {
-          toast.error("Article published, but image upload failed.");
-        }
-      }
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["authMe"] });
 
       reset();
       setImageFile(null);

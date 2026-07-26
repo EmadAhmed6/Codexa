@@ -34,6 +34,12 @@ export const editProfileSchema = z.object({
     .max(20, "Job title must not exceed 20 characters")
     .optional()
     .or(z.literal("")),
+  bio: z
+    .string()
+    .trim()
+    .max(200, "Bio must not exceed 200 characters")
+    .optional()
+    .or(z.literal("")),
   email: z.string().trim().email("Invalid email address"),
 });
 

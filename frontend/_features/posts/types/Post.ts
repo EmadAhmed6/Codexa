@@ -32,12 +32,44 @@ export interface Comment {
       url?: string;
     };
   };
+  commentImage?: {
+    url?: string;
+    publicId?: string;
+  };
   image?: {
     url?: string;
     publicId?: string;
   };
   likes?: (string | { _id: string; username?: string; profilePicture?: { url?: string }; jobTitle?: string })[];
   commentLikesCount?: number;
+  replyCommentsCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Reply {
+  _id: string;
+  postId?: string;
+  parentComment?: string;
+  text: string;
+  user: {
+    _id: string;
+    username: string;
+    jobTitle?: string;
+    profilePicture?: {
+      url?: string;
+    };
+  };
+  commentImage?: {
+    url?: string;
+    publicId?: string;
+  };
+  image?: {
+    url?: string;
+    publicId?: string;
+  };
+  likes?: (string | { _id: string; username?: string; profilePicture?: { url?: string }; jobTitle?: string })[];
+  replyLikesCount?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -46,6 +78,7 @@ export interface PostUserSummary {
   _id: string;
   username?: string;
   jobTitle?: string;
+  bio?: string;
   profilePicture?: {
     url?: string;
   };
@@ -63,6 +96,10 @@ export interface Post {
     profilePicture?: {
       url?: string;
     };
+  };
+  postImage?: {
+    url?: string;
+    publicId?: string;
   };
   image?: {
     url?: string;

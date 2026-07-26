@@ -6,9 +6,9 @@ export const uploadCommentImage = async (
   file: File,
 ): Promise<{ url?: string; publicId?: string }> => {
   const formData = new FormData();
-  formData.append("image", file);
-  const response = await axiosClient.post<any>(
-    `/posts/${postId}/comments/${commentId}/upload`,
+  formData.append("commentImage", file);
+  const response = await axiosClient.put<any>(
+    `/posts/${postId}/comments/${commentId}`,
     formData,
     {
       headers: {
@@ -17,7 +17,7 @@ export const uploadCommentImage = async (
     },
   );
   const data = response.data?.data || response.data;
-  const imageObj = data?.image || data;
+  const imageObj = data?.commentImage || data?.image || data;
   return {
     url: imageObj?.url || "",
     publicId: imageObj?.publicId || null,

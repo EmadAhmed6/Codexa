@@ -90,6 +90,11 @@ export default function AuthorProfileTooltip({
             <span className="truncate font-mono">{id}</span>
           </div>
         )}
+        {(user as any)?.bio && (
+          <p className="text-[11px] text-textSecondary italic leading-relaxed line-clamp-2 pt-1 border-t border-borderPrimary/30">
+            "{(user as any).bio}"
+          </p>
+        )}
       </div>
 
       {/* Footer Prompt */}

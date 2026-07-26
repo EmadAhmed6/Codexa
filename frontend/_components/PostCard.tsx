@@ -27,6 +27,8 @@ import { Text } from "@/_components/Text";
 import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
 
+import UserHoverCard from "@/_components/UserHoverCard";
+
 interface PostCardProps {
   post: Post;
 }
@@ -164,10 +166,10 @@ export default function PostCard({ post }: PostCardProps) {
         />
 
         {/* Featured Cover Image */}
-        {post.image?.url && (
+        {(post.postImage?.url || post.image?.url) && (
           <div className="block mb-4 overflow-hidden rounded-xl border border-borderPrimary/30 aspect-video relative z-10 pointer-events-none">
             <img
-              src={post.image.url}
+              src={post.postImage?.url || post.image?.url}
               alt={post.title || "Cover Image"}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -268,44 +270,46 @@ export default function PostCard({ post }: PostCardProps) {
           {/* Footer: Author Info & Interactive Actions */}
           <div className="pt-4 border-t border-borderPrimary/30 flex items-center justify-between gap-2 mt-auto">
             {/* Author Details */}
-            <Link
-              href={`/profile/${displayAuthor?._id || "me"}`}
-              className="flex items-center gap-2 group/author cursor-pointer pointer-events-auto relative z-10"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {displayAuthor?.profilePicture?.url ? (
-                <img
-                  src={displayAuthor.profilePicture.url}
-                  alt={displayAuthor.username}
-                  className="h-7 w-7 rounded-full object-cover border border-borderPrimary"
-                />
-              ) : (
-                <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center text-primary">
-                  <UserIcon className="h-3.5 w-3.5" />
-                </div>
-              )}
-              <div>
-                <Text
-                  as="span"
-                  size="xs"
-                  font="semiBold"
-                  color="primary"
-                  className="group-hover/author:text-primary transition-colors block truncate max-w-36"
-                >
-                  {displayAuthor?.username || "Anonymous"}
-                </Text>
-                {displayAuthor?.jobTitle && (
+            <UserHoverCard user={displayAuthor as any}>
+              <Link
+                href={`/profile/${displayAuthor?._id || "me"}`}
+                className="flex items-center gap-2 group/author cursor-pointer pointer-events-auto relative z-10"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {displayAuthor?.profilePicture?.url ? (
+                  <img
+                    src={displayAuthor.profilePicture.url}
+                    alt={displayAuthor.username}
+                    className="h-7 w-7 rounded-full object-cover border border-borderPrimary"
+                  />
+                ) : (
+                  <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center text-primary">
+                    <UserIcon className="h-3.5 w-3.5" />
+                  </div>
+                )}
+                <div>
                   <Text
                     as="span"
                     size="xs"
-                    color="secondary"
-                    className="text-[10px] block truncate max-w-36"
+                    font="semiBold"
+                    color="primary"
+                    className="group-hover/author:text-primary transition-colors block truncate max-w-36"
                   >
-                    {displayAuthor.jobTitle}
+                    {displayAuthor?.username || "Anonymous"}
                   </Text>
-                )}
-              </div>
-            </Link>
+                  {displayAuthor?.jobTitle && (
+                    <Text
+                      as="span"
+                      size="xs"
+                      color="secondary"
+                      className="text-[10px] block truncate max-w-36"
+                    >
+                      {displayAuthor.jobTitle}
+                    </Text>
+                  )}
+                </div>
+              </Link>
+            </UserHoverCard>
 
             {/* Actions: Likes, Comments, Share */}
             <div className="flex items-center gap-2 pointer-events-auto relative z-10">

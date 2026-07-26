@@ -32,13 +32,13 @@ const getAllComments = asyncHandler(
       postId: new Types.ObjectId(postId),
       parentComment: null,
     })
-      .populate("user", ["_id", "username", "profilePicture"])
-      .populate("likes", ["_id", "username", "profilePicture", "jobTitle"])
+      .populate("user", ["_id", "username", "profilePicture", "jobTitle", "bio"])
+      .populate("likes", ["_id", "username", "profilePicture", "jobTitle", "bio"])
       .populate({
         path: "replies",
         populate: {
           path: "user",
-          select: ["_id", "username", "profilePicture"],
+          select: ["_id", "username", "profilePicture", "jobTitle", "bio"],
         },
       })
       .skip((pageNumber - 1) * commentsPerPost)
@@ -105,7 +105,7 @@ const createComment = asyncHandler(
 
     const finalComment = await Comment.findById(newComment._id).populate(
       "user",
-      ["_id", "username"],
+      ["_id", "username", "profilePicture", "jobTitle", "bio"],
     );
 
     await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
@@ -177,7 +177,7 @@ const updateComment = asyncHandler(
         },
       },
       { new: true, runValidators: true },
-    ).populate("user", ["_id", "username", "profilePicture", "jobTitle"]);
+    ).populate("user", ["_id", "username", "profilePicture", "jobTitle", "bio"]);
 
     res.status(200).json({
       success: true,
@@ -262,7 +262,7 @@ const likeComment = asyncHandler(
         ? { $pull: { likes: userId }, $inc: { commentLikesCount: -1 } }
         : { $push: { likes: userId }, $inc: { commentLikesCount: 1 } },
       { new: true },
-    ).populate("likes", ["_id", "username", "profilePicture", "jobTitle"]);
+    ).populate("likes", ["_id", "username", "profilePicture", "jobTitle", "bio"]);
 
     res.status(200).json({
       success: true,

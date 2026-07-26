@@ -3,8 +3,22 @@ import { Post } from "../types/Post";
 
 export const updatePost = async (
   postId: string,
-  postData: Partial<Post>,
+  postData: Partial<Post> & { postImageFile?: File | null },
 ): Promise<Post> => {
-  const response = await axiosClient.put<any>(`/posts/${postId}`, postData);
+  const { postImageFile, ...data } = postData;
+  let payload: any = data;
+  let headers = {};
+
+  if (postImageFile) {
+    const formData = new FormData();
+    if (data.title) formData.append("title", data.title);
+    if (data.description) formData.append("description", data.description);
+    if (data.category) formData.append("category", data.category);
+    formData.append("postImage", postImageFile);
+    payload = formData;
+    headers = { "Content-Type": "multipart/form-data" };
+  }
+
+  const response = await axiosClient.put<any>(`/posts/${postId}`, payload, { headers });
   return response.data?.data || response.data;
 };

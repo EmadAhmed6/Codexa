@@ -4,6 +4,7 @@ import { UserProfile } from "../../posts/types/Post";
 export interface UpdateUserPayload {
   username?: string;
   jobTitle?: string;
+  bio?: string;
   email?: string;
   password?: string;
 }

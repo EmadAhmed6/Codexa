@@ -30,6 +30,7 @@ import { formatRelativeTime } from "@/lib/utils";
 import { Text } from "@/_components/Text";
 import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
+import UserHoverCard from "@/_components/UserHoverCard";
 
 export default function SinglePostPage() {
   const params = useParams();
@@ -160,36 +161,38 @@ export default function SinglePostPage() {
 
         {/* Author Header Bar (Top) */}
         <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-bgSecondary/60 border border-borderPrimary/40 mb-6">
-          <Link
-            href={`/profile/${post.user?._id || "me"}`}
-            className="flex items-center gap-3 group cursor-pointer"
-          >
-            {post.user?.profilePicture?.url ? (
-              <img
-                src={post.user.profilePicture.url}
-                alt={post.user.username}
-                className="h-10 w-10 rounded-full object-cover border border-borderPrimary"
-              />
-            ) : (
-              <div className="h-10 w-10 rounded-full bg-primary/15 flex items-center justify-center text-primary">
-                <UserIcon className="h-5 w-5" />
+          <UserHoverCard user={post.user as any}>
+            <Link
+              href={`/profile/${post.user?._id || "me"}`}
+              className="flex items-center gap-3 group cursor-pointer"
+            >
+              {post.user?.profilePicture?.url ? (
+                <img
+                  src={post.user.profilePicture.url}
+                  alt={post.user.username}
+                  className="h-10 w-10 rounded-full object-cover border border-borderPrimary"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-primary/15 flex items-center justify-center text-primary">
+                  <UserIcon className="h-5 w-5" />
+                </div>
+              )}
+              <div>
+                <Text
+                  as="p"
+                  size="sm"
+                  font="bold"
+                  color="primary"
+                  className="group-hover:text-primary transition-colors"
+                >
+                  {post.user?.username || "Anonymous Author"}
+                </Text>
+                <Text as="p" size="xs" font="medium" color="secondary" className="text-[11px]">
+                  {post.user?.jobTitle || "Developer"}
+                </Text>
               </div>
-            )}
-            <div>
-              <Text
-                as="p"
-                size="sm"
-                font="bold"
-                color="primary"
-                className="group-hover:text-primary transition-colors"
-              >
-                {post.user?.username || "Anonymous Author"}
-              </Text>
-              <Text as="p" size="xs" font="medium" color="secondary" className="text-[11px]">
-                {post.user?.jobTitle || "Developer"}
-              </Text>
-            </div>
-          </Link>
+            </Link>
+          </UserHoverCard>
 
           {/* Owner / Admin Actions (Edit & Delete) */}
           {isOwnerOrAdmin && (
@@ -257,12 +260,12 @@ export default function SinglePostPage() {
         </Text>
 
         {/* Cloudinary Header Cover Image */}
-        {post.image?.url && (
-          <div className="w-full mb-10 overflow-hidden rounded-2xl border border-borderPrimary/50 shadow-lg max-h-120">
+        {(post.postImage?.url || post.image?.url) && (
+          <div className="w-full mb-10 overflow-hidden rounded-2xl border border-borderPrimary/50 shadow-lg">
             <img
-              src={post.image.url}
+              src={post.postImage?.url || post.image?.url}
               alt={post.title}
-              className="w-full h-full object-cover"
+              className="w-full h-auto object-cover rounded-2xl"
             />
           </div>
         )}

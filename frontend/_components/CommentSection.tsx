@@ -37,6 +37,8 @@ import { cn, formatRelativeTime } from "@/lib/utils";
 import { Text } from "@/_components/Text";
 import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
+import ReplySection from "@/_components/ReplySection";
+import UserHoverCard from "@/_components/UserHoverCard";
 
 interface CommentSectionProps {
   postId: string;
@@ -60,6 +62,8 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   // Edit Comment state
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
 
   const {
     register,
@@ -86,21 +90,24 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     }
   };
 
+  const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEditImageFile(file);
+      setEditImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const onSubmitComment = async (data: ICommentForm) => {
     try {
       if (imageFile) {
         setIsUploading(true);
       }
 
-      const createdComment = await addCommentMutation.mutateAsync({
+      await addCommentMutation.mutateAsync({
         text: data.text.trim(),
+        commentImageFile: imageFile,
       });
-
-      const createdCommentId = createdComment?._id;
-      if (imageFile && createdCommentId) {
-        await uploadCommentImage(postId, createdCommentId, imageFile);
-        queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-      }
 
       reset();
       setImageFile(null);
@@ -115,14 +122,21 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   const handleSaveEdit = async (commentId: string) => {
     if (!editText.trim()) return;
     try {
+      setIsUploading(true);
       await updateCommentMutation.mutateAsync({
         commentId,
         text: editText.trim(),
+        commentImageFile: editImageFile,
       });
+
       setEditingCommentId(null);
       setEditText("");
+      setEditImageFile(null);
+      setEditImagePreview(null);
     } catch {
       // Handled in mutation
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -265,43 +279,45 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     {comment.user?._id ? (
-                      <Link
-                        href={`/profile/${comment.user._id}`}
-                        className="flex items-center gap-2.5 group/commentAuthor hover:opacity-80 transition-opacity"
-                      >
-                        {comment.user?.profilePicture?.url ? (
-                          <img
-                            src={comment.user.profilePicture.url}
-                            alt={comment.user.username}
-                            className="h-7 w-7 rounded-full object-cover border border-borderPrimary"
-                          />
-                        ) : (
-                          <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                            <UserIcon className="h-4 w-4" />
-                          </div>
-                        )}
-                        <div>
-                          <Text
-                            as="span"
-                            size="xs"
-                            font="bold"
-                            color="primary"
-                            className="group-hover/commentAuthor:text-primary group-hover/commentAuthor:underline"
-                          >
-                            {comment.user?.username || "Anonymous"}
-                          </Text>
-                          {comment.createdAt && (
+                      <UserHoverCard user={comment.user as any}>
+                        <Link
+                          href={`/profile/${comment.user._id}`}
+                          className="flex items-center gap-2.5 group/commentAuthor hover:opacity-80 transition-opacity"
+                        >
+                          {comment.user?.profilePicture?.url ? (
+                            <img
+                              src={comment.user.profilePicture.url}
+                              alt={comment.user.username}
+                              className="h-7 w-7 rounded-full object-cover border border-borderPrimary"
+                            />
+                          ) : (
+                            <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                              <UserIcon className="h-4 w-4" />
+                            </div>
+                          )}
+                          <div>
                             <Text
                               as="span"
                               size="xs"
-                              color="secondary"
-                              className="text-[10px] ml-2"
+                              font="bold"
+                              color="primary"
+                              className="group-hover/commentAuthor:text-primary group-hover/commentAuthor:underline"
                             >
-                              {formatRelativeTime(comment.createdAt)}
+                              {comment.user?.username || "Anonymous"}
                             </Text>
-                          )}
-                        </div>
-                      </Link>
+                            {comment.createdAt && (
+                              <Text
+                                as="span"
+                                size="xs"
+                                color="secondary"
+                                className="text-[10px] ml-2"
+                              >
+                                {formatRelativeTime(comment.createdAt)}
+                              </Text>
+                            )}
+                          </div>
+                        </Link>
+                      </UserHoverCard>
                     ) : (
                       <div className="flex items-center gap-2.5">
                         <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary">
@@ -333,6 +349,10 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                         onClick={() => {
                           setEditingCommentId(comment._id);
                           setEditText(comment.text);
+                          setEditImagePreview(
+                            comment.commentImage?.url || comment.image?.url || null,
+                          );
+                          setEditImageFile(null);
                         }}
                         className="p-1 rounded-md text-textSecondary hover:text-primary transition-colors cursor-pointer"
                         title="Edit Comment"
@@ -361,27 +381,70 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                       onChange={(e) => setEditText(e.target.value)}
                       className="w-full p-2.5 text-xs rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary outline-none focus:ring-1 focus:ring-primary"
                     />
-                    <div className="flex gap-2 justify-end">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setEditingCommentId(null)}
-                        className="text-xs rounded-lg"
-                      >
-                        <Text as="span" size="xs" color="secondary">
-                          Cancel
+
+                    {/* Edit Comment Image Preview */}
+                    {editImagePreview && (
+                      <div className="relative inline-block mt-1 rounded-xl overflow-hidden border border-borderPrimary max-h-32">
+                        <img
+                          src={editImagePreview}
+                          alt="Edit image preview"
+                          className="h-24 object-cover rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditImageFile(null);
+                            setEditImagePreview(null);
+                          }}
+                          className="absolute top-1 right-1 p-1 bg-black/70 rounded-full text-white hover:bg-black transition-colors"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between pt-1">
+                      <label className="flex items-center gap-1.5 text-xs text-textSecondary hover:text-primary transition-colors cursor-pointer">
+                        <ImageIcon className="h-3.5 w-3.5 text-primary" />
+                        <Text as="span" size="xs" font="medium" color="secondary" className="text-[11px]">
+                          {editImagePreview ? "Change Image" : "Attach Image"}
                         </Text>
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => handleSaveEdit(comment._id)}
-                        disabled={updateCommentMutation.isPending}
-                        className="text-xs rounded-lg bg-primary text-primary-foreground"
-                      >
-                        <Text as="span" size="xs" font="semiBold" color="white">
-                          Save
-                        </Text>
-                      </Button>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleEditImageChange}
+                          className="hidden"
+                        />
+                      </label>
+
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingCommentId(null);
+                            setEditImageFile(null);
+                            setEditImagePreview(null);
+                          }}
+                          className="text-xs rounded-lg"
+                        >
+                          <Text as="span" size="xs" color="secondary">
+                            Cancel
+                          </Text>
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleSaveEdit(comment._id)}
+                          disabled={updateCommentMutation.isPending || isUploading}
+                          className="text-xs rounded-lg bg-primary text-primary-foreground"
+                        >
+                          <Text as="span" size="xs" font="semiBold" color="white">
+                            {updateCommentMutation.isPending || isUploading
+                              ? "Saving..."
+                              : "Save"}
+                          </Text>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -395,11 +458,11 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                   </Text>
                 )}
 
-                {/* Attached Image */}
-                {comment.image?.url && (
+                {/* Attached Image (When not editing) */}
+                {!isEditing && (comment.commentImage?.url || comment.image?.url) && (
                   <div className="mt-2 overflow-hidden rounded-xl border border-borderPrimary/40 max-w-sm">
                     <img
-                      src={comment.image.url}
+                      src={comment.commentImage?.url || comment.image?.url}
                       alt="Attachment"
                       className="max-h-48 object-cover rounded-xl"
                     />
@@ -446,6 +509,15 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                     </button>
                   </Tooltip>
                 </div>
+
+                {/* Reply Section Component */}
+                <ReplySection
+                  postId={postId}
+                  commentId={comment._id}
+                  replyCommentsCount={comment.replyCommentsCount}
+                  currentUser={currentUser}
+                  token={token}
+                />
               </div>
             );
           })}

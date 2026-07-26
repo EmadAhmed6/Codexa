@@ -5,8 +5,8 @@ import { toast } from "sonner";
 export const useUpdateComment = (postId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ commentId, text }: { commentId: string; text: string }) =>
-      updateComment(commentId, { text }, postId),
+    mutationFn: ({ commentId, text, commentImageFile }: { commentId: string; text: string; commentImageFile?: File | null }) =>
+      updateComment(commentId, { text, commentImageFile }, postId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
       toast.success("Comment updated.");

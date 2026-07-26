@@ -10,3 +10,8 @@ export * from "./useAddComment";
 export * from "./useUpdateComment";
 export * from "./useDeleteComment";
 export * from "./useLikeComment";
+export * from "./useGetReplies";
+export * from "./useAddReply";
+export * from "./useUpdateReply";
+export * from "./useDeleteReply";
+export * from "./useLikeReply";

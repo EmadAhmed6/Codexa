@@ -9,6 +9,8 @@ export const useLikePost = () => {
     onSuccess: (data, postId) => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["post", postId] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["authMe"] });
       toast.success("Post reaction updated!");
     },
     onError: (err: any) => {

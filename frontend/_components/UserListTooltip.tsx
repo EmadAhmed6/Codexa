@@ -11,9 +11,14 @@ interface UserListTooltipProps {
   type: "like" | "share";
 }
 
-export default function UserListTooltip({ users, type }: UserListTooltipProps) {
+export default function UserListTooltip({
+  users,
+  type,
+}: UserListTooltipProps) {
   const userObjects = Array.isArray(users)
-    ? (users.filter((item) => typeof item === "object" && item !== null) as PostUserSummary[])
+    ? (users.filter(
+        (item) => typeof item === "object" && item !== null,
+      ) as PostUserSummary[])
     : [];
 
   const count = userObjects.length;
@@ -52,31 +57,10 @@ export default function UserListTooltip({ users, type }: UserListTooltipProps) {
       <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
         {displayUsers.map((u, idx) => {
           const userId = u._id;
-          if (!userId) {
-            return (
-              <div key={idx} className="flex items-center gap-2 p-1.5 rounded-lg">
-                {u.profilePicture?.url ? (
-                  <img
-                    src={u.profilePicture.url}
-                    alt={u.username || "User"}
-                    className="h-6 w-6 rounded-full object-cover border border-borderPrimary shrink-0"
-                  />
-                ) : (
-                  <div className="h-6 w-6 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0">
-                    <UserIcon className="h-3 w-3" />
-                  </div>
-                )}
-                <Text as="span" size="xs" font="bold" color="primary" className="truncate leading-tight text-[11px]">
-                  {u.username || "User"}
-                </Text>
-              </div>
-            );
-          }
-
           return (
             <Link
               key={userId || idx}
-              href={`/profile/${userId}`}
+              href={`/profile/${userId || "me"}`}
               onClick={(e) => e.stopPropagation()}
               className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-primary/10 transition-colors group/user cursor-pointer"
             >
@@ -91,27 +75,15 @@ export default function UserListTooltip({ users, type }: UserListTooltipProps) {
                   <UserIcon className="h-3 w-3" />
                 </div>
               )}
-              <div className="flex flex-col truncate">
-                <Text
-                  as="span"
-                  size="xs"
-                  font="bold"
-                  color="primary"
-                  className="truncate leading-tight text-[11px] group-hover/user:text-primary group-hover/user:underline"
-                >
-                  {u.username || "User"}
-                </Text>
-                {u.jobTitle && (
-                  <Text
-                    as="span"
-                    size="xs"
-                    color="secondary"
-                    className="truncate text-[10px] opacity-80"
-                  >
-                    {u.jobTitle}
-                  </Text>
-                )}
-              </div>
+              <Text
+                as="span"
+                size="xs"
+                font="bold"
+                color="primary"
+                className="truncate leading-tight text-[11px] group-hover/user:text-primary group-hover/user:underline"
+              >
+                {u.username || "User"}
+              </Text>
             </Link>
           );
         })}
@@ -119,7 +91,12 @@ export default function UserListTooltip({ users, type }: UserListTooltipProps) {
 
       {remainingCount > 0 && (
         <div className="pt-1 border-t border-borderPrimary/30 text-center">
-          <Text as="span" size="xs" color="secondary" className="text-[10px] font-semibold">
+          <Text
+            as="span"
+            size="xs"
+            color="secondary"
+            className="text-[10px] font-semibold"
+          >
             + {remainingCount} more {remainingCount === 1 ? "user" : "users"}
           </Text>
         </div>
