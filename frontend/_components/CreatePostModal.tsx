@@ -7,11 +7,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreatePost } from "@/_features/posts/hooks";
-import { uploadPostImage } from "@/_features/posts/api";
 import { postFormSchema, type IPostForm } from "@/_features/posts/schemas/post";
 import Error from "@/_components/Error";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Text } from "@/_components/Text";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -26,13 +26,14 @@ const CATEGORIES = [
   "AI & ML",
   "DevOps & Cloud",
   "Career & Insights",
-];
+] as const;
 
 export default function CreatePostModal({
   isOpen,
   onClose,
 }: CreatePostModalProps) {
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -113,10 +114,10 @@ export default function CreatePostModal({
             </div>
             <div>
               <Text as="h2" size="xl" font="bold" color="primary">
-                Create New Article
+                {t.createEditPost.createTitle}
               </Text>
               <Text as="p" size="xs" color="secondary">
-                Share your technical insights with the DevQuill community
+                {t.createEditPost.createSubtitle}
               </Text>
             </div>
           </div>
@@ -140,7 +141,7 @@ export default function CreatePostModal({
                 color="secondary"
                 className="block uppercase tracking-wider"
               >
-                Title
+                {t.createEditPost.titleLabel}
               </Text>
               <Text
                 as="span"
@@ -153,7 +154,7 @@ export default function CreatePostModal({
             </div>
             <input
               type="text"
-              placeholder="e.g. Building Scalable Apps"
+              placeholder={t.createEditPost.titlePlaceholder}
               {...register("title", {
                 onChange: () => clearErrors("title"),
               })}
@@ -172,7 +173,7 @@ export default function CreatePostModal({
                 color="secondary"
                 className="block uppercase tracking-wider"
               >
-                Content & Description
+                {t.createEditPost.contentLabel}
               </Text>
               <Text
                 as="span"
@@ -185,7 +186,7 @@ export default function CreatePostModal({
             </div>
             <textarea
               rows={6}
-              placeholder="Write your article content here..."
+              placeholder={t.createEditPost.contentPlaceholder}
               {...register("description", {
                 onChange: () => clearErrors("description"),
               })}
@@ -203,7 +204,7 @@ export default function CreatePostModal({
               color="secondary"
               className="block uppercase tracking-wider mb-2"
             >
-              Category
+              {t.createEditPost.categoryLabel}
             </Text>
             <select
               {...register("category", {
@@ -213,7 +214,7 @@ export default function CreatePostModal({
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat}
+                  {t.categories[cat as keyof typeof t.categories] || cat}
                 </option>
               ))}
             </select>
@@ -228,7 +229,7 @@ export default function CreatePostModal({
               color="secondary"
               className="block uppercase tracking-wider mb-2"
             >
-              Featured Cover Image (Optional)
+              {t.createEditPost.imageLabel}
             </Text>
             <div className="flex flex-col gap-3">
               {imagePreview ? (
@@ -244,7 +245,7 @@ export default function CreatePostModal({
                       setImageFile(null);
                       setImagePreview(null);
                     }}
-                    className="absolute top-3 right-3 p-1.5 rounded-full bg-black/70 text-white hover:bg-black transition-colors cursor-pointer"
+                    className="absolute top-3 ltr:right-3 rtl:left-3 p-1.5 rounded-full bg-black/70 text-white hover:bg-black transition-colors cursor-pointer"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -253,7 +254,7 @@ export default function CreatePostModal({
                 <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-borderPrimary/60 rounded-xl hover:border-primary/50 bg-bgPrimary/50 hover:bg-bgPrimary transition-all cursor-pointer">
                   <ImageIcon className="h-8 w-8 text-primary mb-2 opacity-70" />
                   <Text as="span" size="xs" font="semiBold" color="primary">
-                    Click to upload cover image
+                    {t.createEditPost.clickToUpload}
                   </Text>
                   <Text
                     as="span"
@@ -261,7 +262,7 @@ export default function CreatePostModal({
                     color="secondary"
                     className="text-[11px] mt-1"
                   >
-                    PNG, JPG, WebP up to 5MB
+                    {t.createEditPost.imageFormatHint}
                   </Text>
                   <input
                     type="file"
@@ -283,7 +284,7 @@ export default function CreatePostModal({
               className="rounded-xl border-borderPrimary"
             >
               <Text as="span" size="xs" font="semiBold" color="primary">
-                Cancel
+                {t.createEditPost.cancel}
               </Text>
             </Button>
             <Button
@@ -295,12 +296,12 @@ export default function CreatePostModal({
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <Text as="span" size="xs" font="semiBold" color="white">
-                    Publishing...
+                    {t.createEditPost.publishing}
                   </Text>
                 </span>
               ) : (
                 <Text as="span" size="xs" font="semiBold" color="white">
-                  Publish Article
+                  {t.createEditPost.publish}
                 </Text>
               )}
             </Button>

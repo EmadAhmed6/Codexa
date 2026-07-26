@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export const useLogout = () => {
   const router = useRouter();

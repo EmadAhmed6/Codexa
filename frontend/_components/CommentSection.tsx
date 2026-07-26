@@ -39,6 +39,7 @@ import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
 import ReplySection from "@/_components/ReplySection";
 import UserHoverCard from "@/_components/UserHoverCard";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface CommentSectionProps {
   postId: string;
@@ -49,6 +50,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   const token = Cookies.get("token");
   const { data: currentUser } = useGetAuthMeQuery();
   const { data: comments, isLoading } = useGetComments(postId);
+  const { t, isArabic } = useLanguage();
 
   const addCommentMutation = useAddComment(postId);
   const updateCommentMutation = useUpdateComment(postId);
@@ -148,7 +150,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       <div className="flex items-center gap-2">
         <MessageSquare className="h-5 w-5 text-primary" />
         <Text as="h3" size="lg" font="bold" color="primary">
-          Discussion & Comments ({commentsCount})
+          {t.post.discussionComments} ({commentsCount})
         </Text>
       </div>
 
@@ -158,7 +160,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
           <div className="p-4 rounded-2xl bg-bgSecondary/60 border border-borderPrimary/50 shadow-sm focus-within:border-primary/50 transition-all">
             <div className="flex justify-between items-center mb-2">
               <Text as="span" size="xs" font="semiBold" color="secondary">
-                Write a response
+                {t.post.writeResponse}
               </Text>
               <Text as="span" size="xs" color="secondary" className="text-[11px]">
                 {watchText.length}/500
@@ -167,7 +169,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
             <textarea
               rows={3}
-              placeholder="What are your thoughts on this article?"
+              placeholder={t.post.commentPlaceholder}
               {...register("text", {
                 onChange: () => clearErrors("text"),
               })}
@@ -189,7 +191,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                     setImageFile(null);
                     setImagePreview(null);
                   }}
-                  className="absolute top-1 right-1 p-1 bg-black/70 rounded-full text-white hover:bg-black transition-colors"
+                  className="absolute top-1 ltr:right-1 rtl:left-1 p-1 bg-black/70 rounded-full text-white hover:bg-black transition-colors"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -201,7 +203,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
               <label className="flex items-center gap-1.5 text-xs text-textSecondary hover:text-primary transition-colors cursor-pointer">
                 <ImageIcon className="h-4 w-4 text-primary" />
                 <Text as="span" size="xs" font="medium" color="secondary">
-                  Attach Image
+                  {t.post.attachImage}
                 </Text>
                 <input
                   type="file"
@@ -226,9 +228,9 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                 ) : (
                   <>
                     <Text as="span" size="xs" font="semiBold" color="white">
-                      Post Comment
+                      {t.post.postComment}
                     </Text>
-                    <Send className="h-3.5 w-3.5 ml-1.5" />
+                    <Send className="h-3.5 w-3.5 ltr:ml-1.5 rtl:mr-1.5 rtl:rotate-180" />
                   </>
                 )}
               </Button>
@@ -238,7 +240,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       ) : (
         <div className="p-4 rounded-2xl bg-bgSecondary/40 border border-borderPrimary/40 text-center mb-8">
           <Text as="p" size="xs" color="secondary">
-            Please log in to join the conversation and post comments.
+            {t.post.loginToComment}
           </Text>
         </div>
       )}
@@ -303,14 +305,14 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                               color="primary"
                               className="group-hover/commentAuthor:text-primary group-hover/commentAuthor:underline"
                             >
-                              {comment.user?.username || "Anonymous"}
+                              {comment.user?.username || t.post.anonymous}
                             </Text>
                             {comment.createdAt && (
                               <Text
                                 as="span"
                                 size="xs"
                                 color="secondary"
-                                className="text-[10px] ml-2"
+                                className="text-[10px] ltr:ml-2 rtl:mr-2"
                               >
                                 {formatRelativeTime(comment.createdAt)}
                               </Text>
@@ -325,14 +327,14 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                         </div>
                         <div>
                           <Text as="span" size="xs" font="bold" color="primary">
-                            Anonymous
+                            {t.post.anonymous}
                           </Text>
                           {comment.createdAt && (
                             <Text
                               as="span"
                               size="xs"
                               color="secondary"
-                              className="text-[10px] ml-2"
+                              className="text-[10px] ltr:ml-2 rtl:mr-2"
                             >
                               {formatRelativeTime(comment.createdAt)}
                             </Text>
@@ -355,7 +357,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                           setEditImageFile(null);
                         }}
                         className="p-1 rounded-md text-textSecondary hover:text-primary transition-colors cursor-pointer"
-                        title="Edit Comment"
+                        title={t.post.editComment}
                       >
                         <Edit2 className="h-3.5 w-3.5" />
                       </button>
@@ -365,7 +367,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                         }
                         disabled={deleteCommentMutation.isPending}
                         className="p-1 rounded-md text-textSecondary hover:text-rose-500 transition-colors cursor-pointer"
-                        title="Delete Comment"
+                        title={t.post.deleteComment}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -396,7 +398,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                             setEditImageFile(null);
                             setEditImagePreview(null);
                           }}
-                          className="absolute top-1 right-1 p-1 bg-black/70 rounded-full text-white hover:bg-black transition-colors"
+                          className="absolute top-1 ltr:right-1 rtl:left-1 p-1 bg-black/70 rounded-full text-white hover:bg-black transition-colors"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -407,7 +409,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                       <label className="flex items-center gap-1.5 text-xs text-textSecondary hover:text-primary transition-colors cursor-pointer">
                         <ImageIcon className="h-3.5 w-3.5 text-primary" />
                         <Text as="span" size="xs" font="medium" color="secondary" className="text-[11px]">
-                          {editImagePreview ? "Change Image" : "Attach Image"}
+                          {editImagePreview ? t.post.changeImage : t.post.attachImage}
                         </Text>
                         <input
                           type="file"
@@ -429,7 +431,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                           className="text-xs rounded-lg"
                         >
                           <Text as="span" size="xs" color="secondary">
-                            Cancel
+                            {t.post.cancel}
                           </Text>
                         </Button>
                         <Button
@@ -440,8 +442,8 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                         >
                           <Text as="span" size="xs" font="semiBold" color="white">
                             {updateCommentMutation.isPending || isUploading
-                              ? "Saving..."
-                              : "Save"}
+                              ? t.post.saving
+                              : t.post.save}
                           </Text>
                         </Button>
                       </div>
@@ -525,7 +527,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       ) : (
         <div className="text-center py-6">
           <Text as="p" size="xs" color="secondary">
-            No comments yet. Be the first to share your thoughts!
+            {t.post.noCommentsYet}
           </Text>
         </div>
       )}

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteReply } from "../api/deleteReply";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export const useDeleteReply = (postId: string, commentId: string) => {
   const queryClient = useQueryClient();

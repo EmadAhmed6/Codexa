@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateUser, UpdateUserPayload } from "../api/updateUser";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export const useUpdateUser = (userId: string) => {
   const queryClient = useQueryClient();

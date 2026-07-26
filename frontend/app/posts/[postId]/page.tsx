@@ -20,6 +20,7 @@ import {
   Trash2,
   Edit2,
   ArrowLeft,
+  ArrowRight,
   Loader2,
   User as UserIcon,
 } from "lucide-react";
@@ -31,11 +32,13 @@ import { Text } from "@/_components/Text";
 import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
 import UserHoverCard from "@/_components/UserHoverCard";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function SinglePostPage() {
   const params = useParams();
   const postId = params.postId as string;
   const router = useRouter();
+  const { t, isArabic } = useLanguage();
 
   const token = Cookies.get("token");
   const { data: currentUser } = useGetAuthMeQuery();
@@ -105,6 +108,8 @@ export default function SinglePostPage() {
     }
   };
 
+  const BackIcon = isArabic ? ArrowRight : ArrowLeft;
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col">
@@ -122,15 +127,15 @@ export default function SinglePostPage() {
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center py-24 text-center px-4">
           <Text as="h2" size="2xl" font="bold" color="primary" className="mb-2">
-            Article Not Found
+            {t.post.articleNotFound}
           </Text>
           <Text as="p" size="xs" color="secondary" className="mb-6">
-            The article you requested could not be retrieved.
+            {t.post.articleNotFoundDesc}
           </Text>
           <Link href="/">
             <Button className="rounded-xl bg-primary text-primary-foreground">
               <Text as="span" size="xs" font="semiBold" color="white">
-                Back to Feed
+                {t.post.backToFeed}
               </Text>
             </Button>
           </Link>
@@ -140,6 +145,10 @@ export default function SinglePostPage() {
   }
 
   const formattedDate = formatRelativeTime(post.createdAt);
+  const translatedCategory =
+    post.category && t.categories[post.category as keyof typeof t.categories]
+      ? t.categories[post.category as keyof typeof t.categories]
+      : post.category || t.post.general;
 
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col justify-between">
@@ -147,14 +156,14 @@ export default function SinglePostPage() {
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12">
         {/* Back Link with Tooltip */}
-        <Tooltip position="right" content="Return to Feed">
+        <Tooltip position="right" content={t.post.returnToFeed}>
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors mb-6"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <BackIcon className="h-4 w-4" />
             <Text as="span" size="xs" font="semiBold" color="secondary">
-              Back to Feed
+              {t.post.backToFeed}
             </Text>
           </Link>
         </Tooltip>
@@ -185,7 +194,7 @@ export default function SinglePostPage() {
                   color="primary"
                   className="group-hover:text-primary transition-colors"
                 >
-                  {post.user?.username || "Anonymous Author"}
+                  {post.user?.username || t.post.anonymousAuthor}
                 </Text>
                 {post.user?.jobTitle && (
                   <Text as="p" size="xs" font="medium" color="secondary" className="text-[11px]">
@@ -199,7 +208,7 @@ export default function SinglePostPage() {
           {/* Owner / Admin Actions (Edit & Delete) */}
           {isOwnerOrAdmin && (
             <div className="flex items-center gap-2">
-              <Tooltip position="bottom" content="Edit Article">
+              <Tooltip position="bottom" content={t.post.edit}>
                 <Button
                   variant="outline"
                   size="sm"
@@ -208,12 +217,12 @@ export default function SinglePostPage() {
                 >
                   <Edit2 className="h-3.5 w-3.5" />
                   <Text as="span" size="xs" font="semiBold" color="primary">
-                    Edit
+                    {t.post.edit}
                   </Text>
                 </Button>
               </Tooltip>
 
-              <Tooltip position="bottom" content="Delete Article">
+              <Tooltip position="bottom" content={t.post.delete}>
                 <Button
                   variant="destructive"
                   size="sm"
@@ -223,7 +232,7 @@ export default function SinglePostPage() {
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   <Text as="span" size="xs" font="semiBold" color="white">
-                    Delete
+                    {t.post.delete}
                   </Text>
                 </Button>
               </Tooltip>
@@ -240,7 +249,7 @@ export default function SinglePostPage() {
             color="primary"
             className="uppercase tracking-wider px-3 py-1 rounded-md bg-primary/10 border border-primary/20"
           >
-            {post.category || "General"}
+            {translatedCategory}
           </Text>
           <div className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 text-textSecondary" />
@@ -307,7 +316,7 @@ export default function SinglePostPage() {
                   font="semiBold"
                   className={isLiked ? "text-white" : "text-rose-500"}
                 >
-                  Like Article ({likesCount})
+                  {t.post.likeArticle} ({likesCount})
                 </Text>
               </button>
             </Tooltip>
@@ -328,7 +337,7 @@ export default function SinglePostPage() {
                   font="semiBold"
                   className="text-textSecondary group-hover:text-textPrimary transition-colors"
                 >
-                  Share ({sharesCount})
+                  {t.post.share} ({sharesCount})
                 </Text>
               </button>
             </Tooltip>
@@ -353,9 +362,9 @@ export default function SinglePostPage() {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDeletePost}
-        title="Delete Article"
-        description="Are you sure you want to delete this article? This action cannot be undone."
-        confirmText="Delete Article"
+        title={t.post.deleteTitle}
+        description={t.post.deleteDesc}
+        confirmText={t.post.deleteConfirm}
         isPending={deletePostMutation.isPending}
       />
     </div>

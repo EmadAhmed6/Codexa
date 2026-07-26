@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteComment } from "../api/deleteComment";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export const useDeleteComment = (postId: string) => {
   const queryClient = useQueryClient();

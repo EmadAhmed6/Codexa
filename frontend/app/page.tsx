@@ -7,7 +7,7 @@ import PostCard from "@/_components/PostCard";
 import CreatePostModal from "@/_components/CreatePostModal";
 import { useGetPosts } from "@/_features/posts/hooks";
 import {
-  Sparkles,
+  Zap,
   ChevronLeft,
   ChevronRight,
   FileText,
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import Cookies from "js-cookie";
 import { Text } from "@/_components/Text";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 const CATEGORIES = [
   "All",
@@ -26,12 +27,13 @@ const CATEGORIES = [
   "Design & UX",
   "AI & ML",
   "DevOps & Cloud",
-];
+] as const;
 
 function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = Cookies.get("token");
+  const { t, isArabic } = useLanguage();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -67,6 +69,9 @@ function HomeContent() {
     router.push(`/?${params.toString()}`);
   };
 
+  const PrevIcon = isArabic ? ChevronRight : ChevronLeft;
+  const NextIcon = isArabic ? ChevronLeft : ChevronRight;
+
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col justify-between relative">
       {/* Background Ambient Gradient */}
@@ -83,9 +88,9 @@ function HomeContent() {
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary mb-4">
-              <Sparkles className="h-3.5 w-3.5" />
+              <Zap className="h-3.5 w-3.5 text-primary fill-primary/20" />
               <Text as="span" size="xs" font="bold" color="primary">
-                DevQuill Technical Community Feed
+                {t.home.feedBadge}
               </Text>
             </div>
             <Text
@@ -95,9 +100,9 @@ function HomeContent() {
               color="primary"
               className="tracking-tight leading-tight mb-4 md:text-5xl"
             >
-              Architecting the Future of <br className="hidden md:block" />
+              {t.home.heroTitlePrefix} <br className="hidden md:block" />
               <span className="bg-linear-to-r from-primary via-indigo-500 to-primaryHover bg-clip-text text-transparent">
-                Software & Web Engineering
+                {t.home.heroTitleHighlight}
               </span>
             </Text>
             <Text
@@ -106,8 +111,7 @@ function HomeContent() {
               color="secondary"
               className="leading-relaxed text-sm md:text-base"
             >
-              Discover peer-reviewed tutorials, architecture breakdowns, and
-              developer insights directly from experts.
+              {t.home.heroSubtitle}
             </Text>
           </div>
         </div>
@@ -116,6 +120,8 @@ function HomeContent() {
         <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 no-scrollbar scroll-smooth">
           {CATEGORIES.map((cat) => {
             const isActive = selectedCategory === cat;
+            const translatedCat =
+              t.categories[cat as keyof typeof t.categories] || cat;
             return (
               <button
                 key={cat}
@@ -132,7 +138,7 @@ function HomeContent() {
                   font="bold"
                   color={isActive ? "white" : "secondary"}
                 >
-                  {cat}
+                  {translatedCat}
                 </Text>
               </button>
             );
@@ -143,7 +149,7 @@ function HomeContent() {
         {search && (
           <div className="mb-6 flex items-center justify-between p-3.5 rounded-xl bg-bgSecondary/60 border border-borderPrimary/40">
             <Text as="span" size="xs" color="secondary">
-              Showing search results for:{" "}
+              {t.home.showingResults}{" "}
               <strong className="text-textPrimary">"{search}"</strong>
             </Text>
             <button
@@ -151,7 +157,7 @@ function HomeContent() {
               className="text-xs font-bold text-primary hover:underline cursor-pointer"
             >
               <Text as="span" size="xs" font="bold" color="primary">
-                Clear Search
+                {t.home.clearSearch}
               </Text>
             </button>
           </div>
@@ -192,7 +198,7 @@ function HomeContent() {
               color="primary"
               className="mb-2"
             >
-              No Articles Found
+              {t.home.noArticlesTitle}
             </Text>
             <Text
               as="p"
@@ -200,8 +206,7 @@ function HomeContent() {
               color="secondary"
               className="max-w-md mb-6 md:text-sm"
             >
-              We couldn't find any published articles matching your current
-              filter criteria.
+              {t.home.noArticlesDesc}
             </Text>
           </div>
         )}
@@ -215,9 +220,9 @@ function HomeContent() {
             onClick={() => handlePageChange(pageNumber - 1)}
             className="w-fit rounded-xl border-borderPrimary/60 px-3 py-1.5 h-8 text-xs font-semibold shrink-0 cursor-pointer"
           >
-            <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+            <PrevIcon className="h-3.5 w-3.5 ltr:mr-1 rtl:ml-1" />
             <Text as="span" size="xs" font="semiBold" color="primary">
-              Prev
+              {t.home.prev}
             </Text>
           </Button>
 
@@ -239,9 +244,9 @@ function HomeContent() {
             className="w-fit rounded-xl border-borderPrimary/60 px-3 py-1.5 h-8 text-xs font-semibold shrink-0 cursor-pointer"
           >
             <Text as="span" size="xs" font="semiBold" color="primary">
-              Next
+              {t.home.next}
             </Text>
-            <ChevronRight className="h-3.5 w-3.5 ml-1" />
+            <NextIcon className="h-3.5 w-3.5 ltr:ml-1 rtl:mr-1" />
           </Button>
         </div>
       </main>
@@ -250,8 +255,8 @@ function HomeContent() {
       {token && (
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="fixed bottom-6 right-6 z-40 p-4 rounded-full bg-primary hover:bg-primaryHover text-primary-foreground shadow-2xl shadow-primary/40 flex items-center gap-2 font-bold text-xs transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
-          title="Create New Post"
+          className="fixed bottom-6 ltr:right-6 rtl:left-6 z-40 p-4 rounded-full bg-primary hover:bg-primaryHover text-primary-foreground shadow-2xl shadow-primary/40 flex items-center gap-2 font-bold text-xs transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+          title={t.home.createPost}
         >
           <PlusCircle className="h-5 w-5" />
           <Text
@@ -261,7 +266,7 @@ function HomeContent() {
             color="white"
             className="hidden sm:inline"
           >
-            Create Post
+            {t.home.createPost}
           </Text>
         </button>
       )}
@@ -275,7 +280,7 @@ function HomeContent() {
       {/* Footer */}
       <footer className="w-full max-w-7xl mx-auto px-6 py-8 border-t border-borderPrimary/20 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-textSecondary">
         <Text as="p" size="xs" color="secondary">
-          © {new Date().getFullYear()} Fluxion Social Media app. made by{" "}
+          © {new Date().getFullYear()} {t.home.footerRights}{" "}
           <Link
             className="transition-all duration-300"
             href={"https://emad-site.vercel.app/"}
@@ -288,13 +293,13 @@ function HomeContent() {
         </Text>
         <div className="flex gap-4">
           <Text as="span" size="xs" color="secondary">
-            Terms
+            {t.home.terms}
           </Text>
           <Text as="span" size="xs" color="secondary">
-            Privacy
+            {t.home.privacy}
           </Text>
           <Text as="span" size="xs" color="secondary">
-            API Documentation
+            {t.home.apiDoc}
           </Text>
         </div>
       </footer>

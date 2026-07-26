@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUpdatePost } from "@/_features/posts/hooks";
-import { uploadPostImage } from "@/_features/posts/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { Post } from "@/_features/posts/types/Post";
 import { postFormSchema, type IPostForm } from "@/_features/posts/schemas/post";
 import Error from "@/_components/Error";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Text } from "@/_components/Text";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface EditPostModalProps {
   isOpen: boolean;
@@ -28,7 +28,7 @@ const CATEGORIES = [
   "AI & ML",
   "DevOps & Cloud",
   "Career & Insights",
-];
+] as const;
 
 export default function EditPostModal({
   isOpen,
@@ -37,6 +37,7 @@ export default function EditPostModal({
 }: EditPostModalProps) {
   const queryClient = useQueryClient();
   const updatePostMutation = useUpdatePost();
+  const { t } = useLanguage();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -126,10 +127,10 @@ export default function EditPostModal({
             </div>
             <div>
               <Text as="h2" size="xl" font="bold" color="primary">
-                Edit Article
+                {t.createEditPost.editTitle}
               </Text>
               <Text as="p" size="xs" color="secondary">
-                Update article details and category
+                {t.createEditPost.editSubtitle}
               </Text>
             </div>
           </div>
@@ -153,7 +154,7 @@ export default function EditPostModal({
                 color="secondary"
                 className="block uppercase tracking-wider"
               >
-                Title
+                {t.createEditPost.titleLabel}
               </Text>
               <Text
                 as="span"
@@ -184,7 +185,7 @@ export default function EditPostModal({
                 color="secondary"
                 className="block uppercase tracking-wider"
               >
-                Content & Description
+                {t.createEditPost.contentLabel}
               </Text>
               <Text
                 as="span"
@@ -213,7 +214,7 @@ export default function EditPostModal({
               color="secondary"
               className="block uppercase tracking-wider mb-2"
             >
-              Category
+              {t.createEditPost.categoryLabel}
             </Text>
             <select
               {...register("category", {
@@ -223,7 +224,7 @@ export default function EditPostModal({
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat}
+                  {t.categories[cat as keyof typeof t.categories] || cat}
                 </option>
               ))}
             </select>
@@ -239,7 +240,7 @@ export default function EditPostModal({
               color="secondary"
               className="block uppercase tracking-wider mb-2"
             >
-              Article Image
+              {t.createEditPost.imageLabel}
             </Text>
             {imagePreview ? (
               <div className="relative rounded-xl overflow-hidden border border-borderPrimary max-h-48 mb-2 group">
@@ -254,7 +255,7 @@ export default function EditPostModal({
                     setImageFile(null);
                     setImagePreview(null);
                   }}
-                  className="absolute top-2 right-2 p-1.5 bg-black/70 rounded-full text-white hover:bg-black transition-colors"
+                  className="absolute top-2 ltr:right-2 rtl:left-2 p-1.5 bg-black/70 rounded-full text-white hover:bg-black transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -263,7 +264,7 @@ export default function EditPostModal({
 
             <label className="flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed border-borderPrimary hover:border-primary/50 bg-bgPrimary hover:bg-primary/5 text-textSecondary hover:text-primary transition-all cursor-pointer text-xs font-semibold">
               <ImageIcon className="h-4 w-4 text-primary" />
-              <span>{imagePreview ? "Change Article Image" : "Upload Article Image"}</span>
+              <span>{imagePreview ? t.createEditPost.changeImage : t.createEditPost.uploadImage}</span>
               <input
                 type="file"
                 accept="image/*"
@@ -282,7 +283,7 @@ export default function EditPostModal({
               className="rounded-xl border-borderPrimary"
             >
               <Text as="span" size="xs" font="semiBold" color="primary">
-                Cancel
+                {t.createEditPost.cancel}
               </Text>
             </Button>
             <Button
@@ -294,12 +295,12 @@ export default function EditPostModal({
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <Text as="span" size="xs" font="semiBold" color="white">
-                    Saving...
+                    {t.post.saving}
                   </Text>
                 </span>
               ) : (
                 <Text as="span" size="xs" font="semiBold" color="white">
-                  Save Changes
+                  {t.createEditPost.saveChanges}
                 </Text>
               )}
             </Button>

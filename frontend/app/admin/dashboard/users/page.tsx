@@ -20,17 +20,20 @@ import {
   User as UserIcon,
   Search,
   ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
 import Tooltip from "@/_components/Tooltip";
 import UserHoverCard from "@/_components/UserHoverCard";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function AdminUsersPage() {
   const { data: currentUser, isLoading: isAuthLoading } = useGetAuthMeQuery();
   const { data: users, isLoading: isUsersLoading } = useGetAllUsers();
   const { data: posts } = useGetPosts();
   const deleteUserMutation = useDeleteUser();
+  const { t, isArabic } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserToDelete, setSelectedUserToDelete] = useState<{
@@ -49,6 +52,8 @@ export default function AdminUsersPage() {
     );
   }
 
+  const BackIcon = isArabic ? ArrowRight : ArrowLeft;
+
   if (!currentUser?.isAdmin) {
     return (
       <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col justify-between">
@@ -64,7 +69,7 @@ export default function AdminUsersPage() {
             color="primary"
             className="mb-2"
           >
-            Access Denied
+            {isArabic ? "غير مسموح بالدخول" : "Access Denied"}
           </Text>
           <Text
             as="p"
@@ -72,14 +77,15 @@ export default function AdminUsersPage() {
             color="secondary"
             className="mb-6 leading-relaxed"
           >
-            You do not have administrative privileges to access the Admin
-            Dashboard.
+            {isArabic
+              ? "معندكش صلاحيات أدمن عشان تدخل لوحة التحكم."
+              : "You do not have administrative privileges to access the Admin Dashboard."}
           </Text>
           <Link href="/">
             <Button className="rounded-xl bg-primary text-primary-foreground text-xs font-semibold cursor-pointer">
-              <ArrowLeft className="h-4 w-4 mr-1.5" />
+              <BackIcon className="h-4 w-4 ltr:mr-1.5 rtl:ml-1.5" />
               <Text as="span" size="xs" font="semiBold" color="white">
-                Back to Home
+                {t.post.backToFeed}
               </Text>
             </Button>
           </Link>
@@ -133,10 +139,10 @@ export default function AdminUsersPage() {
               color="primary"
               className="tracking-tight"
             >
-              Admin Control Center
+              {t.admin.dashboard}
             </Text>
             <Text as="p" size="xs" color="secondary">
-              Manage system users, published articles, and platform metrics
+              {isArabic ? "إدارة اليوزرات والمقالات المنشورة وإحصائيات السيستم" : "Manage system users, published articles, and platform metrics"}
             </Text>
           </div>
         </div>
@@ -157,21 +163,18 @@ export default function AdminUsersPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <Text as="h2" size="xl" font="bold" color="primary">
-                  User Accounts Management
-                </Text>
-                <Text as="p" size="xs" color="secondary">
-                  View accounts, user credentials, roles, and remove accounts
+                  {t.admin.usersManagement}
                 </Text>
               </div>
 
               <div className="relative w-full md:w-72">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-textSecondary" />
+                <Search className="absolute ltr:left-3.5 rtl:right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-textSecondary" />
                 <input
                   type="text"
-                  placeholder="Search users by name, email..."
+                  placeholder={t.admin.searchUsers}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 text-xs rounded-xl bg-bgSecondary border border-borderPrimary text-textPrimary outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full ltr:pl-10 ltr:pr-4 rtl:pr-10 rtl:pl-4 py-2 text-xs rounded-xl bg-bgSecondary border border-borderPrimary text-textPrimary outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
             </div>
@@ -184,7 +187,7 @@ export default function AdminUsersPage() {
                 </div>
                 <div>
                   <Text as="p" size="xs" font="medium" color="secondary">
-                    Total Registered
+                    {isArabic ? "إجمالي المسجلين" : "Total Registered"}
                   </Text>
                   <Text as="h3" size="2xl" font="black" color="primary">
                     {totalUsers}
@@ -198,7 +201,7 @@ export default function AdminUsersPage() {
                 </div>
                 <div>
                   <Text as="p" size="xs" font="medium" color="secondary">
-                    Administrators
+                    {isArabic ? "الأدمنز" : "Administrators"}
                   </Text>
                   <Text as="h3" size="2xl" font="black" color="primary">
                     {adminUsersCount}
@@ -212,7 +215,7 @@ export default function AdminUsersPage() {
                 </div>
                 <div>
                   <Text as="p" size="xs" font="medium" color="secondary">
-                    Standard Users
+                    {isArabic ? "مستخدمين عاديين" : "Standard Users"}
                   </Text>
                   <Text as="h3" size="2xl" font="black" color="primary">
                     {regularUsersCount}
@@ -230,20 +233,20 @@ export default function AdminUsersPage() {
               ) : filteredUsers.length === 0 ? (
                 <div className="py-16 text-center">
                   <Text as="p" size="xs" color="secondary">
-                    No users found matching your search query.
+                    {isArabic ? "ملقيناش أي يوزر يطابق البحث بتاعك." : "No users found matching your search query."}
                   </Text>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full ltr:text-left rtl:text-right text-xs">
                     <thead className="bg-bgSecondary/90 text-textSecondary font-semibold uppercase tracking-wider border-b border-borderPrimary/40">
                       <tr>
-                        <th className="px-6 py-4">User</th>
+                        <th className="px-6 py-4">{isArabic ? "اليوزر" : "User"}</th>
                         <th className="px-6 py-4">Email</th>
-                        <th className="px-6 py-4">Job Title</th>
-                        <th className="px-6 py-4">Role</th>
-                        <th className="px-6 py-4">Joined Date</th>
-                        <th className="px-6 py-4 text-right">Actions</th>
+                        <th className="px-6 py-4">{t.profile.jobTitle}</th>
+                        <th className="px-6 py-4">{t.admin.role}</th>
+                        <th className="px-6 py-4">{t.profile.joined}</th>
+                        <th className="px-6 py-4 ltr:text-right rtl:text-left">{t.admin.actions}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-borderPrimary/30 text-textPrimary font-medium">
@@ -343,11 +346,11 @@ export default function AdminUsersPage() {
                             {userItem.isAdmin ? (
                               <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1 w-fit">
                                 <ShieldCheck className="h-3 w-3" />
-                                Admin
+                                {t.admin.admin}
                               </span>
                             ) : (
                               <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-slate-500/15 text-textSecondary border border-borderPrimary/40 w-fit">
-                                User
+                                {t.admin.user}
                               </span>
                             )}
                           </td>
@@ -359,7 +362,7 @@ export default function AdminUsersPage() {
                                 <Text as="span" size="xs" color="secondary">
                                   {new Date(
                                     userItem.createdAt,
-                                  ).toLocaleDateString("en-US", {
+                                  ).toLocaleDateString(isArabic ? "ar-EG" : "en-US", {
                                     month: "short",
                                     day: "numeric",
                                     year: "numeric",
@@ -378,10 +381,10 @@ export default function AdminUsersPage() {
                             )}
                           </td>
 
-                          <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <td className="px-6 py-4 whitespace-nowrap ltr:text-right rtl:text-left">
                             <div className="flex items-center justify-end gap-2">
                               {userItem._id && (
-                                <Tooltip position="top" content="View User Profile">
+                                <Tooltip position="top" content={t.profile.userProfile}>
                                   <Link href={`/profile/${userItem._id}`}>
                                     <Button
                                       variant="outline"
@@ -393,7 +396,7 @@ export default function AdminUsersPage() {
                                   </Link>
                                 </Tooltip>
                               )}
-                              <Tooltip position="top" content="Delete User">
+                              <Tooltip position="top" content={t.admin.deleteUser}>
                                 <Button
                                   variant="destructive"
                                   size="sm"
@@ -429,9 +432,13 @@ export default function AdminUsersPage() {
         isOpen={!!selectedUserToDelete}
         onClose={() => setSelectedUserToDelete(null)}
         onConfirm={handleConfirmDeleteUser}
-        title="Delete User Account"
-        description={`Are you sure you want to delete user account "${selectedUserToDelete?.username}"? All associated posts and comments will be permanently removed.`}
-        confirmText="Delete User"
+        title={t.admin.deleteUser}
+        description={
+          isArabic
+            ? `انت متأكد انك عايز تمسح حساب "${selectedUserToDelete?.username}"؟ كل مقالاته وكومنتاته هتتمسح نهائياً.`
+            : `Are you sure you want to delete user account "${selectedUserToDelete?.username}"? All associated posts and comments will be permanently removed.`
+        }
+        confirmText={t.admin.deleteUser}
         isPending={deleteUserMutation.isPending}
       />
     </div>

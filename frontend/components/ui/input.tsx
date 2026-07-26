@@ -20,7 +20,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={actualType}
             suppressHydrationWarning
             className={cn(
-              "flex h-11 w-full rounded-lg border border-borderPrimary bg-bgPrimary/50 px-4 py-3 text-sm text-textPrimary placeholder:text-textSecondary/60 shadow-sm transition-all focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-ringPrimary/20 disabled:cursor-not-allowed disabled:opacity-50 pr-11",
+              "flex h-11 w-full rounded-lg border border-borderPrimary bg-bgPrimary/50 px-4 py-3 text-sm text-textPrimary placeholder:text-textSecondary/60 shadow-sm transition-all focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-ringPrimary/20 disabled:cursor-not-allowed disabled:opacity-50 ltr:pr-11 rtl:pl-11",
               className,
             )}
             ref={ref}
@@ -35,7 +35,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               setShowPassword((prev) => !prev);
             }}
             className={cn(
-              "absolute right-3.5 z-10 p-1 transition-colors cursor-pointer",
+              "absolute ltr:right-3.5 rtl:left-3.5 z-10 p-1 transition-colors cursor-pointer",
               showPassword
                 ? "text-primary hover:text-primaryHover"
                 : "text-textSecondary hover:text-textPrimary",

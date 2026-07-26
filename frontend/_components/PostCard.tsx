@@ -26,8 +26,8 @@ import { formatRelativeTime } from "@/lib/utils";
 import { Text } from "@/_components/Text";
 import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
-
 import UserHoverCard from "@/_components/UserHoverCard";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PostCardProps {
   post: Post;
@@ -36,6 +36,7 @@ interface PostCardProps {
 export default function PostCard({ post }: PostCardProps) {
   const token = Cookies.get("token");
   const { data: currentUser } = useGetAuthMeQuery();
+  const { t } = useLanguage();
 
   const likePostMutation = useLikePost();
   const sharePostMutation = useSharePost();
@@ -155,6 +156,11 @@ export default function PostCard({ post }: PostCardProps) {
     setIsEditModalOpen(true);
   };
 
+  const translatedCategory =
+    post.category && t.categories[post.category as keyof typeof t.categories]
+      ? t.categories[post.category as keyof typeof t.categories]
+      : post.category || t.post.general;
+
   return (
     <>
       <article className="group flex flex-col justify-between bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/50 hover:border-primary/40 rounded-2xl p-5 md:p-6 shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-visible">
@@ -162,7 +168,7 @@ export default function PostCard({ post }: PostCardProps) {
         <Link
           href={`/posts/${post._id}`}
           className="absolute inset-0 z-0"
-          aria-label={post.title || "View Article"}
+          aria-label={post.title || t.post.viewArticle}
         />
 
         {/* Featured Cover Image */}
@@ -189,7 +195,7 @@ export default function PostCard({ post }: PostCardProps) {
                   color="primary"
                   className="inline-block text-[11px] uppercase tracking-wide px-2.5 py-1 rounded-md bg-primary/10 border border-primary/20"
                 >
-                  {post.category || "General"}
+                  {translatedCategory}
                 </Text>
                 {post.sharedPost && (
                   <Text
@@ -200,7 +206,7 @@ export default function PostCard({ post }: PostCardProps) {
                     className="inline-flex items-center gap-1 text-[10px] bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10"
                   >
                     <Repeat className="h-3 w-3" />
-                    Shared
+                    {t.post.shared}
                   </Text>
                 )}
               </div>
@@ -215,23 +221,23 @@ export default function PostCard({ post }: PostCardProps) {
 
                 {/* Edit & Delete Controls */}
                 {isOwnerOrAdmin && (
-                  <div className="flex items-center gap-1 ml-2 border-l border-borderPrimary/40 pl-2 pointer-events-auto">
-                    <Tooltip position="top" content="Edit Article">
+                  <div className="flex items-center gap-1 ltr:ml-2 ltr:border-l rtl:mr-2 rtl:border-r border-borderPrimary/40 ltr:pl-2 rtl:pr-2 pointer-events-auto">
+                    <Tooltip position="top" content={t.post.edit}>
                       <button
                         onClick={handleOpenEdit}
                         className="p-1 rounded-md text-textSecondary hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
-                        title="Edit Article"
+                        title={t.post.edit}
                       >
                         <Edit2 className="h-3.5 w-3.5" />
                       </button>
                     </Tooltip>
 
-                    <Tooltip position="top" content="Delete Article">
+                    <Tooltip position="top" content={t.post.delete}>
                       <button
                         onClick={handleDelete}
                         disabled={deletePostMutation.isPending}
                         className="p-1 rounded-md text-textSecondary hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                        title="Delete Article"
+                        title={t.post.delete}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -295,7 +301,7 @@ export default function PostCard({ post }: PostCardProps) {
                     color="primary"
                     className="group-hover/author:text-primary transition-colors block truncate max-w-36"
                   >
-                    {displayAuthor?.username || "Anonymous"}
+                    {displayAuthor?.username || t.post.anonymous}
                   </Text>
                   {displayAuthor?.jobTitle && (
                     <Text
@@ -346,7 +352,7 @@ export default function PostCard({ post }: PostCardProps) {
               </Tooltip>
 
               {/* Comment Counter */}
-              <Tooltip position="top" content="View Comments">
+              <Tooltip position="top" content={t.post.viewComments}>
                 <Link
                   href={`/posts/${post._id}#comments`}
                   className="group/comment flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10 relative z-10"
@@ -402,9 +408,9 @@ export default function PostCard({ post }: PostCardProps) {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="Delete Article"
-        description="Are you sure you want to delete this article? This action cannot be undone."
-        confirmText="Delete Article"
+        title={t.post.deleteTitle}
+        description={t.post.deleteDesc}
+        confirmText={t.post.deleteConfirm}
         isPending={deletePostMutation.isPending}
       />
     </>

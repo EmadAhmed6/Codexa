@@ -37,15 +37,16 @@ import {
   type IEditProfile,
 } from "@/_features/posts/schemas/post";
 import Error from "@/_components/Error";
-import { toast } from "sonner";
 import { Text } from "@/_components/Text";
 import { Post } from "@/_features/posts/types/Post";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function UserProfilePage() {
   const params = useParams();
   const router = useRouter();
   const routeUserId = params.id as string;
+  const { t, isArabic } = useLanguage();
 
   const { data: currentUser } = useGetAuthMeQuery();
 
@@ -163,6 +164,13 @@ export default function UserProfilePage() {
     return String(pUserId) === String(targetUserId);
   });
 
+  const joinedDateFormatted = userToDisplay?.createdAt
+    ? new Date(userToDisplay.createdAt).toLocaleDateString(
+        isArabic ? "ar-EG" : "en-US",
+        { month: "short", day: "numeric", year: "numeric" },
+      )
+    : "";
+
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col justify-between">
       <Navbar />
@@ -170,7 +178,7 @@ export default function UserProfilePage() {
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
         {/* User Hero Header Card */}
         <div className="relative rounded-3xl bg-bgSecondary/60 border border-borderPrimary/50 p-6 md:p-10 mb-10 overflow-hidden shadow-xl">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+          <div className="absolute top-0 ltr:right-0 rtl:left-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
           {isUserLoading ? (
             <div className="flex justify-center py-12">
@@ -207,7 +215,7 @@ export default function UserProfilePage() {
                           color="white"
                           className="text-[10px] uppercase"
                         >
-                          Upload
+                          {t.profile.changePhoto}
                         </Text>
                       </>
                     )}
@@ -223,10 +231,10 @@ export default function UserProfilePage() {
               </div>
 
               {/* User Info Details */}
-              <div className="flex-1 text-center md:text-left space-y-3">
+              <div className="flex-1 text-center ltr:md:text-left rtl:md:text-right space-y-3">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-3">
                   <div>
-                    <div className="flex items-center gap-2 justify-center md:justify-start">
+                    <div className="flex items-center gap-2 justify-center ltr:md:justify-start rtl:md:justify-end">
                       <Text
                         as="h1"
                         size="2xl"
@@ -239,17 +247,17 @@ export default function UserProfilePage() {
                       {userToDisplay?.isAdmin ? (
                         <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1">
                           <ShieldCheck className="h-3.5 w-3.5" />
-                          Admin
+                          {t.admin.admin}
                         </span>
                       ) : (
                         <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30 flex items-center gap-1">
                           <UserIcon className="h-3.5 w-3.5" />
-                          User
+                          {t.admin.user}
                         </span>
                       )}
                     </div>
                     {userToDisplay?.jobTitle && (
-                      <div className="flex items-center justify-center md:justify-start gap-1.5 mt-1">
+                      <div className="flex items-center justify-center ltr:md:justify-start rtl:md:justify-end gap-1.5 mt-1">
                         <Briefcase className="h-3.5 w-3.5 text-primary" />
                         <Text as="p" size="xs" font="semiBold" color="primary">
                           {userToDisplay.jobTitle}
@@ -257,7 +265,7 @@ export default function UserProfilePage() {
                       </div>
                     )}
                     {userToDisplay?.email && (
-                      <div className="flex items-center justify-center md:justify-start gap-1.5 mt-1">
+                      <div className="flex items-center justify-center ltr:md:justify-start rtl:md:justify-end gap-1.5 mt-1">
                         <Mail className="h-3.5 w-3.5 text-textSecondary" />
                         <Text as="p" size="xs" color="secondary">
                           {userToDisplay.email}
@@ -291,7 +299,7 @@ export default function UserProfilePage() {
                             font="semiBold"
                             color="white"
                           >
-                            Create Article
+                            {t.home.createPost}
                           </Text>
                         </Button>
                         <Button
@@ -307,7 +315,7 @@ export default function UserProfilePage() {
                             font="semiBold"
                             color="primary"
                           >
-                            Edit Profile
+                            {t.profile.editProfile}
                           </Text>
                         </Button>
                       </>
@@ -321,14 +329,14 @@ export default function UserProfilePage() {
                         disabled={deleteUserMutation.isPending}
                         className="group/delBtn rounded-xl text-xs flex items-center gap-1.5 cursor-pointer bg-rose-500/15 border border-rose-500/30 hover:bg-rose-600 transition-all"
                       >
-                        <Trash2 className="h-3.5 w-3.5 text-rose-700  group-hover/delBtn:text-white transition-colors" />
+                        <Trash2 className="h-3.5 w-3.5 text-rose-700 group-hover/delBtn:text-white transition-colors" />
                         <Text
                           as="span"
                           size="xs"
                           font="semiBold"
                           className="text-rose-700 group-hover/delBtn:text-white transition-colors"
                         >
-                          {isOwnProfile ? "Delete Account" : "Delete User"}
+                          {isOwnProfile ? (isArabic ? "مسح الحساب" : "Delete Account") : t.admin.deleteUser}
                         </Text>
                       </Button>
                     )}
@@ -336,22 +344,18 @@ export default function UserProfilePage() {
                 </div>
 
                 {/* Stats & Details Pills */}
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
+                <div className="flex flex-wrap items-center justify-center ltr:md:justify-start rtl:md:justify-end gap-3 pt-2">
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-bgPrimary/80 border border-borderPrimary/40">
                     <FileText className="h-4 w-4 text-primary" />
                     <Text as="span" size="xs" font="semiBold" color="primary">
-                      {displayUserPosts.length} Articles
+                      {displayUserPosts.length} {t.profile.articlesPublished}
                     </Text>
                   </div>
                   {userToDisplay?.createdAt && (
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-bgPrimary/80 border border-borderPrimary/40">
                       <Calendar className="h-4 w-4 text-primary/70" />
                       <Text as="span" size="xs" font="semiBold" color="primary">
-                        Joined{" "}
-                        {new Date(userToDisplay.createdAt).toLocaleDateString(
-                          "en-US",
-                          { month: "short", day: "numeric", year: "numeric" },
-                        )}
+                        {t.profile.joined} {joinedDateFormatted}
                       </Text>
                     </div>
                   )}
@@ -368,8 +372,8 @@ export default function UserProfilePage() {
               <FileText className="h-5 w-5 text-primary" />
               <Text as="h2" size="xl" font="bold" color="primary">
                 {isOwnProfile
-                  ? "My Published Articles"
-                  : `${userToDisplay?.username}'s Articles`}
+                  ? (isArabic ? "المقالات المنشورة الخاصة بي" : "My Published Articles")
+                  : `${userToDisplay?.username || ""} - ${t.profile.userPosts}`}
               </Text>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
                 {displayUserPosts.length}
@@ -384,7 +388,7 @@ export default function UserProfilePage() {
               >
                 <PlusCircle className="h-3.5 w-3.5" />
                 <Text as="span" size="xs" font="semiBold" color="white">
-                  New Article
+                  {t.home.createPost}
                 </Text>
               </Button>
             )}
@@ -398,12 +402,7 @@ export default function UserProfilePage() {
             <div className="text-center py-12 p-8 rounded-2xl bg-bgSecondary/40 border border-borderPrimary/40">
               <FileText className="h-10 w-10 text-textSecondary mx-auto mb-3 opacity-40" />
               <Text as="p" size="sm" font="semiBold" color="primary">
-                No articles published yet
-              </Text>
-              <Text as="p" size="xs" color="secondary" className="mt-1 mb-4">
-                {isOwnProfile
-                  ? "Create your first post to get started."
-                  : "This user hasn't published any articles yet."}
+                {t.profile.noPostsYet}
               </Text>
             </div>
           ) : (
@@ -428,11 +427,11 @@ export default function UserProfilePage() {
           <div className="relative w-full max-w-md bg-bgSecondary border border-borderPrimary rounded-2xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-borderPrimary/40 pb-3">
               <Text as="h3" size="lg" font="bold" color="primary">
-                Edit Profile Settings
+                {t.profile.editProfile}
               </Text>
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="p-1.5 rounded-lg text-textSecondary hover:text-textPrimary"
+                className="p-1.5 rounded-lg text-textSecondary hover:text-textPrimary cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -450,7 +449,7 @@ export default function UserProfilePage() {
                   color="secondary"
                   className="block mb-1"
                 >
-                  Username
+                  {t.nav.user}
                 </Text>
                 <Input
                   type="text"
@@ -469,7 +468,7 @@ export default function UserProfilePage() {
                   color="secondary"
                   className="block mb-1"
                 >
-                  Job Title (Optional)
+                  {t.profile.jobTitle}
                 </Text>
                 <Input
                   type="text"
@@ -489,7 +488,7 @@ export default function UserProfilePage() {
                   color="secondary"
                   className="block mb-1"
                 >
-                  Bio (Optional)
+                  {t.profile.bio}
                 </Text>
                 <Input
                   type="text"
@@ -526,22 +525,22 @@ export default function UserProfilePage() {
                   variant="outline"
                   size="sm"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="rounded-xl text-xs"
+                  className="rounded-xl text-xs cursor-pointer"
                 >
                   <Text as="span" size="xs" color="secondary">
-                    Cancel
+                    {t.post.cancel}
                   </Text>
                 </Button>
                 <Button
                   type="submit"
                   size="sm"
                   disabled={updateUserMutation.isPending}
-                  className="rounded-xl bg-primary text-primary-foreground text-xs"
+                  className="rounded-xl bg-primary text-primary-foreground text-xs cursor-pointer"
                 >
                   <Text as="span" size="xs" font="semiBold" color="white">
                     {updateUserMutation.isPending
-                      ? "Saving..."
-                      : "Save Changes"}
+                      ? t.post.saving
+                      : t.profile.saveProfile}
                   </Text>
                 </Button>
               </div>
@@ -555,13 +554,13 @@ export default function UserProfilePage() {
         isOpen={isDeleteUserModalOpen}
         onClose={() => setIsDeleteUserModalOpen(false)}
         onConfirm={handleDeleteAccount}
-        title={isOwnProfile ? "Delete My Account" : "Delete User Account"}
+        title={isOwnProfile ? (isArabic ? "مسح الحساب" : "Delete My Account") : t.admin.deleteUser}
         description={
           isOwnProfile
-            ? "Are you sure you want to delete your account? All associated posts and data will be permanently removed. This action cannot be undone."
-            : "Are you sure you want to delete this user account? All associated posts and data will be permanently removed. This action cannot be undone."
+            ? (isArabic ? "انت متأكد انك عايز تمسح حسابك؟ كل البيانات والمقالات هتتمسح نهائياً." : "Are you sure you want to delete your account? All associated posts and data will be permanently removed.")
+            : (isArabic ? "انت متأكد انك عايز تمسح حساب اليوزر ده؟ كل بياناته وهتتمسح." : "Are you sure you want to delete this user account?")
         }
-        confirmText={isOwnProfile ? "Delete My Account" : "Delete User"}
+        confirmText={isOwnProfile ? (isArabic ? "امسح حسابي" : "Delete My Account") : t.admin.deleteUser}
         isPending={deleteUserMutation.isPending}
       />
     </div>

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { sharePost } from "../api/sharePost";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export const useSharePost = () => {
   const queryClient = useQueryClient();

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Mail, ArrowRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export default function VerifyEmailPage() {
   const [isResending, setIsResending] = useState(false);

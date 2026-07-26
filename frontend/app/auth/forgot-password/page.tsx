@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import {
   forgotPasswordSchema,
@@ -23,11 +23,13 @@ import {
 import { useForgotPasswordMutation } from "@/_features/auth/hooks";
 import { Text } from "@/_components/Text";
 import Error from "@/_components/Error";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ForgotPasswordPage() {
   const [isSent, setIsSent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [submittedEmail, setSubmittedEmail] = useState("");
+  const { t, isArabic } = useLanguage();
 
   const forgotMutation = useForgotPasswordMutation();
 
@@ -59,13 +61,13 @@ export default function ForgotPasswordPage() {
         setSubmittedEmail(data.email);
         setIsSent(true);
         setResendCooldown(30); // 30-second cooldown
-        toast.success("Recovery link sent!");
+        toast.success(isArabic ? "تم إرسال رابط الاسترجاع!" : "Recovery link sent!");
         reset();
       },
       onError: (error: any) => {
         const errorText =
           error?.response?.data?.message ||
-          "Failed to send reset link. Please try again.";
+          (isArabic ? "فشل إرسال الرابط. حاول تاني." : "Failed to send reset link. Please try again.");
         toast.error(errorText);
       },
     });
@@ -76,6 +78,9 @@ export default function ForgotPasswordPage() {
     onSubmit({ email: submittedEmail });
   };
 
+  const BackIcon = isArabic ? ArrowRight : ArrowLeft;
+  const SubmitIcon = isArabic ? ArrowLeft : ArrowRight;
+
   // Render Sent Success State
   if (isSent) {
     return (
@@ -85,10 +90,10 @@ export default function ForgotPasswordPage() {
         </div>
 
         <Text as="h1" size="2xl" font="bold" color="primary" className="mb-3">
-          Check your email
+          {t.auth.checkYourEmail}
         </Text>
         <Text size="sm" color="secondary" className="leading-relaxed mb-6">
-          We've sent recovery link to your inbox. Check spam if not found.{" "}
+          {t.auth.checkEmailDesc}{" "}
           <Text as="strong" color="primary" font="bold">
             {submittedEmail}
           </Text>
@@ -103,7 +108,7 @@ export default function ForgotPasswordPage() {
               className="bg-bgPrimary/40 py-2.5 px-4 rounded-xl inline-flex items-center gap-2"
             >
               <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
-              You can resend in {resendCooldown}s
+              {t.auth.canResendIn} {resendCooldown}s
             </Text>
           ) : (
             <Button
@@ -117,7 +122,7 @@ export default function ForgotPasswordPage() {
                 className={`h-3.5 w-3.5 ${forgotMutation.isPending ? "animate-spin" : ""}`}
               />
               <Text as="span" size="xs" font="semiBold">
-                Resend Email
+                {t.auth.resendEmail}
               </Text>
             </Button>
           )}
@@ -128,7 +133,7 @@ export default function ForgotPasswordPage() {
           href="/auth/login"
           className="inline-flex items-center gap-1.5 transition-colors group"
         >
-          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform text-textSecondary" />
+          <BackIcon className="h-4 w-4 group-hover:-translate-x-1 transition-transform text-textSecondary" />
           <Text
             as="span"
             size="sm"
@@ -136,7 +141,7 @@ export default function ForgotPasswordPage() {
             color="secondary"
             className="group-hover:text-textPrimary"
           >
-            Back to login
+            {t.auth.backToLogin}
           </Text>
         </Link>
       </div>
@@ -150,7 +155,7 @@ export default function ForgotPasswordPage() {
         href="/auth/login"
         className="inline-flex items-center gap-1 mb-6 group"
       >
-        <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform text-textSecondary" />
+        <BackIcon className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform text-textSecondary" />
         <Text
           as="span"
           size="xs"
@@ -158,7 +163,7 @@ export default function ForgotPasswordPage() {
           color="secondary"
           className="group-hover:text-textPrimary"
         >
-          Back to login
+          {t.auth.backToLogin}
         </Text>
       </Link>
 
@@ -171,27 +176,27 @@ export default function ForgotPasswordPage() {
           color="primary"
           className="tracking-tight mb-2"
         >
-          Forgot Password
+          {t.auth.forgotPasswordTitle}
         </Text>
         <Text size="sm" color="secondary">
-          Enter your email to receive recovery instructions
+          {t.auth.forgotPasswordDesc}
         </Text>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Email Field */}
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email Address</Label>
+          <Label htmlFor="email">{t.auth.emailLabel}</Label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 flex items-center text-textSecondary/60">
+            <span className="absolute inset-y-0 ltr:left-3.5 rtl:right-3.5 flex items-center text-textSecondary/60">
               <Mail className="h-4.5 w-4.5" />
             </span>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t.auth.emailPlaceholder}
               disabled={forgotMutation.isPending}
-              className={`pl-11 ${errors.email ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
+              className={`ltr:pl-11 rtl:pr-11 ${errors.email ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
               {...register("email", { onChange: () => clearErrors("email") })}
             />
           </div>
@@ -203,21 +208,21 @@ export default function ForgotPasswordPage() {
           type="submit"
           disabled={forgotMutation.isPending}
           size="lg"
-          className={"w-full"}
+          className={"w-full cursor-pointer"}
         >
           {forgotMutation.isPending ? (
             <div className="flex items-center gap-2">
               <span className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
               <Text as="span" font="semiBold" color="white">
-                Sending link...
+                {t.auth.sendingLinkBtn}
               </Text>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <Text as="span" font="semiBold" color="white">
-                Send Email
+                {t.auth.sendEmailBtn}
               </Text>
-              <ArrowRight className="h-4.5 w-4.5 group-hover/button:translate-x-1 transition-transform" />
+              <SubmitIcon className="h-4.5 w-4.5 group-hover/button:translate-x-1 transition-transform" />
             </div>
           )}
         </Button>

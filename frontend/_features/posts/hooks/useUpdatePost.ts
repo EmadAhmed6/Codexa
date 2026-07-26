@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updatePost } from "../api/updatePost";
-import { toast } from "sonner";
+import { appToast as toast } from "@/lib/toast";
 
 export const useUpdatePost = () => {
   const queryClient = useQueryClient();
@@ -15,7 +15,7 @@ export const useUpdatePost = () => {
       queryClient.invalidateQueries({ queryKey: ["post", variables.postId] });
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
       queryClient.invalidateQueries({ queryKey: ["authMe"] });
-      toast.success("Post updated!");
+      toast.success("Post updated successfully!");
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || "Failed to update post.");

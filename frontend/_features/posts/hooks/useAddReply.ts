@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addReply } from "../api/addReply";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export const useAddReply = (postId: string, commentId: string) => {
   const queryClient = useQueryClient();

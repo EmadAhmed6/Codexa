@@ -2,7 +2,7 @@
 
 import React, { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { KeyRound, ArrowRight, Loader2 } from "lucide-react";
+import { KeyRound, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import {
   verifyOtpSchema,
   type IVerifyOtp,
@@ -22,11 +22,13 @@ import { useVerifyOtpMutation } from "@/_features/auth/hooks";
 import { Text } from "@/_components/Text";
 import Error from "@/_components/Error";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 function VerifyOtpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailQuery = searchParams.get("email") || "";
+  const { t, isArabic } = useLanguage();
 
   const verifyOtpMutation = useVerifyOtpMutation();
 
@@ -57,19 +59,21 @@ function VerifyOtpForm() {
           toast.success(
             res?.message ||
               res?.data?.message ||
-              "Account verified successfully! Please sign in.",
+              (isArabic ? "تم تأكيد الحساب بنجاح! سجل دخول دلوقتي." : "Account verified successfully! Please sign in."),
           );
           router.push("/auth/login");
         },
         onError: (err: any) => {
           toast.error(
             err?.response?.data?.message ||
-              "Invalid OTP code or expired code. Please try again.",
+              (isArabic ? "كود الـ OTP غلط أو انتهى. حاول تاني." : "Invalid OTP code or expired code. Please try again."),
           );
         },
       },
     );
   };
+
+  const SubmitIcon = isArabic ? ArrowLeft : ArrowRight;
 
   return (
     <div className="w-full max-w-md glass-card p-8 md:p-10 transition-all duration-300">
@@ -85,21 +89,21 @@ function VerifyOtpForm() {
           color="primary"
           className="tracking-tight mb-2"
         >
-          Verify OTP Code
+          {t.auth.verifyOtpTitle}
         </Text>
         <Text size="sm" color="secondary">
-          Enter the 6-digit verification code sent to your email
+          {t.auth.verifyOtpDesc}
         </Text>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Email Field */}
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email address</Label>
+          <Label htmlFor="email">{t.auth.emailLabel}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder={t.auth.emailPlaceholder}
             disabled={verifyOtpMutation.isPending}
             className={`bg-bgSecondary/50 ${errors.email ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
             {...register("email", { onChange: () => clearErrors("email") })}
@@ -110,7 +114,7 @@ function VerifyOtpForm() {
         {/* Shadcn InputOTP Component */}
         <div className="space-y-2">
           <Label className="block text-center text-xs font-semibold text-textSecondary mb-6">
-            Enter 6-Digit Code
+            {t.auth.enter6DigitCode}
           </Label>
           <div className="flex justify-center">
             <Controller
@@ -154,21 +158,21 @@ function VerifyOtpForm() {
           type="submit"
           disabled={verifyOtpMutation.isPending}
           size="lg"
-          className="w-full rounded-2xl"
+          className="w-full rounded-2xl cursor-pointer"
         >
           {verifyOtpMutation.isPending ? (
             <div className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin text-white" />
               <Text as="span" font="semiBold" color="white">
-                Verifying OTP...
+                {t.auth.verifyingOtpBtn}
               </Text>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <Text as="span" font="semiBold" color="white">
-                Verify Account
+                {t.auth.verifyAccountBtn}
               </Text>
-              <ArrowRight className="h-4.5 w-4.5 group-hover/button:translate-x-1 transition-transform" />
+              <SubmitIcon className="h-4.5 w-4.5 group-hover/button:translate-x-1 transition-transform" />
             </div>
           )}
         </Button>
@@ -177,12 +181,12 @@ function VerifyOtpForm() {
       {/* Footer Link */}
       <div className="mt-6 text-center border-t border-borderPrimary/40 pt-4">
         <Text size="xs" color="secondary">
-          Already verified?{" "}
+          {t.auth.alreadyVerified}{" "}
           <Link
             href="/auth/login"
             className="text-primary hover:underline font-semibold"
           >
-            Sign in
+            {t.auth.signInBtn}
           </Link>
         </Text>
       </div>

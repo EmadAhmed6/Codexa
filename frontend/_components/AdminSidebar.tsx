@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Users, FileText } from "lucide-react";
 import { Text } from "@/_components/Text";
 import { UserProfile } from "@/_features/posts/types/Post";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface AdminSidebarProps {
   currentUser?: UserProfile | null;
@@ -19,6 +20,7 @@ export default function AdminSidebar({
   totalPosts = 0,
 }: AdminSidebarProps) {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   const isUsersActive =
     pathname === "/admin/dashboard/users" || pathname === "/admin/dashboard";
@@ -33,7 +35,7 @@ export default function AdminSidebar({
         color="secondary"
         className="uppercase tracking-wider px-3 mb-3"
       >
-        Navigation Menu
+        {t.admin.navMenu}
       </Text>
 
       <nav className="flex flex-col gap-1.5">
@@ -54,7 +56,7 @@ export default function AdminSidebar({
               font="semiBold"
               color={isUsersActive ? "white" : "primary"}
             >
-              Users Management
+              {t.admin.usersManagement}
             </Text>
           </div>
           <span
@@ -85,7 +87,7 @@ export default function AdminSidebar({
               font="semiBold"
               color={isPostsActive ? "white" : "primary"}
             >
-              Posts & Articles
+              {t.admin.postsManagement}
             </Text>
           </div>
           <span
@@ -130,7 +132,7 @@ export default function AdminSidebar({
               font="semiBold"
               className="text-[10px] text-amber-500 uppercase block"
             >
-              Administrator
+              {t.admin.adminBadge}
             </Text>
           </div>
         </div>

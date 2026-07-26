@@ -19,6 +19,7 @@ import {
   Share2,
   Search,
   ArrowLeft,
+  ArrowRight,
   ExternalLink,
   Layers,
   User as UserIcon,
@@ -28,12 +29,14 @@ import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
 import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
 import AuthorProfileTooltip from "@/_components/AuthorProfileTooltip";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function AdminPostsPage() {
   const { data: currentUser, isLoading: isAuthLoading } = useGetAuthMeQuery();
   const { data: users } = useGetAllUsers();
   const { data: posts, isLoading: isPostsLoading } = useGetPosts();
   const deletePostMutation = useDeletePost();
+  const { t, isArabic } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPostToDelete, setSelectedPostToDelete] = useState<{
@@ -52,6 +55,8 @@ export default function AdminPostsPage() {
     );
   }
 
+  const BackIcon = isArabic ? ArrowRight : ArrowLeft;
+
   if (!currentUser?.isAdmin) {
     return (
       <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col justify-between">
@@ -67,7 +72,7 @@ export default function AdminPostsPage() {
             color="primary"
             className="mb-2"
           >
-            Access Denied
+            {isArabic ? "غير مسموح بالدخول" : "Access Denied"}
           </Text>
           <Text
             as="p"
@@ -75,14 +80,15 @@ export default function AdminPostsPage() {
             color="secondary"
             className="mb-6 leading-relaxed"
           >
-            You do not have administrative privileges to access the Admin
-            Dashboard.
+            {isArabic
+              ? "معندكش صلاحيات أدمن عشان تدخل لوحة التحكم."
+              : "You do not have administrative privileges to access the Admin Dashboard."}
           </Text>
           <Link href="/">
             <Button className="rounded-xl bg-primary text-primary-foreground text-xs font-semibold cursor-pointer">
-              <ArrowLeft className="h-4 w-4 mr-1.5" />
+              <BackIcon className="h-4 w-4 ltr:mr-1.5 rtl:ml-1.5" />
               <Text as="span" size="xs" font="semiBold" color="white">
-                Back to Home
+                {t.post.backToFeed}
               </Text>
             </Button>
           </Link>
@@ -151,10 +157,10 @@ export default function AdminPostsPage() {
               color="primary"
               className="tracking-tight"
             >
-              Admin Control Center
+              {t.admin.dashboard}
             </Text>
             <Text as="p" size="xs" color="secondary">
-              Manage system users, published articles, and platform metrics
+              {isArabic ? "إدارة اليوزرات والمقالات المنشورة وإحصائيات السيستم" : "Manage system users, published articles, and platform metrics"}
             </Text>
           </div>
         </div>
@@ -175,22 +181,18 @@ export default function AdminPostsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <Text as="h2" size="xl" font="bold" color="primary">
-                  Articles & Posts Management
-                </Text>
-                <Text as="p" size="xs" color="secondary">
-                  Monitor published articles, categories, reactions, and delete
-                  posts
+                  {t.admin.postsManagement}
                 </Text>
               </div>
 
               <div className="relative w-full md:w-72">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-textSecondary" />
+                <Search className="absolute ltr:left-3.5 rtl:right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-textSecondary" />
                 <input
                   type="text"
-                  placeholder="Search posts by title, category..."
+                  placeholder={t.admin.searchPosts}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 text-xs rounded-xl bg-bgSecondary border border-borderPrimary text-textPrimary outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full ltr:pl-10 ltr:pr-4 rtl:pr-10 rtl:pl-4 py-2 text-xs rounded-xl bg-bgSecondary border border-borderPrimary text-textPrimary outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
             </div>
@@ -203,7 +205,7 @@ export default function AdminPostsPage() {
                 </div>
                 <div>
                   <Text as="p" size="xs" font="medium" color="secondary">
-                    Total Articles
+                    {isArabic ? "إجمالي المقالات" : "Total Articles"}
                   </Text>
                   <Text as="h3" size="2xl" font="black" color="primary">
                     {totalPosts}
@@ -217,7 +219,7 @@ export default function AdminPostsPage() {
                 </div>
                 <div>
                   <Text as="p" size="xs" font="medium" color="secondary">
-                    Total Reactions
+                    {isArabic ? "إجمالي التفاعلات" : "Total Reactions"}
                   </Text>
                   <Text as="h3" size="2xl" font="black" color="primary">
                     {totalReactions}
@@ -231,7 +233,7 @@ export default function AdminPostsPage() {
                 </div>
                 <div>
                   <Text as="p" size="xs" font="medium" color="secondary">
-                    Active Categories
+                    {isArabic ? "الفئات النشطة" : "Active Categories"}
                   </Text>
                   <Text as="h3" size="2xl" font="black" color="primary">
                     {categoriesCount}
@@ -249,20 +251,20 @@ export default function AdminPostsPage() {
               ) : filteredPosts.length === 0 ? (
                 <div className="py-16 text-center">
                   <Text as="p" size="xs" color="secondary">
-                    No posts found matching your search query.
+                    {isArabic ? "ملقيناش أي مقال يطابق البحث بتاعك." : "No posts found matching your search query."}
                   </Text>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full ltr:text-left rtl:text-right text-xs">
                     <thead className="bg-bgSecondary/90 text-textSecondary font-semibold uppercase tracking-wider border-b border-borderPrimary/40">
                       <tr>
-                        <th className="px-6 py-4">Article Title</th>
-                        <th className="px-6 py-4">Author</th>
-                        <th className="px-6 py-4">Category</th>
-                        <th className="px-6 py-4">Reactions & Comments</th>
-                        <th className="px-6 py-4">Published Date</th>
-                        <th className="px-6 py-4 text-right">Actions</th>
+                        <th className="px-6 py-4">{isArabic ? "عنوان المقال" : "Article Title"}</th>
+                        <th className="px-6 py-4">{isArabic ? "الكاتب" : "Author"}</th>
+                        <th className="px-6 py-4">{t.createEditPost.categoryLabel}</th>
+                        <th className="px-6 py-4">{isArabic ? "التفاعلات والكومنتات" : "Reactions & Comments"}</th>
+                        <th className="px-6 py-4">{isArabic ? "تاريخ النشر" : "Published Date"}</th>
+                        <th className="px-6 py-4 ltr:text-right rtl:text-left">{t.admin.actions}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-borderPrimary/30 text-textPrimary font-medium">
@@ -276,11 +278,17 @@ export default function AdminPostsPage() {
                             ? postItem.user
                             : authorObj?._id;
                         const authorUsername =
-                          authorObj?.username || "Unknown Author";
+                          authorObj?.username || t.post.anonymousAuthor;
 
                         const likes = postItem.likes?.length || 0;
                         const sharesCount = postItem.shares?.length || 0;
                         const commentsCount = postItem.comments?.length || 0;
+
+                        const translatedCat =
+                          postItem.category &&
+                          t.categories[postItem.category as keyof typeof t.categories]
+                            ? t.categories[postItem.category as keyof typeof t.categories]
+                            : postItem.category || t.post.general;
 
                         return (
                           <tr
@@ -375,7 +383,7 @@ export default function AdminPostsPage() {
                                     color="primary"
                                     className="truncate"
                                   >
-                                    Unknown Author
+                                    {t.post.anonymousAuthor}
                                   </Text>
                                 </div>
                               )}
@@ -383,7 +391,7 @@ export default function AdminPostsPage() {
 
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className="px-2.5 py-1 rounded-md bg-primary/10 text-primary border border-primary/20 text-[10px] font-semibold">
-                                {postItem.category || "General"}
+                                {translatedCat}
                               </span>
                             </td>
 
@@ -404,7 +412,7 @@ export default function AdminPostsPage() {
                                   </span>
                                 </Tooltip>
 
-                                <Tooltip position="bottom" content="View Comments">
+                                <Tooltip position="bottom" content={t.post.viewComments}>
                                   <Link
                                     href={`/posts/${postItem._id}#comments`}
                                     className="flex items-center gap-1 text-sky-500 hover:bg-sky-500/10 px-2 py-1 rounded-lg transition-colors font-semibold border border-transparent hover:border-sky-500/20"
@@ -436,7 +444,7 @@ export default function AdminPostsPage() {
                                 <Text as="span" size="xs" color="secondary">
                                   {new Date(
                                     postItem.createdAt,
-                                  ).toLocaleDateString("en-US", {
+                                  ).toLocaleDateString(isArabic ? "ar-EG" : "en-US", {
                                     month: "short",
                                     day: "numeric",
                                     year: "numeric",
@@ -454,11 +462,11 @@ export default function AdminPostsPage() {
                               )}
                             </td>
 
-                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                            <td className="px-6 py-4 whitespace-nowrap ltr:text-right rtl:text-left">
                               <div className="flex items-center justify-end gap-2">
                                 <Tooltip
                                   position="top"
-                                  content="View Post Article"
+                                  content={t.post.viewArticle}
                                 >
                                   <Link href={`/posts/${postItem._id}`}>
                                     <Button
@@ -470,7 +478,7 @@ export default function AdminPostsPage() {
                                     </Button>
                                   </Link>
                                 </Tooltip>
-                                <Tooltip position="top" content="Delete Post">
+                                <Tooltip position="top" content={t.post.delete}>
                                   <Button
                                     variant="destructive"
                                     size="sm"
@@ -507,9 +515,13 @@ export default function AdminPostsPage() {
         isOpen={!!selectedPostToDelete}
         onClose={() => setSelectedPostToDelete(null)}
         onConfirm={handleConfirmDeletePost}
-        title="Delete Article Post"
-        description={`Are you sure you want to delete the post titled "${selectedPostToDelete?.title}"? This action cannot be undone.`}
-        confirmText="Delete Post"
+        title={t.post.deleteTitle}
+        description={
+          isArabic
+            ? `انت متأكد انك عايز تمسح المقال "${selectedPostToDelete?.title}"؟ الحركة دي مش هينفع ترجع فيها.`
+            : `Are you sure you want to delete the post titled "${selectedPostToDelete?.title}"? This action cannot be undone.`
+        }
+        confirmText={t.post.deleteConfirm}
         isPending={deletePostMutation.isPending}
       />
     </div>
