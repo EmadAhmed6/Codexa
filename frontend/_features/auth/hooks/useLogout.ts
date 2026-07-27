@@ -10,7 +10,7 @@ export const useLogout = () => {
   const logout = () => {
     Cookies.remove("token", { path: "/" });
     if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
+      Cookies.remove("token");
     }
     queryClient.removeQueries({ queryKey: ["authMe"] });
     toast.success("Signed out successfully!");

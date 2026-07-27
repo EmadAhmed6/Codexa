@@ -39,6 +39,7 @@ const getAllReplies = asyncHandler(
       .populate("user", [
         "_id",
         "username",
+        "fullName",
         "profilePicture",
         "jobTitle",
         "bio",
@@ -46,6 +47,7 @@ const getAllReplies = asyncHandler(
       .populate("likes", [
         "_id",
         "username",
+        "fullName",
         "profilePicture",
         "jobTitle",
         "bio",
@@ -135,7 +137,7 @@ const replyComment = asyncHandler(
     });
     const finalCommentReply = await Comment.findById(newReply._id).populate(
       "user",
-      ["_id", "username", "profilePicture", "jobTitle", "bio"],
+      ["_id", "username", "fullName", "profilePicture", "jobTitle", "bio"],
     );
 
     res.status(201).json({
@@ -212,6 +214,7 @@ const updateReplyComment = asyncHandler(
     ).populate("user", [
       "_id",
       "username",
+      "fullName",
       "profilePicture",
       "jobTitle",
       "bio",
@@ -334,8 +337,8 @@ const likeReply = asyncHandler(async (req: Request, res: Response) => {
         },
     { new: true, runValidators: true },
   )
-    .populate("likes", ["_id", "username", "profilePicture"])
-    .populate("user", ["_id", "username", "profilePicture", "jobTitle", "bio"]);
+    .populate("likes", ["_id", "username", "fullName", "profilePicture"])
+    .populate("user", ["_id", "username", "fullName", "profilePicture", "jobTitle", "bio"]);
 
   res.status(200).json({
     success: true,
@@ -346,6 +349,7 @@ const likeReply = asyncHandler(async (req: Request, res: Response) => {
   });
   return;
 });
+
 export {
   getAllReplies,
   replyComment,

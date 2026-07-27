@@ -12,8 +12,6 @@ export const updatePost = async (
   if (postImageFile) {
     const formData = new FormData();
     if (data.title) formData.append("title", data.title);
-    if (data.description) formData.append("description", data.description);
-    if (data.category) formData.append("category", data.category);
     formData.append("postImage", postImageFile);
     payload = formData;
     headers = { "Content-Type": "multipart/form-data" };

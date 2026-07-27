@@ -160,7 +160,7 @@ export default function AdminPostsPage() {
               {t.admin.dashboard}
             </Text>
             <Text as="p" size="xs" color="secondary">
-              {isArabic ? "إدارة اليوزرات والمقالات المنشورة وإحصائيات السيستم" : "Manage system users, published articles, and platform metrics"}
+              {isArabic ? "إدارة البوستات المنشورة وإحصائيات السيستم" : "Manage system posts and platform metrics"}
             </Text>
           </div>
         </div>
@@ -205,7 +205,7 @@ export default function AdminPostsPage() {
                 </div>
                 <div>
                   <Text as="p" size="xs" font="medium" color="secondary">
-                    {isArabic ? "إجمالي المقالات" : "Total Articles"}
+                    {isArabic ? "إجمالي البوستات" : "Total Posts"}
                   </Text>
                   <Text as="h3" size="2xl" font="black" color="primary">
                     {totalPosts}
@@ -251,7 +251,7 @@ export default function AdminPostsPage() {
               ) : filteredPosts.length === 0 ? (
                 <div className="py-16 text-center">
                   <Text as="p" size="xs" color="secondary">
-                    {isArabic ? "ملقيناش أي مقال يطابق البحث بتاعك." : "No posts found matching your search query."}
+                    {isArabic ? "ملقيناش أي بوست يطابق البحث بتاعك." : "No posts found matching your search query."}
                   </Text>
                 </div>
               ) : (
@@ -259,7 +259,7 @@ export default function AdminPostsPage() {
                   <table className="w-full ltr:text-left rtl:text-right text-xs">
                     <thead className="bg-bgSecondary/90 text-textSecondary font-semibold uppercase tracking-wider border-b border-borderPrimary/40">
                       <tr>
-                        <th className="px-6 py-4">{isArabic ? "عنوان المقال" : "Article Title"}</th>
+                        <th className="px-6 py-4">{isArabic ? "عنوان البوست" : "Post Title"}</th>
                         <th className="px-6 py-4">{isArabic ? "الكاتب" : "Author"}</th>
                         <th className="px-6 py-4">{t.createEditPost.categoryLabel}</th>
                         <th className="px-6 py-4">{isArabic ? "التفاعلات والكومنتات" : "Reactions & Comments"}</th>

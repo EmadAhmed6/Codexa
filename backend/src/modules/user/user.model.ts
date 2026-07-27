@@ -23,6 +23,12 @@ interface IUser extends Document, IUserSchema {
 
 const userSchema = new Schema<IUser>(
   {
+    fullName: {
+      type: String,
+      required: true,
+      minLength: 3,
+      maxLength: 100,
+  },
     username: {
       type: String,
       required: true,
@@ -36,6 +42,11 @@ const userSchema = new Schema<IUser>(
       minLength: 4,
       unique: true,
     },
+    password: {
+      type: String,
+      required: true,
+      minLength: 6,
+    },
     jobTitle: {
       type: String,
       default: "User",
@@ -46,11 +57,6 @@ const userSchema = new Schema<IUser>(
       type: String,
       trim: true,
       maxLength: 250,
-    },
-    password: {
-      type: String,
-      required: true,
-      minLength: 6,
     },
     postsCount: {
       type: Number,

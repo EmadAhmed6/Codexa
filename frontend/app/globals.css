@@ -73,7 +73,7 @@
 }
 
 :root {
-  /* Semantic Variables (bgPrimary, bgSecondary, textPrimary, textSecondary, etc.) */
+  /* Semantic Variables  */
   --bg-primary: oklch(0.985 0.004 240);
   --bg-secondary: oklch(1 0 0);
   --text-primary: oklch(0.15 0.01 240);
@@ -85,7 +85,7 @@
   --ring-primary: oklch(0.51 0.22 286 / 40%);
   --text-error: #e24b4a;
 
-  /* Shadcn standard overrides mapping to our custom variables */
+  /* Shadcn Colors */
   --background: var(--bg-primary);
   --foreground: var(--text-primary);
   --card: var(--bg-secondary);
@@ -120,7 +120,7 @@
   --primary-hover: oklch(0.55 0.2 286);
   --ring-primary: oklch(0.62 0.22 286 / 50%);
 
-  /* Shadcn dark overrides mapping to our custom variables */
+  /* Shadcn dark */
   --background: var(--bg-primary);
   --foreground: var(--text-primary);
   --card: var(--bg-secondary);
@@ -163,5 +163,24 @@
   .glass-card::before {
     content: "";
     @apply absolute inset-0 -z-10 bg-linear-to-tr from-primary/5 via-transparent to-secondary/5 opacity-50;
+  }
+
+  /* Custom Sleek Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(140, 140, 140, 0.25);
+    border-radius: 9999px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
   }
 }

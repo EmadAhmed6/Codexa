@@ -26,19 +26,9 @@ const PostSchema = new Schema<IPost>(
       minlength: 1,
       maxlength: 32,
     },
-    description: {
-      type: String,
-      required: true,
-      minlength: 1,
-      maxlength: 250,
-    },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
-    },
-    category: {
-      type: String,
-      required: true,
     },
     postImage: {
       type: {

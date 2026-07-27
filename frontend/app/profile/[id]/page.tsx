@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Navbar from "@/_components/Navbar";
 import PostCard from "@/_components/PostCard";
-import CreatePostModal from "@/_components/CreatePostModal";
+import CreatePostCard from "@/_components/CreatePostCard";
 import {
   useGetUserProfile,
   useUploadProfilePicture,
@@ -26,7 +26,6 @@ import {
   ShieldCheck,
   Calendar,
   Briefcase,
-  PlusCircle,
 } from "lucide-react";
 import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
 import { Button } from "@/components/ui/button";
@@ -68,7 +67,6 @@ export default function UserProfilePage() {
   const deleteUserMutation = useDeleteUser();
 
   const [isUploading, setIsUploading] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteUserModalOpen, setIsDeleteUserModalOpen] = useState(false);
 
@@ -105,6 +103,7 @@ export default function UserProfilePage() {
     resolver: zodResolver(editProfileSchema as any),
     mode: "onBlur",
     defaultValues: {
+      fullName: userToDisplay?.fullName || "",
       username: userToDisplay?.username || "",
       jobTitle: userToDisplay?.jobTitle || "",
       bio: (userToDisplay as any)?.bio || "",
@@ -126,6 +125,7 @@ export default function UserProfilePage() {
 
   const handleOpenEditModal = () => {
     reset({
+      fullName: userToDisplay?.fullName || "",
       username: userToDisplay?.username || "",
       jobTitle: userToDisplay?.jobTitle || "",
       bio: (userToDisplay as any)?.bio || "",
@@ -137,6 +137,7 @@ export default function UserProfilePage() {
   const handleUpdateProfile = async (data: IEditProfile) => {
     try {
       await updateUserMutation.mutateAsync({
+        fullName: data.fullName.trim(),
         username: data.username.trim(),
         jobTitle: data.jobTitle ? data.jobTitle.trim() : "",
         bio: data.bio ? data.bio.trim() : "",
@@ -191,7 +192,7 @@ export default function UserProfilePage() {
                 {userToDisplay?.profilePicture?.url ? (
                   <img
                     src={userToDisplay.profilePicture.url}
-                    alt={userToDisplay.username}
+                    alt={userToDisplay.fullName || userToDisplay.username}
                     className="h-28 w-28 md:h-32 md:w-32 rounded-3xl object-cover border-2 border-primary/30 shadow-md"
                   />
                 ) : (
@@ -242,7 +243,7 @@ export default function UserProfilePage() {
                         color="primary"
                         className="tracking-tight md:text-4xl"
                       >
-                        {userToDisplay?.username || "Developer"}
+                        {userToDisplay?.fullName || userToDisplay?.username || "Developer"}
                       </Text>
                       {userToDisplay?.isAdmin ? (
                         <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1">
@@ -256,6 +257,18 @@ export default function UserProfilePage() {
                         </span>
                       )}
                     </div>
+
+                    {userToDisplay?.fullName && (
+                      <Text
+                        as="p"
+                        size="xs"
+                        color="secondary"
+                        className="font-semibold text-xs mt-0.5"
+                      >
+                        @{userToDisplay.username}
+                      </Text>
+                    )}
+
                     {userToDisplay?.jobTitle && (
                       <div className="flex items-center justify-center ltr:md:justify-start rtl:md:justify-end gap-1.5 mt-1">
                         <Briefcase className="h-3.5 w-3.5 text-primary" />
@@ -286,39 +299,22 @@ export default function UserProfilePage() {
 
                   <div className="flex items-center gap-2">
                     {isOwnProfile && (
-                      <>
-                        <Button
-                          onClick={() => setIsCreateModalOpen(true)}
-                          size="sm"
-                          className="rounded-xl bg-primary hover:bg-primaryHover text-white text-xs flex items-center gap-1.5 cursor-pointer font-semibold shadow-md shadow-primary/20"
+                      <Button
+                        onClick={handleOpenEditModal}
+                        variant="outline"
+                        size="sm"
+                        className="rounded-xl border-borderPrimary text-xs flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                        <Text
+                          as="span"
+                          size="xs"
+                          font="semiBold"
+                          color="primary"
                         >
-                          <PlusCircle className="h-3.5 w-3.5 text-white" />
-                          <Text
-                            as="span"
-                            size="xs"
-                            font="semiBold"
-                            color="white"
-                          >
-                            {t.home.createPost}
-                          </Text>
-                        </Button>
-                        <Button
-                          onClick={handleOpenEditModal}
-                          variant="outline"
-                          size="sm"
-                          className="rounded-xl border-borderPrimary text-xs flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                          <Text
-                            as="span"
-                            size="xs"
-                            font="semiBold"
-                            color="primary"
-                          >
-                            {t.profile.editProfile}
-                          </Text>
-                        </Button>
-                      </>
+                          {t.profile.editProfile}
+                        </Text>
+                      </Button>
                     )}
 
                     {(isOwnProfile || currentUser?.isAdmin) && (
@@ -367,32 +363,26 @@ export default function UserProfilePage() {
 
         {/* Profile User Posts Section */}
         <div className="space-y-6">
-          <div className="flex items-center justify-between pb-2 border-b border-borderPrimary/40">
+          <div className="max-w-2xl mx-auto w-full flex items-center justify-between pb-2 border-b border-borderPrimary/40">
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
               <Text as="h2" size="xl" font="bold" color="primary">
                 {isOwnProfile
-                  ? (isArabic ? "المقالات المنشورة الخاصة بي" : "My Published Articles")
-                  : `${userToDisplay?.username || ""} - ${t.profile.userPosts}`}
+                  ? (isArabic ? "البوستات بتاعتي" : "My Published Posts")
+                  : `${userToDisplay?.fullName || userToDisplay?.username || ""} - ${t.profile.userPosts}`}
               </Text>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
-                {displayUserPosts.length}
-              </span>
             </div>
-
-            {isOwnProfile && (
-              <Button
-                onClick={() => setIsCreateModalOpen(true)}
-                size="sm"
-                className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground text-xs flex items-center gap-1.5 cursor-pointer font-semibold"
-              >
-                <PlusCircle className="h-3.5 w-3.5" />
-                <Text as="span" size="xs" font="semiBold" color="white">
-                  {t.home.createPost}
-                </Text>
-              </Button>
-            )}
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+              {displayUserPosts.length}
+            </span>
           </div>
+
+          {/* Inline Create Post Box if viewing own profile */}
+          {isOwnProfile && (
+            <div className="max-w-2xl mx-auto w-full">
+              <CreatePostCard />
+            </div>
+          )}
 
           {isPostsLoading ? (
             <div className="flex justify-center py-12">
@@ -406,7 +396,7 @@ export default function UserProfilePage() {
               </Text>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6 max-w-2xl mx-auto w-full">
               {displayUserPosts.map((post: Post) => (
                 <PostCard key={post._id} post={post} />
               ))}
@@ -414,12 +404,6 @@ export default function UserProfilePage() {
           )}
         </div>
       </main>
-
-      {/* Create Article Modal */}
-      <CreatePostModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-      />
 
       {/* Edit Profile Modal */}
       {isEditModalOpen && (
@@ -449,10 +433,33 @@ export default function UserProfilePage() {
                   color="secondary"
                   className="block mb-1"
                 >
+                  {isArabic ? "الاسم بالكامل" : "Full Name"}
+                </Text>
+                <Input
+                  type="text"
+                  icon="user"
+                  placeholder={isArabic ? "الاسم بالكامل" : "Full Name"}
+                  {...register("fullName", {
+                    onChange: () => clearErrors("fullName"),
+                  })}
+                />
+                <Error error={errors.fullName?.message} />
+              </div>
+
+              <div>
+                <Text
+                  as="label"
+                  size="xs"
+                  font="semiBold"
+                  color="secondary"
+                  className="block mb-1"
+                >
                   {t.nav.user}
                 </Text>
                 <Input
                   type="text"
+                  icon="user"
+                  placeholder="Username"
                   {...register("username", {
                     onChange: () => clearErrors("username"),
                   })}
@@ -472,6 +479,7 @@ export default function UserProfilePage() {
                 </Text>
                 <Input
                   type="text"
+                  icon="briefcase"
                   placeholder="e.g. Frontend Developer"
                   {...register("jobTitle" as any, {
                     onChange: () => clearErrors("jobTitle" as any),
@@ -492,6 +500,7 @@ export default function UserProfilePage() {
                 </Text>
                 <Input
                   type="text"
+                  icon="file"
                   placeholder="Tell us about yourself..."
                   {...register("bio" as any, {
                     onChange: () => clearErrors("bio" as any),
@@ -512,6 +521,8 @@ export default function UserProfilePage() {
                 </Text>
                 <Input
                   type="email"
+                  icon="mail"
+                  placeholder="Email"
                   {...register("email", {
                     onChange: () => clearErrors("email"),
                   })}
@@ -557,7 +568,7 @@ export default function UserProfilePage() {
         title={isOwnProfile ? (isArabic ? "مسح الحساب" : "Delete My Account") : t.admin.deleteUser}
         description={
           isOwnProfile
-            ? (isArabic ? "انت متأكد انك عايز تمسح حسابك؟ كل البيانات والمقالات هتتمسح نهائياً." : "Are you sure you want to delete your account? All associated posts and data will be permanently removed.")
+            ? (isArabic ? "انت متأكد انك عايز تمسح حسابك؟ كل البيانات والبوستات هتتمسح نهائياً." : "Are you sure you want to delete your account? All associated posts and data will be permanently removed.")
             : (isArabic ? "انت متأكد انك عايز تمسح حساب اليوزر ده؟ كل بياناته وهتتمسح." : "Are you sure you want to delete this user account?")
         }
         confirmText={isOwnProfile ? (isArabic ? "امسح حسابي" : "Delete My Account") : t.admin.deleteUser}

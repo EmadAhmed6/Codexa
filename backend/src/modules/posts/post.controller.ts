@@ -12,11 +12,12 @@ import { User } from "../user/user.model.js";
 const getAllPosts = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const pageNumber = Number(req.query.pageNumber) || 1;
-    const postsPerPage = 6;
+    const postsPerPage = 5;
     const posts = await Post.find()
       .populate("user", [
         "_id",
         "username",
+        "fullName",
         "profilePicture",
         "jobTitle",
         "bio",
@@ -24,21 +25,22 @@ const getAllPosts = asyncHandler(
       .populate("likes", [
         "_id",
         "username",
+        "fullName",
         "profilePicture",
         "jobTitle",
         "bio",
       ])
-      .populate("shares", ["_id", "username", "profilePicture"])
+      .populate("shares", ["_id", "username", "fullName", "profilePicture"])
       .populate({
         path: "comments",
         populate: [
           {
             path: "user",
-            select: ["_id", "username", "profilePicture"],
+            select: ["_id", "username", "fullName", "profilePicture"],
           },
           {
             path: "likes",
-            select: ["_id", "username", "profilePicture"],
+            select: ["_id", "username", "fullName", "profilePicture"],
           },
         ],
       })
@@ -54,19 +56,19 @@ const getAllPosts = asyncHandler(
 const getPostById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const posts = await Post.findById(req.params.postId)
-      .populate("user", ["_id", "username", "profilePicture", "jobTitle"])
-      .populate("likes", ["_id", "username", "profilePicture"])
-      .populate("shares", ["_id", "username", "profilePicture"])
+      .populate("user", ["_id", "username", "fullName", "profilePicture", "jobTitle"])
+      .populate("likes", ["_id", "username", "fullName", "profilePicture"])
+      .populate("shares", ["_id", "username", "fullName", "profilePicture"])
       .populate({
         path: "comments",
         populate: [
           {
             path: "user",
-            select: ["_id", "username", "profilePicture"],
+            select: ["_id", "username", "fullName", "profilePicture"],
           },
           {
             path: "likes",
-            select: ["_id", "username", "profilePicture"],
+            select: ["_id", "username", "fullName", "profilePicture"],
           },
         ],
       });
@@ -113,8 +115,6 @@ const createPost = asyncHandler(
 
     const newPost = new Post({
       title: req.body.title,
-      description: req.body.description,
-      category: req.body.category,
       postImage: req.file ? postImage : undefined,
       user: req.user?.id,
     });
@@ -123,6 +123,7 @@ const createPost = asyncHandler(
     await finalPost.populate("user", [
       "_id",
       "username",
+      "fullName",
       "profilePicture",
       "jobTitle",
       "bio",
@@ -170,8 +171,6 @@ const updatePost = asyncHandler(
       {
         $set: {
           title: req.body.title,
-          description: req.body.description,
-          category: req.body.category,
           postImage: req.file ? postImage : undefined,
         },
       },
@@ -179,6 +178,7 @@ const updatePost = asyncHandler(
     ).populate("user", [
       "_id",
       "username",
+      "fullName",
       "profilePicture",
       "jobTitle",
       "bio",
@@ -246,7 +246,7 @@ const likePost = asyncHandler(
             $inc: { postLikesCount: 1 } as any,
           },
       { new: true },
-    ).populate("likes", ["_id", "username", "profilePicture"]);
+    ).populate("likes", ["_id", "username", "fullName", "profilePicture"]);
 
     res.status(200).json({ success: true, data: updatedPost });
     return;
@@ -262,7 +262,6 @@ const sharePost = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
   const { postId } = req.params;
-  const { description } = req.body || {};
   const originalPost = await Post.findById(postId);
   if (!originalPost) {
     res
@@ -272,9 +271,6 @@ const sharePost = asyncHandler(async (req: Request, res: Response) => {
   }
   const sharedPostRecord = new Post({
     title: originalPost?.title,
-    description:
-      description?.trim() || originalPost?.description || "Shared Article",
-    category: originalPost?.category,
     postImage: originalPost?.postImage,
     user: req.user.id,
     sharedPost: originalPost?._id,

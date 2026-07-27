@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  Mail,
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
@@ -187,19 +186,15 @@ export default function ForgotPasswordPage() {
         {/* Email Field */}
         <div className="space-y-1.5">
           <Label htmlFor="email">{t.auth.emailLabel}</Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 ltr:left-3.5 rtl:right-3.5 flex items-center text-textSecondary/60">
-              <Mail className="h-4.5 w-4.5" />
-            </span>
-            <Input
-              id="email"
-              type="email"
-              placeholder={t.auth.emailPlaceholder}
-              disabled={forgotMutation.isPending}
-              className={`ltr:pl-11 rtl:pr-11 ${errors.email ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
-              {...register("email", { onChange: () => clearErrors("email") })}
-            />
-          </div>
+          <Input
+            id="email"
+            type="email"
+            icon="mail"
+            placeholder={t.auth.emailPlaceholder}
+            disabled={forgotMutation.isPending}
+            className={errors.email ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            {...register("email", { onChange: () => clearErrors("email") })}
+          />
           <Error error={errors.email?.message} />
         </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { User as UserIcon, Mail, ExternalLink, ShieldCheck } from "lucide-react";
+import { Mail, ExternalLink, ShieldCheck } from "lucide-react";
 import { Text } from "@/_components/Text";
 import { PostUserSummary } from "@/_features/posts/types/Post";
 
@@ -14,7 +14,7 @@ export default function AuthorProfileTooltip({
   user,
   userId,
 }: AuthorProfileTooltipProps) {
-  const username = user?.username || "Unknown Author";
+  const displayName = user?.fullName || user?.username || "Unknown Author";
   const id = user?._id || userId;
   const avatarUrl = user?.profilePicture?.url;
   const jobTitle = user?.jobTitle;
@@ -28,12 +28,12 @@ export default function AuthorProfileTooltip({
         {avatarUrl ? (
           <img
             src={avatarUrl}
-            alt={username}
+            alt={displayName}
             className="h-10 w-10 rounded-full object-cover border border-borderPrimary shrink-0"
           />
         ) : (
           <div className="h-10 w-10 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold text-xs shrink-0">
-            {username?.[0]?.toUpperCase() || "U"}
+            {displayName?.[0]?.toUpperCase() || "U"}
           </div>
         )}
         <div className="flex flex-col truncate">
@@ -45,7 +45,7 @@ export default function AuthorProfileTooltip({
               color="primary"
               className="truncate"
             >
-              {username}
+              {displayName}
             </Text>
             {isAdmin && (
               <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-0.5 shrink-0">

@@ -24,30 +24,30 @@ const getUserById = asyncHandler(
         populate: [
           {
             path: "user",
-            select: ["_id", "username", "profilePicture", "jobTitle"],
+            select: ["_id", "fullName", "username", "profilePicture", "jobTitle"],
           },
           {
             path: "likes",
-            select: ["_id", "username", "profilePicture", "jobTitle"],
+            select: ["_id", "fullName", "username", "profilePicture", "jobTitle"],
           },
           {
             path: "shares",
-            select: ["_id", "username", "profilePicture", "jobTitle"],
+            select: ["_id", "fullName", "username", "profilePicture", "jobTitle"],
           },
           {
             path: "sharedPost",
             populate: [
               {
                 path: "user",
-                select: ["_id", "username", "profilePicture", "jobTitle"],
+                select: ["_id", "fullName", "username", "profilePicture", "jobTitle"],
               },
               {
                 path: "likes",
-                select: ["_id", "username", "profilePicture", "jobTitle"],
+                select: ["_id", "fullName", "username", "profilePicture", "jobTitle"],
               },
               {
                 path: "shares",
-                select: ["_id", "username", "profilePicture", "jobTitle"],
+                select: ["_id", "fullName", "username", "profilePicture", "jobTitle"],
               },
             ],
           },
@@ -94,6 +94,7 @@ const updateUser = asyncHandler(
       req.params.id,
       {
         $set: {
+          fullName: req.body.fullName,
           username: req.body.username,
           email: req.body.email,
           password: req.body.password,

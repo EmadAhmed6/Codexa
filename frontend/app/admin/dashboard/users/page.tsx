@@ -142,7 +142,7 @@ export default function AdminUsersPage() {
               {t.admin.dashboard}
             </Text>
             <Text as="p" size="xs" color="secondary">
-              {isArabic ? "إدارة اليوزرات والمقالات المنشورة وإحصائيات السيستم" : "Manage system users, published articles, and platform metrics"}
+              {isArabic ? "إدارة اليوزرات والبوستات المنشورة وإحصائيات السيستم" : "Manage system users, published posts, and platform metrics"}
             </Text>
           </div>
         </div>

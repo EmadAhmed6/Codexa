@@ -9,7 +9,6 @@ export const useLikeReply = (postId: string, commentId: string) => {
       likeReply({ postId, commentId, replyCommentId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["replies", postId, commentId] });
-      toast.success("Reply reaction updated!");
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || "Could not update reply reaction.");

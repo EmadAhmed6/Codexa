@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Mail, Lock, ArrowRight, ArrowLeft } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -46,17 +46,27 @@ export default function LoginPage() {
           if (typeof window !== "undefined") {
             localStorage.setItem("token", token);
           }
-          toast.success(isArabic ? "تم تسجيل الدخول بنجاح! مرحب بيك." : "Signed in successfully! Welcome back.");
+          toast.success(
+            isArabic
+              ? "تم تسجيل الدخول بنجاح! مرحب بيك."
+              : "Signed in successfully! Welcome back.",
+          );
           router.push("/");
           reset();
         } else {
-          toast.error(isArabic ? "تم الدخول بنجاح لكن مفيش توكن." : "Login successful but token missing from server response.");
+          toast.error(
+            isArabic
+              ? "تم الدخول بنجاح لكن مفيش توكن."
+              : "Login successful but token missing from server response.",
+          );
         }
       },
       onError: (err: any) => {
         toast.error(
           err?.response?.data?.message ||
-            (isArabic ? "الإيميل أو الباسورد غلط. حاول تاني." : "Invalid email or password. Please try again."),
+            (isArabic
+              ? "الإيميل أو الباسورد غلط. حاول تاني."
+              : "Invalid email or password. Please try again."),
         );
       },
     });
@@ -68,13 +78,7 @@ export default function LoginPage() {
     <div className="w-full max-w-md glass-card p-8 md:p-10 transition-all duration-300">
       {/* Header */}
       <div className="text-center mb-8">
-        <Text
-          as="h1"
-          size="3xl"
-          font="bold"
-          color="primary"
-          className="tracking-tight mb-2"
-        >
+        <Text as="h1" size="3xl" font="bold" color="primary" className=" mb-2">
           {t.auth.welcomeBack}
         </Text>
         <Text size="sm" color="secondary">
@@ -86,19 +90,15 @@ export default function LoginPage() {
         {/* Email Field */}
         <div className="space-y-1.5">
           <Label htmlFor="email">{t.auth.emailLabel}</Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 ltr:left-3.5 rtl:right-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
-              <Mail className="h-4.5 w-4.5" />
-            </span>
-            <Input
-              id="email"
-              type="email"
-              placeholder={t.auth.emailPlaceholder}
-              disabled={loginMutation.isPending}
-              className={`ltr:pl-11 rtl:pr-11 ${errors.email ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
-              {...register("email", { onChange: () => clearErrors("email") })}
-            />
-          </div>
+          <Input
+            id="email"
+            type="email"
+            icon="mail"
+            placeholder={t.auth.emailPlaceholder}
+            disabled={loginMutation.isPending}
+            className={errors.email ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            {...register("email", { onChange: () => clearErrors("email") })}
+          />
           <Error error={errors.email?.message} />
         </div>
 
@@ -108,21 +108,17 @@ export default function LoginPage() {
             <Label htmlFor="password">{t.auth.passwordLabel}</Label>
           </div>
 
-          <div className="relative">
-            <span className="absolute inset-y-0 ltr:left-3.5 rtl:right-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
-              <Lock className="h-4.5 w-4.5" />
-            </span>
-            <Input
-              id="password"
-              type="password"
-              placeholder={t.auth.passwordPlaceholder}
-              disabled={loginMutation.isPending}
-              className={`ltr:pl-11 rtl:pr-11 ${errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
-              {...register("password", {
-                onChange: () => clearErrors("password"),
-              })}
-            />
-          </div>
+          <Input
+            id="password"
+            type="password"
+            icon="lock"
+            placeholder={t.auth.passwordPlaceholder}
+            disabled={loginMutation.isPending}
+            className={errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            {...register("password", {
+              onChange: () => clearErrors("password"),
+            })}
+          />
           <Error error={errors.password?.message} />
         </div>
 

@@ -8,9 +8,17 @@ const passwordSchema = z
     "Password must include uppercase, lowercase, and numbers",
   );
 const RegisterSchema = z.object({
-  username: z.string().min(3).max(50),
+  fullName: z.string().min(3).max(100),
+  username: z
+    .string()
+    .min(3)
+    .max(50)
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username must contain only letters, numbers, and underscores",
+    ),
   email: z.string().email().trim().min(4),
-  jobTitle: z.string().min(3).max(50).optional(),
+  jobTitle: z.string().min(3).max(50).optional().or(z.literal("")),
   password: passwordSchema,
 });
 
@@ -38,6 +46,7 @@ const ResetPasswordSchema = z
   });
 
 const UserSchema = z.object({
+  fullName: z.string().trim().min(3).max(250),
   username: z.string().trim().min(3).max(50),
   email: z.string().email().trim().min(4),
   password: passwordSchema,

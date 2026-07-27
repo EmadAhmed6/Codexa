@@ -11,7 +11,6 @@ export const useLikePost = () => {
       queryClient.invalidateQueries({ queryKey: ["post", postId] });
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
       queryClient.invalidateQueries({ queryKey: ["authMe"] });
-      toast.success("Post reaction updated!");
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || "Could not update post reaction.");

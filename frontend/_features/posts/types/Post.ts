@@ -1,5 +1,6 @@
 export interface UserProfile {
   _id: string;
+  fullName?: string;
   username: string;
   jobTitle?: string;
   email?: string;
@@ -26,6 +27,7 @@ export interface Comment {
   text: string;
   user: {
     _id: string;
+    fullName?: string;
     username: string;
     jobTitle?: string;
     profilePicture?: {
@@ -40,7 +42,7 @@ export interface Comment {
     url?: string;
     publicId?: string;
   };
-  likes?: (string | { _id: string; username?: string; profilePicture?: { url?: string }; jobTitle?: string })[];
+  likes?: (string | { _id: string; fullName?: string; username?: string; profilePicture?: { url?: string }; jobTitle?: string })[];
   commentLikesCount?: number;
   replyCommentsCount?: number;
   createdAt?: string;
@@ -54,6 +56,7 @@ export interface Reply {
   text: string;
   user: {
     _id: string;
+    fullName?: string;
     username: string;
     jobTitle?: string;
     profilePicture?: {
@@ -68,7 +71,7 @@ export interface Reply {
     url?: string;
     publicId?: string;
   };
-  likes?: (string | { _id: string; username?: string; profilePicture?: { url?: string }; jobTitle?: string })[];
+  likes?: (string | { _id: string; fullName?: string; username?: string; profilePicture?: { url?: string }; jobTitle?: string })[];
   replyLikesCount?: number;
   createdAt?: string;
   updatedAt?: string;
@@ -76,6 +79,7 @@ export interface Reply {
 
 export interface PostUserSummary {
   _id: string;
+  fullName?: string;
   username?: string;
   jobTitle?: string;
   bio?: string;
@@ -87,10 +91,11 @@ export interface PostUserSummary {
 export interface Post {
   _id: string;
   title: string;
-  description: string;
-  category: string;
+  description?: string;
+  category?: string;
   user: {
     _id: string;
+    fullName?: string;
     username: string;
     jobTitle?: string;
     profilePicture?: {

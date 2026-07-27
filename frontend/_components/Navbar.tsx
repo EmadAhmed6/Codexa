@@ -91,7 +91,11 @@ const Navbar = () => {
           {mounted && (
             <Tooltip
               position="bottom"
-              content={isArabic ? "تغيير للإنجليزية (English)" : "تغيير للغة العربية (عامية مصرية)"}
+              content={
+                isArabic
+                  ? "تغيير للإنجليزية (English)"
+                  : "تغيير للغة العربية (عامية مصرية)"
+              }
             >
               <button
                 onClick={toggleLanguage}
@@ -110,11 +114,7 @@ const Navbar = () => {
           {mounted && (
             <Tooltip
               position="bottom"
-              content={
-                theme === "dark"
-                  ? t.nav.themeLight
-                  : t.nav.themeDark
-              }
+              content={theme === "dark" ? t.nav.themeLight : t.nav.themeDark}
             >
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -165,7 +165,7 @@ const Navbar = () => {
                   {user?.profilePicture?.url ? (
                     <img
                       src={user.profilePicture.url}
-                      alt={user.username}
+                      alt={user.fullName}
                       className="h-7 w-7 rounded-lg object-cover"
                     />
                   ) : (
@@ -180,7 +180,7 @@ const Navbar = () => {
                     color="primary"
                     className="max-w-25 truncate"
                   >
-                    {user?.username || t.nav.account}
+                    {user?.fullName || t.nav.account}
                   </Text>
                   <ChevronDown className="h-3.5 w-3.5 text-textSecondary" />
                 </button>
@@ -294,7 +294,11 @@ const Navbar = () => {
               className="p-2 rounded-xl bg-bgSecondary/60 border border-borderPrimary/40 text-textPrimary cursor-pointer transition-colors"
               aria-label="Toggle Mobile Menu"
             >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </button>
           )}
         </div>
@@ -376,7 +380,9 @@ const Navbar = () => {
                 )}
                 <div>
                   <p className="font-bold text-textPrimary">{user?.username}</p>
-                  <p className="text-[11px] text-textSecondary">{user?.email}</p>
+                  <p className="text-[11px] text-textSecondary">
+                    {user?.email}
+                  </p>
                 </div>
               </Link>
 
@@ -394,11 +400,17 @@ const Navbar = () => {
           ) : (
             <div className="grid grid-cols-2 gap-2 pt-2 border-t border-borderPrimary/40">
               <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" className="w-full text-xs rounded-xl cursor-pointer">
+                <Button
+                  variant="outline"
+                  className="w-full text-xs rounded-xl cursor-pointer"
+                >
                   {t.nav.signIn}
                 </Button>
               </Link>
-              <Link href="/auth/register" onClick={() => setMobileMenuOpen(false)}>
+              <Link
+                href="/auth/register"
+                onClick={() => setMobileMenuOpen(false)}
+              >
                 <Button className="w-full text-xs rounded-xl bg-primary text-white cursor-pointer">
                   {t.nav.signUp}
                 </Button>

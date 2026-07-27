@@ -11,6 +11,7 @@ export interface ForgotPasswordData {
 
 export interface AuthMe {
   _id: string;
+  fullName?: string;
   username: string;
   jobTitle?: string;
   email: string;

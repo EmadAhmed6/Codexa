@@ -22,11 +22,11 @@ import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import Cookies from "js-cookie";
 import EditPostModal from "./EditPostModal";
 import DeleteConfirmModal from "./DeleteConfirmModal";
+import CommentsModal from "./CommentsModal";
 import { formatRelativeTime } from "@/lib/utils";
 import { Text } from "@/_components/Text";
 import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
-import UserHoverCard from "@/_components/UserHoverCard";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface PostCardProps {
@@ -44,6 +44,7 @@ export default function PostCard({ post }: PostCardProps) {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
 
   const currentUserId = currentUser?._id || (currentUser as any)?.id;
   const postUserId =
@@ -59,12 +60,14 @@ export default function PostCard({ post }: PostCardProps) {
       ? post.sharedPost.user
       : post.user;
 
+  const authorDisplayName = displayAuthor?.fullName || t.post.anonymous;
+
   // Check if current user is owner of this post OR Admin
   const isOwnerOrAdmin = Boolean(
     currentUser &&
-      currentUserId &&
-      postUserId &&
-      (String(postUserId) === String(currentUserId) || currentUser.isAdmin),
+    currentUserId &&
+    postUserId &&
+    (String(postUserId) === String(currentUserId) || currentUser.isAdmin),
   );
 
   // Derived like status from server data
@@ -80,11 +83,18 @@ export default function PostCard({ post }: PostCardProps) {
   const [userLikedState, setUserLikedState] = useState<boolean | null>(null);
   const [likesCountDelta, setLikesCountDelta] = useState<number>(0);
 
+  const [sharesCountDelta, setSharesCountDelta] = useState<number>(0);
+  const [localSharesUsers, setLocalSharesUsers] = useState<any[]>(
+    post.shares || [],
+  );
+
   // Reset local overrides when server post data updates
   useEffect(() => {
     setUserLikedState(null);
     setLikesCountDelta(0);
-  }, [post.likes, post.likesCount]);
+    setSharesCountDelta(0);
+    setLocalSharesUsers(post.shares || []);
+  }, [post.likes, post.likesCount, post.shares, post.sharesCount]);
 
   const isLiked = userLikedState !== null ? userLikedState : isLikedFromServer;
 
@@ -104,12 +114,14 @@ export default function PostCard({ post }: PostCardProps) {
         ? post.comments.length
         : 0;
 
-  const sharesCount =
+  const baseSharesCount =
     post.sharesCount !== undefined
       ? post.sharesCount
       : Array.isArray(post.shares)
         ? post.shares.length
         : 0;
+
+  const displaySharesCount = Math.max(0, baseSharesCount + sharesCountDelta);
 
   const formattedDate = formatRelativeTime(post.createdAt);
 
@@ -132,7 +144,22 @@ export default function PostCard({ post }: PostCardProps) {
   const handleShare = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Increment share counter dynamically
+    setSharesCountDelta((prev) => prev + 1);
+
+    // Maintain list of users who have shared the post
+    if (currentUser) {
+      setLocalSharesUsers((prev) => [...prev, currentUser]);
+    }
+
     sharePostMutation.mutate(post._id);
+  };
+
+  const handleOpenComments = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsCommentsModalOpen(true);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -156,11 +183,6 @@ export default function PostCard({ post }: PostCardProps) {
     setIsEditModalOpen(true);
   };
 
-  const translatedCategory =
-    post.category && t.categories[post.category as keyof typeof t.categories]
-      ? t.categories[post.category as keyof typeof t.categories]
-      : post.category || t.post.general;
-
   return (
     <>
       <article className="group flex flex-col justify-between bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/50 hover:border-primary/40 rounded-2xl p-5 md:p-6 shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-visible">
@@ -171,83 +193,108 @@ export default function PostCard({ post }: PostCardProps) {
           aria-label={post.title || t.post.viewArticle}
         />
 
-        {/* Featured Cover Image */}
-        {(post.postImage?.url || post.image?.url) && (
-          <div className="block mb-4 overflow-hidden rounded-xl border border-borderPrimary/30 aspect-video relative z-10 pointer-events-none">
-            <img
-              src={post.postImage?.url || post.image?.url}
-              alt={post.title || "Cover Image"}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-        )}
-
-        {/* Post Content */}
-        <div className="flex-1 flex flex-col justify-between relative z-10 pointer-events-none">
-          <div>
-            {/* Header Info: Category Badge, Date, & Owner/Admin Controls */}
-            <div className="flex items-center justify-between gap-2 mb-3">
+        {/* 1. TOP HEADER: Author Info & Controls */}
+        <div className="flex items-center justify-between gap-2 mb-4 relative z-10">
+          {/* Author Details */}
+          <Link
+            href={`/profile/${displayAuthor?._id || "me"}`}
+            className="flex items-center gap-2.5 group/author cursor-pointer pointer-events-auto relative z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {displayAuthor?.profilePicture?.url ? (
+              <img
+                src={displayAuthor.profilePicture.url}
+                alt={authorDisplayName}
+                className="h-9 w-9 rounded-full object-cover border border-borderPrimary"
+              />
+            ) : (
+              <div className="h-9 w-9 rounded-full bg-primary/15 flex items-center justify-center text-primary">
+                <UserIcon className="h-4 w-4" />
+              </div>
+            )}
+            <div>
+              <Text
+                as="span"
+                size="xs"
+                font="bold"
+                color="primary"
+                className="group-hover/author:text-primary transition-colors block truncate max-w-40"
+              >
+                {authorDisplayName}
+              </Text>
               <div className="flex items-center gap-2">
-                <Text
-                  as="span"
-                  size="xs"
-                  font="bold"
-                  color="primary"
-                  className="inline-block text-[11px] uppercase tracking-wide px-2.5 py-1 rounded-md bg-primary/10 border border-primary/20"
-                >
-                  {translatedCategory}
-                </Text>
-                {post.sharedPost && (
+                {displayAuthor?.jobTitle && (
                   <Text
                     as="span"
                     size="xs"
-                    font="semiBold"
-                    color="primary"
-                    className="inline-flex items-center gap-1 text-[10px] bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10"
+                    color="secondary"
+                    className="text-[10px] block truncate max-w-32"
                   >
-                    <Repeat className="h-3 w-3" />
-                    {t.post.shared}
+                    {displayAuthor.jobTitle}
                   </Text>
                 )}
-              </div>
-
-              <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3 text-textSecondary" />
-                  <Text as="span" size="xs" font="medium" color="secondary" className="text-[11px]">
+                  <Text
+                    as="span"
+                    size="xs"
+                    font="medium"
+                    color="secondary"
+                    className="text-[10px]"
+                  >
                     {formattedDate}
                   </Text>
                 </div>
-
-                {/* Edit & Delete Controls */}
-                {isOwnerOrAdmin && (
-                  <div className="flex items-center gap-1 ltr:ml-2 ltr:border-l rtl:mr-2 rtl:border-r border-borderPrimary/40 ltr:pl-2 rtl:pr-2 pointer-events-auto">
-                    <Tooltip position="top" content={t.post.edit}>
-                      <button
-                        onClick={handleOpenEdit}
-                        className="p-1 rounded-md text-textSecondary hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
-                        title={t.post.edit}
-                      >
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </button>
-                    </Tooltip>
-
-                    <Tooltip position="top" content={t.post.delete}>
-                      <button
-                        onClick={handleDelete}
-                        disabled={deletePostMutation.isPending}
-                        className="p-1 rounded-md text-textSecondary hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                        title={t.post.delete}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </Tooltip>
-                  </div>
-                )}
               </div>
             </div>
+          </Link>
 
-            {/* Title */}
+          {/* Shared Post Badge & Owner/Admin Controls */}
+          <div className="flex items-center gap-2 pointer-events-auto relative z-10">
+            {post.sharedPost && (
+              <Text
+                as="span"
+                size="xs"
+                font="semiBold"
+                color="primary"
+                className="inline-flex items-center gap-1 text-[10px] bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10"
+              >
+                <Repeat className="h-3 w-3" />
+                {t.post.shared}
+              </Text>
+            )}
+
+            {/* Edit & Delete Controls */}
+            {isOwnerOrAdmin && (
+              <div className="flex items-center gap-1 ltr:ml-1 ltr:border-l rtl:mr-1 rtl:border-r border-borderPrimary/40 ltr:pl-1.5 rtl:pr-1.5">
+                <Tooltip position="top" content={t.post.edit}>
+                  <button
+                    onClick={handleOpenEdit}
+                    className="p-1 rounded-md text-textSecondary hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                    title={t.post.edit}
+                  >
+                    <Edit2 className="h-3.5 w-3.5" />
+                  </button>
+                </Tooltip>
+
+                <Tooltip position="top" content={t.post.delete}>
+                  <button
+                    onClick={handleDelete}
+                    disabled={deletePostMutation.isPending}
+                    className="p-1 rounded-md text-textSecondary hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                    title={t.post.delete}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </Tooltip>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 2. POST CONTENT */}
+        <div className="flex-1 flex flex-col justify-between relative z-10 pointer-events-none mb-3">
+          <div>
             {post.title && (
               <Text
                 as="h2"
@@ -259,142 +306,117 @@ export default function PostCard({ post }: PostCardProps) {
                 {post.title}
               </Text>
             )}
-
-            {/* Description Excerpt */}
-            {post.description && (
-              <Text
-                as="p"
-                size="sm"
-                color="secondary"
-                className="line-clamp-3 leading-relaxed mb-3 text-xs md:text-sm"
-              >
-                {post.description}
-              </Text>
-            )}
           </div>
+        </div>
 
-          {/* Footer: Author Info & Interactive Actions */}
-          <div className="pt-4 border-t border-borderPrimary/30 flex items-center justify-between gap-2 mt-auto">
-            {/* Author Details */}
-            <UserHoverCard user={displayAuthor as any}>
-              <Link
-                href={`/profile/${displayAuthor?._id || "me"}`}
-                className="flex items-center gap-2 group/author cursor-pointer pointer-events-auto relative z-10"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {displayAuthor?.profilePicture?.url ? (
-                  <img
-                    src={displayAuthor.profilePicture.url}
-                    alt={displayAuthor.username}
-                    className="h-7 w-7 rounded-full object-cover border border-borderPrimary"
-                  />
-                ) : (
-                  <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center text-primary">
-                    <UserIcon className="h-3.5 w-3.5" />
-                  </div>
-                )}
-                <div>
-                  <Text
-                    as="span"
-                    size="xs"
-                    font="semiBold"
-                    color="primary"
-                    className="group-hover/author:text-primary transition-colors block truncate max-w-36"
-                  >
-                    {displayAuthor?.username || t.post.anonymous}
-                  </Text>
-                  {displayAuthor?.jobTitle && (
-                    <Text
-                      as="span"
-                      size="xs"
-                      color="secondary"
-                      className="text-[10px] block truncate max-w-36"
-                    >
-                      {displayAuthor.jobTitle}
-                    </Text>
-                  )}
-                </div>
-              </Link>
-            </UserHoverCard>
+        {/* 3. FEATURED COVER IMAGE */}
+        {(post.postImage?.url || post.image?.url) && (
+          <div className="block mb-4 overflow-hidden rounded-xl border border-borderPrimary/30 aspect-video relative z-10 pointer-events-none">
+            <img
+              src={post.postImage?.url || post.image?.url}
+              alt={post.title || "Cover Image"}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+        )}
 
-            {/* Actions: Likes, Comments, Share */}
-            <div className="flex items-center gap-2 pointer-events-auto relative z-10">
-              {/* Like Button with User List Tooltip */}
-              <Tooltip
-                position="top"
-                content={<UserListTooltip users={post.likes} type="like" />}
+        {/* 4. BOTTOM ACTION BAR: Likes, Comments, Share */}
+        <div className="pt-3 border-t border-borderPrimary/30 flex items-center justify-between gap-2 pointer-events-auto relative z-10 mt-auto">
+          <div className="flex items-center gap-3">
+            {/* Like Button with User List Tooltip */}
+            <Tooltip
+              position="top"
+              content={<UserListTooltip users={post.likes} type="like" />}
+            >
+              <button
+                onClick={handleLike}
+                disabled={likePostMutation.isPending}
+                className={`flex items-center gap-1.5 text-xs font-bold transition-all p-1.5 rounded-lg cursor-pointer ${
+                  isLiked
+                    ? "text-rose-500 bg-rose-500/10"
+                    : "text-textSecondary hover:text-rose-500 hover:bg-rose-500/10"
+                }`}
               >
-                <button
-                  onClick={handleLike}
-                  disabled={likePostMutation.isPending}
-                  className={`flex items-center gap-1.5 text-xs font-bold transition-all p-1.5 rounded-lg cursor-pointer ${
+                <Heart
+                  className={`h-4 w-4 transition-transform active:scale-125 ${
                     isLiked
-                      ? "text-rose-500 bg-rose-500/10"
-                      : "text-textSecondary hover:text-rose-500 hover:bg-rose-500/10"
+                      ? "fill-rose-500 text-rose-500"
+                      : "text-textSecondary fill-transparent"
                   }`}
+                />
+                <Text
+                  as="span"
+                  size="xs"
+                  font="bold"
+                  className={isLiked ? "text-rose-500" : "text-textSecondary"}
                 >
-                  <Heart
-                    className={`h-4 w-4 transition-transform active:scale-125 ${
-                      isLiked
-                        ? "fill-rose-500 text-rose-500"
-                        : "text-textSecondary fill-transparent"
-                    }`}
-                  />
-                  <Text
-                    as="span"
-                    size="xs"
-                    font="bold"
-                    className={isLiked ? "text-rose-500" : "text-textSecondary"}
-                  >
-                    {displayLikesCount}
-                  </Text>
-                </button>
-              </Tooltip>
+                  {displayLikesCount}
+                </Text>
+              </button>
+            </Tooltip>
 
-              {/* Comment Counter */}
-              <Tooltip position="top" content={t.post.viewComments}>
-                <Link
-                  href={`/posts/${post._id}#comments`}
-                  className="group/comment flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10 relative z-10"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MessageSquare className="h-4 w-4 text-textSecondary group-hover/comment:text-primary transition-colors" />
-                  <Text
-                    as="span"
-                    size="xs"
-                    font="semiBold"
-                    className="text-textSecondary group-hover/comment:text-primary transition-colors"
-                  >
-                    {commentsCount}
-                  </Text>
-                </Link>
-              </Tooltip>
-
-              {/* Share Counter with User List Tooltip */}
-              <Tooltip
-                position="top"
-                content={<UserListTooltip users={post.shares} type="share" />}
+            {/* Comment Counter Button */}
+            <Tooltip
+              position="top"
+              content={
+                <div className="flex items-center gap-1.5 px-0.5">
+                  <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                  <span>{t.post.viewComments}</span>
+                </div>
+              }
+            >
+              <button
+                type="button"
+                onClick={handleOpenComments}
+                className="group/comment flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10 cursor-pointer"
               >
-                <button
-                  onClick={handleShare}
-                  disabled={sharePostMutation.isPending}
-                  className="group/share flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10 cursor-pointer"
+                <MessageSquare className="h-4 w-4 text-textSecondary group-hover/comment:text-primary transition-colors" />
+                <Text
+                  as="span"
+                  size="xs"
+                  font="semiBold"
+                  className="text-textSecondary group-hover/comment:text-primary transition-colors"
                 >
-                  <Share2 className="h-4 w-4 text-textSecondary group-hover/share:text-primary transition-colors" />
-                  <Text
-                    as="span"
-                    size="xs"
-                    font="semiBold"
-                    className="text-textSecondary group-hover/share:text-primary transition-colors"
-                  >
-                    {sharesCount}
-                  </Text>
-                </button>
-              </Tooltip>
-            </div>
+                  {commentsCount}
+                </Text>
+              </button>
+            </Tooltip>
+
+            {/* Share Counter with User List Tooltip */}
+            <Tooltip
+              position="top"
+              content={
+                <UserListTooltip users={localSharesUsers} type="share" />
+              }
+            >
+              <button
+                onClick={handleShare}
+                disabled={sharePostMutation.isPending}
+                className="group/share flex items-center gap-1.5 text-xs font-semibold text-textSecondary hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/10 cursor-pointer"
+              >
+                <Share2 className="h-4 w-4 text-textSecondary group-hover/share:text-primary transition-colors" />
+                <Text
+                  as="span"
+                  size="xs"
+                  font="semiBold"
+                  className="text-textSecondary group-hover/share:text-primary transition-colors"
+                >
+                  {displaySharesCount}
+                </Text>
+              </button>
+            </Tooltip>
           </div>
         </div>
       </article>
+
+      {/* Comments Modal */}
+      <CommentsModal
+        isOpen={isCommentsModalOpen}
+        onClose={() => setIsCommentsModalOpen(false)}
+        postId={post._id}
+        postTitle={post.title}
+        postAuthorName={authorDisplayName}
+      />
 
       {/* Edit Modal */}
       <EditPostModal

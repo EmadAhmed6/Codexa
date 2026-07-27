@@ -20,16 +20,6 @@ interface EditPostModalProps {
   post: Post;
 }
 
-const CATEGORIES = [
-  "Development",
-  "React & Next.js",
-  "Backend & API",
-  "Design & UX",
-  "AI & ML",
-  "DevOps & Cloud",
-  "Career & Insights",
-] as const;
-
 export default function EditPostModal({
   isOpen,
   onClose,
@@ -37,7 +27,7 @@ export default function EditPostModal({
 }: EditPostModalProps) {
   const queryClient = useQueryClient();
   const updatePostMutation = useUpdatePost();
-  const { t } = useLanguage();
+  const { t, isArabic } = useLanguage();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -54,8 +44,6 @@ export default function EditPostModal({
     mode: "onBlur",
     defaultValues: {
       title: post?.title || "",
-      category: post?.category || CATEGORIES[0],
-      description: post?.description || "",
     },
   });
 
@@ -63,8 +51,6 @@ export default function EditPostModal({
     if (post) {
       reset({
         title: post.title || "",
-        category: post.category || CATEGORIES[0],
-        description: post.description || "",
       });
       setImagePreview(post.postImage?.url || post.image?.url || null);
       setImageFile(null);
@@ -72,7 +58,6 @@ export default function EditPostModal({
   }, [post, reset]);
 
   const watchTitle = watch("title") || "";
-  const watchDescription = watch("description") || "";
 
   if (!isOpen) return null;
 
@@ -96,8 +81,6 @@ export default function EditPostModal({
         postId: post._id,
         postData: {
           title: data.title.trim(),
-          category: data.category,
-          description: data.description.trim(),
           postImageFile: imageFile,
         },
       });
@@ -144,7 +127,7 @@ export default function EditPostModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Title */}
+          {/* Post Content / Title */}
           <div>
             <div className="flex justify-between items-center mb-2">
               <Text
@@ -154,7 +137,7 @@ export default function EditPostModal({
                 color="secondary"
                 className="block uppercase tracking-wider"
               >
-                {t.createEditPost.titleLabel}
+                {isArabic ? "محتوى البوست" : "Post Content"}
               </Text>
               <Text
                 as="span"
@@ -165,70 +148,14 @@ export default function EditPostModal({
                 {watchTitle.length}/32
               </Text>
             </div>
-            <input
-              type="text"
+            <textarea
+              rows={3}
               {...register("title", {
                 onChange: () => clearErrors("title"),
               })}
-              className="w-full px-4 py-3 rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary text-sm font-semibold outline-none focus:ring-2 focus:ring-primary transition-all"
+              className="w-full px-4 py-3 rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary text-sm font-semibold outline-none focus:ring-2 focus:ring-primary transition-all resize-none"
             />
             <Error error={errors.title?.message} />
-          </div>
-
-          {/* Description */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <Text
-                as="label"
-                size="xs"
-                font="semiBold"
-                color="secondary"
-                className="block uppercase tracking-wider"
-              >
-                {t.createEditPost.contentLabel}
-              </Text>
-              <Text
-                as="span"
-                size="xs"
-                color="secondary"
-                className="text-[11px]"
-              >
-                {watchDescription.length}/250
-              </Text>
-            </div>
-            <textarea
-              rows={6}
-              {...register("description", {
-                onChange: () => clearErrors("description"),
-              })}
-              className="w-full px-4 py-3 rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary text-sm outline-none focus:ring-2 focus:ring-primary transition-all resize-none"
-            />
-            <Error error={errors.description?.message} />
-          </div>
-          {/* Category */}
-          <div>
-            <Text
-              as="label"
-              size="xs"
-              font="semiBold"
-              color="secondary"
-              className="block uppercase tracking-wider mb-2"
-            >
-              {t.createEditPost.categoryLabel}
-            </Text>
-            <select
-              {...register("category", {
-                onChange: () => clearErrors("category"),
-              })}
-              className="w-full px-4 py-2.5 rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all cursor-pointer"
-            >
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {t.categories[cat as keyof typeof t.categories] || cat}
-                </option>
-              ))}
-            </select>
-            <Error error={errors.category?.message} />
           </div>
 
           {/* Featured Image */}
@@ -255,7 +182,7 @@ export default function EditPostModal({
                     setImageFile(null);
                     setImagePreview(null);
                   }}
-                  className="absolute top-2 ltr:right-2 rtl:left-2 p-1.5 bg-black/70 rounded-full text-white hover:bg-black transition-colors"
+                  className="absolute top-2 ltr:right-2 rtl:left-2 p-1.5 bg-black/70 rounded-full text-white hover:bg-black transition-colors cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -280,7 +207,7 @@ export default function EditPostModal({
               type="button"
               variant="outline"
               onClick={onClose}
-              className="rounded-xl border-borderPrimary"
+              className="rounded-xl border-borderPrimary cursor-pointer"
             >
               <Text as="span" size="xs" font="semiBold" color="primary">
                 {t.createEditPost.cancel}

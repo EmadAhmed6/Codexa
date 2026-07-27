@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { User, Mail, Lock, ArrowRight, ArrowLeft, Briefcase } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema as any),
     mode: "onBlur",
     defaultValues: {
+      fullName: "",
       username: "",
       email: "",
       password: "",
@@ -42,7 +43,9 @@ export default function RegisterPage() {
     registerMutation.mutate(data, {
       onSuccess: () => {
         toast.success(
-          isArabic ? "تم إنشاء الحساب بنجاح! أكد الكود اللى اتبعتلك." : "Account created successfully! Please verify your OTP code.",
+          isArabic
+            ? "تم إنشاء الحساب بنجاح! أكد الكود اللى اتبعتلك."
+            : "Account created successfully! Please verify your OTP code.",
         );
         router.push(`/auth/verify-otp?email=${encodeURIComponent(data.email)}`);
         reset();
@@ -50,7 +53,9 @@ export default function RegisterPage() {
       onError: (err: any) => {
         toast.error(
           err?.response?.data?.message ||
-            (isArabic ? "مش عارفين نعمل حساب. الإيميل أو اسم المستخدم مستخدم قبل كدا." : "Error registering account. Email or username might already exist."),
+            (isArabic
+              ? "مش عارفين نعمل حساب. الإيميل أو اسم المستخدم مستخدم قبل كدا."
+              : "Error registering account. Email or username might already exist."),
         );
       },
     });
@@ -77,82 +82,84 @@ export default function RegisterPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {/* Full Name Field */}
+        <div className="space-y-1.5">
+          <Label htmlFor="fullName">
+            {isArabic ? "الاسم بالكامل" : "Full Name"}
+          </Label>
+          <Input
+            id="fullName"
+            type="text"
+            icon="user"
+            placeholder={isArabic ? "أدخل الاسم بالكامل" : "Enter your full name"}
+            disabled={registerMutation.isPending}
+            className={errors.fullName ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            {...register("fullName", {
+              onChange: () => clearErrors("fullName"),
+            })}
+          />
+          <Error error={errors.fullName?.message} />
+        </div>
+
         {/* Username Field */}
         <div className="space-y-1.5">
           <Label htmlFor="username">{t.auth.usernameLabel}</Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 ltr:left-3.5 rtl:right-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
-              <User className="h-4.5 w-4.5" />
-            </span>
-            <Input
-              id="username"
-              type="text"
-              placeholder={t.auth.usernamePlaceholder}
-              disabled={registerMutation.isPending}
-              className={`ltr:pl-11 rtl:pr-11 ${errors.username ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
-              {...register("username", {
-                onChange: () => clearErrors("username"),
-              })}
-            />
-          </div>
+          <Input
+            id="username"
+            type="text"
+            icon="user"
+            placeholder={t.auth.usernamePlaceholder}
+            disabled={registerMutation.isPending}
+            className={errors.username ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            {...register("username", {
+              onChange: () => clearErrors("username"),
+            })}
+          />
           <Error error={errors.username?.message} />
         </div>
 
         {/* Email Field */}
         <div className="space-y-1.5">
           <Label htmlFor="email">{t.auth.emailLabel}</Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 ltr:left-3.5 rtl:right-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
-              <Mail className="h-4.5 w-4.5" />
-            </span>
-            <Input
-              id="email"
-              type="email"
-              placeholder={t.auth.emailPlaceholder}
-              disabled={registerMutation.isPending}
-              className={`ltr:pl-11 rtl:pr-11 ${errors.email ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
-              {...register("email", { onChange: () => clearErrors("email") })}
-            />
-          </div>
+          <Input
+            id="email"
+            type="email"
+            icon="mail"
+            placeholder={t.auth.emailPlaceholder}
+            disabled={registerMutation.isPending}
+            className={errors.email ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            {...register("email", { onChange: () => clearErrors("email") })}
+          />
           <Error error={errors.email?.message} />
         </div>
 
         {/* Job Title Field (Optional) */}
         <div className="space-y-1.5">
           <Label htmlFor="jobTitle">{t.auth.jobTitleLabel}</Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 ltr:left-3.5 rtl:right-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
-              <Briefcase className="h-4.5 w-4.5" />
-            </span>
-            <Input
-              id="jobTitle"
-              type="text"
-              placeholder={t.auth.jobTitlePlaceholder}
-              disabled={registerMutation.isPending}
-              className="ltr:pl-11 rtl:pr-11"
-              {...register("jobTitle" as any)}
-            />
-          </div>
+          <Input
+            id="jobTitle"
+            type="text"
+            icon="briefcase"
+            placeholder={t.auth.jobTitlePlaceholder}
+            disabled={registerMutation.isPending}
+            {...register("jobTitle" as any)}
+          />
         </div>
 
         {/* Password Field */}
         <div className="space-y-1.5">
           <Label htmlFor="password">{t.auth.passwordLabel}</Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 ltr:left-3.5 rtl:right-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
-              <Lock className="h-4.5 w-4.5" />
-            </span>
-            <Input
-              id="password"
-              type="password"
-              placeholder={t.auth.passwordPlaceholder}
-              disabled={registerMutation.isPending}
-              className={`ltr:pl-11 rtl:pr-11 ${errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
-              {...register("password", {
-                onChange: () => clearErrors("password"),
-              })}
-            />
-          </div>
+          <Input
+            id="password"
+            type="password"
+            icon="lock"
+            placeholder={t.auth.passwordPlaceholder}
+            disabled={registerMutation.isPending}
+            className={errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            {...register("password", {
+              onChange: () => clearErrors("password"),
+            })}
+          />
           <Error error={errors.password?.message} />
         </div>
 

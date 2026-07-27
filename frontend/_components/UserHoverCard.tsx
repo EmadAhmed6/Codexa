@@ -3,22 +3,30 @@
 import React from "react";
 import Link from "next/link";
 import { User as UserIcon, ExternalLink } from "lucide-react";
-import Tooltip from "./Tooltip";
+import Tooltip, { TooltipPosition } from "./Tooltip";
 import { Text } from "./Text";
 
 interface UserHoverCardProps {
   user?: {
     _id?: string;
+    fullName?: string;
     username?: string;
     profilePicture?: {
       url?: string;
     };
   };
+  position?: TooltipPosition;
   children: React.ReactNode;
 }
 
-export default function UserHoverCard({ user, children }: UserHoverCardProps) {
+export default function UserHoverCard({
+  user,
+  position = "bottom",
+  children,
+}: UserHoverCardProps) {
   if (!user || !user._id) return <>{children}</>;
+
+  const displayName = user.fullName ||"User";
 
   const content = (
     <div className="p-2.5 max-w-xs space-y-2 min-w-42.5 text-left">
@@ -26,7 +34,7 @@ export default function UserHoverCard({ user, children }: UserHoverCardProps) {
         {user.profilePicture?.url ? (
           <img
             src={user.profilePicture.url}
-            alt={user.username || "User"}
+            alt={displayName}
             className="h-8 w-8 rounded-full object-cover border border-borderPrimary shrink-0"
           />
         ) : (
@@ -41,7 +49,7 @@ export default function UserHoverCard({ user, children }: UserHoverCardProps) {
           color="primary"
           className="truncate leading-tight"
         >
-          {user.username || "User"}
+          {displayName}
         </Text>
       </div>
 
@@ -59,7 +67,7 @@ export default function UserHoverCard({ user, children }: UserHoverCardProps) {
   );
 
   return (
-    <Tooltip position="top" content={content}>
+    <Tooltip position={position} content={content}>
       {children}
     </Tooltip>
   );

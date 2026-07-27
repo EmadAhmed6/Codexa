@@ -91,7 +91,10 @@ const generateOtpEmailHtml = (username: string, otp: string) => {
   `;
 };
 
-const generateResetPasswordEmailHtml = (username: string, resetLink: string) => {
+const generateResetPasswordEmailHtml = (
+  username: string,
+  resetLink: string,
+) => {
   return `
   <!DOCTYPE html>
   <html>
@@ -181,6 +184,7 @@ const register = asyncHandler(
     const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
 
     const newUser = new User({
+      fullName: req.body.fullName,
       username: req.body.username,
       email: req.body.email,
       password: req.body.password,
@@ -382,30 +386,66 @@ const getMe = asyncHandler(
         populate: [
           {
             path: "user",
-            select: ["_id", "username", "profilePicture", "jobTitle"],
+            select: [
+              "_id",
+              "username",
+              "fullName",
+              "profilePicture",
+              "jobTitle",
+            ],
           },
           {
             path: "likes",
-            select: ["_id", "username", "profilePicture", "jobTitle"],
+            select: [
+              "_id",
+              "username",
+              "fullName",
+              "profilePicture",
+              "jobTitle",
+            ],
           },
           {
             path: "shares",
-            select: ["_id", "username", "profilePicture", "jobTitle"],
+            select: [
+              "_id",
+              "username",
+              "fullName",
+              "profilePicture",
+              "jobTitle",
+            ],
           },
           {
             path: "sharedPost",
             populate: [
               {
                 path: "user",
-                select: ["_id", "username", "profilePicture", "jobTitle"],
+                select: [
+                  "_id",
+                  "username",
+                  "fullName",
+                  "profilePicture",
+                  "jobTitle",
+                ],
               },
               {
                 path: "likes",
-                select: ["_id", "username", "profilePicture", "jobTitle"],
+                select: [
+                  "_id",
+                  "username",
+                  "fullName",
+                  "profilePicture",
+                  "jobTitle",
+                ],
               },
               {
                 path: "shares",
-                select: ["_id", "username", "profilePicture", "jobTitle"],
+                select: [
+                  "_id",
+                  "username",
+                  "fullName",
+                  "profilePicture",
+                  "jobTitle",
+                ],
               },
             ],
           },

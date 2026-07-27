@@ -12,11 +12,20 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
+  fullName: z
+    .string()
+    .min(1, "Full Name is required")
+    .min(3, "Full Name must be at least 3 characters long")
+    .max(100, "Full Name must not exceed 100 characters"),
   username: z
     .string()
     .min(1, "Username is required")
     .min(3, "Username must be at least 3 characters long")
-    .max(50, "Username must not exceed 50 characters"),
+    .max(50, "Username must not exceed 50 characters")
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username must contain only letters, numbers, and underscores",
+    ),
   jobTitle: z
     .string()
     .max(50, "Job title must not exceed 50 characters")

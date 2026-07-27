@@ -2,6 +2,7 @@ import { axiosClient } from "@/lib/axiosClient";
 import { UserProfile } from "../../posts/types/Post";
 
 export interface UpdateUserPayload {
+  fullName?: string;
   username?: string;
   jobTitle?: string;
   bio?: string;

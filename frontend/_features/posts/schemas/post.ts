@@ -4,14 +4,8 @@ export const postFormSchema = z.object({
   title: z
     .string()
     .trim()
-    .min(1, "Title is required")
-    .max(32, "Title must not exceed 32 characters"),
-  category: z.string().min(1, "Category is required"),
-  description: z
-    .string()
-    .trim()
-    .min(1, "Content description is required")
-    .max(250, "Content description must not exceed 250 characters"),
+    .min(1, "Post content is required")
+    .max(32, "Post content must not exceed 32 characters"),
 });
 
 export type IPostForm = z.infer<typeof postFormSchema>;
@@ -23,6 +17,12 @@ export const commentFormSchema = z.object({
 export type ICommentForm = z.infer<typeof commentFormSchema>;
 
 export const editProfileSchema = z.object({
+  fullName: z
+    .string()
+    .trim()
+    .min(1, "Full Name is required")
+    .min(3, "Full Name must be at least 3 characters")
+    .max(100, "Full Name must not exceed 100 characters"),
   username: z
     .string()
     .trim()
