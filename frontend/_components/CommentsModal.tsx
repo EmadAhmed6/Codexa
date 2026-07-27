@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, MessageSquare } from "lucide-react";
 import CommentSection from "@/_components/CommentSection";
 import { Text } from "@/_components/Text";
@@ -22,6 +23,11 @@ export default function CommentsModal({
   postAuthorName,
 }: CommentsModalProps) {
   const { t } = useLanguage();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Disable body scroll when modal is open
   useEffect(() => {
@@ -35,15 +41,15 @@ export default function CommentsModal({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-100 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="bg-bgSecondary border border-borderPrimary/60 w-full max-w-2xl rounded-2xl shadow-2xl overflow-visible flex flex-col h-[82vh] max-h-200 animate-in zoom-in-95 duration-200 relative"
+        className="bg-bgSecondary border border-borderPrimary/60 w-full max-w-2xl rounded-2xl shadow-2xl overflow-visible flex flex-col h-[82vh] max-h-162.5 animate-in zoom-in-95 duration-200 relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header (Fixed Top) */}
@@ -79,6 +85,7 @@ export default function CommentsModal({
           <CommentSection postId={postId} hideHeader={true} isModal={true} onCloseModal={onClose} />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

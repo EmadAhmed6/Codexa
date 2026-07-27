@@ -2,12 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  RotateCcw,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -60,13 +55,17 @@ export default function ForgotPasswordPage() {
         setSubmittedEmail(data.email);
         setIsSent(true);
         setResendCooldown(30); // 30-second cooldown
-        toast.success(isArabic ? "تم إرسال رابط الاسترجاع!" : "Recovery link sent!");
+        toast.success(
+          isArabic ? "تم إرسال رابط الاسترجاع!" : "Recovery link sent!",
+        );
         reset();
       },
       onError: (error: any) => {
         const errorText =
           error?.response?.data?.message ||
-          (isArabic ? "فشل إرسال الرابط. حاول تاني." : "Failed to send reset link. Please try again.");
+          (isArabic
+            ? "فشل إرسال الرابط. حاول تاني."
+            : "Failed to send reset link. Please try again.");
         toast.error(errorText);
       },
     });
@@ -192,7 +191,11 @@ export default function ForgotPasswordPage() {
             icon="mail"
             placeholder={t.auth.emailPlaceholder}
             disabled={forgotMutation.isPending}
-            className={errors.email ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            className={
+              errors.email
+                ? "border-destructive/60 focus-visible:ring-destructive/10"
+                : ""
+            }
             {...register("email", { onChange: () => clearErrors("email") })}
           />
           <Error error={errors.email?.message} />

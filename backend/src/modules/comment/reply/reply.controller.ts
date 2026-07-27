@@ -8,6 +8,7 @@ import {
   validateUpdateComment,
 } from "../comment.model.js";
 import cloudinary from "../../../utils/cloudinary.js";
+import { Post } from "../../posts/post.model.js";
 
 // GET ALL REPLIES
 const getAllReplies = asyncHandler(
@@ -134,6 +135,9 @@ const replyComment = asyncHandler(
 
     await Comment.findByIdAndUpdate(parentCommentId, {
       $inc: { replyCommentsCount: 1 },
+    });
+    await Post.findByIdAndUpdate(postId, {
+      $inc: { commentsCount: 1 },
     });
     const finalCommentReply = await Comment.findById(newReply._id).populate(
       "user",
@@ -338,7 +342,14 @@ const likeReply = asyncHandler(async (req: Request, res: Response) => {
     { new: true, runValidators: true },
   )
     .populate("likes", ["_id", "username", "fullName", "profilePicture"])
-    .populate("user", ["_id", "username", "fullName", "profilePicture", "jobTitle", "bio"]);
+    .populate("user", [
+      "_id",
+      "username",
+      "fullName",
+      "profilePicture",
+      "jobTitle",
+      "bio",
+    ]);
 
   res.status(200).json({
     success: true,

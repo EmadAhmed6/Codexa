@@ -6,6 +6,7 @@ import Navbar from "@/_components/Navbar";
 import CommentSection from "@/_components/CommentSection";
 import EditPostModal from "@/_components/EditPostModal";
 import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
+import ActionMenu from "@/_components/ActionMenu";
 import {
   useGetPostById,
   useDeletePost,
@@ -59,10 +60,10 @@ export default function SinglePostPage() {
 
   const isOwnerOrAdmin = Boolean(
     currentUser &&
-      post &&
-      currentUserId &&
-      postUserId &&
-      (String(postUserId) === String(currentUserId) || currentUser.isAdmin),
+    post &&
+    currentUserId &&
+    postUserId &&
+    (String(postUserId) === String(currentUserId) || currentUser.isAdmin),
   );
 
   const isLiked = Boolean(
@@ -145,10 +146,6 @@ export default function SinglePostPage() {
   }
 
   const formattedDate = formatRelativeTime(post.createdAt);
-  const translatedCategory =
-    post.category && t.categories[post.category as keyof typeof t.categories]
-      ? t.categories[post.category as keyof typeof t.categories]
-      : post.category || t.post.general;
 
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col justify-between">
@@ -178,7 +175,7 @@ export default function SinglePostPage() {
               {post.user?.profilePicture?.url ? (
                 <img
                   src={post.user.profilePicture.url}
-                  alt={post.user.username}
+                  alt={post.user.fullName || post.user.username}
                   className="h-10 w-10 rounded-full object-cover border border-borderPrimary"
                 />
               ) : (
@@ -194,10 +191,18 @@ export default function SinglePostPage() {
                   color="primary"
                   className="group-hover:text-primary transition-colors"
                 >
-                  {post.user?.username || t.post.anonymousAuthor}
+                  {post.user?.fullName ||
+                    post.user?.username ||
+                    t.post.anonymousAuthor}
                 </Text>
                 {post.user?.jobTitle && (
-                  <Text as="p" size="xs" font="medium" color="secondary" className="text-[11px]">
+                  <Text
+                    as="p"
+                    size="xs"
+                    font="medium"
+                    color="secondary"
+                    className="text-[11px]"
+                  >
                     {post.user.jobTitle}
                   </Text>
                 )}
@@ -205,58 +210,13 @@ export default function SinglePostPage() {
             </Link>
           </UserHoverCard>
 
-          {/* Owner / Admin Actions (Edit & Delete) */}
+          {/* Owner / Admin Actions Menu */}
           {isOwnerOrAdmin && (
-            <div className="flex items-center gap-2">
-              <Tooltip position="bottom" content={t.post.edit}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="rounded-xl text-xs flex items-center gap-1.5 cursor-pointer border-borderPrimary"
-                >
-                  <Edit2 className="h-3.5 w-3.5" />
-                  <Text as="span" size="xs" font="semiBold" color="primary">
-                    {t.post.edit}
-                  </Text>
-                </Button>
-              </Tooltip>
-
-              <Tooltip position="bottom" content={t.post.delete}>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleDeletePost}
-                  disabled={deletePostMutation.isPending}
-                  className="rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  <Text as="span" size="xs" font="semiBold" color="white">
-                    {t.post.delete}
-                  </Text>
-                </Button>
-              </Tooltip>
-            </div>
+            <ActionMenu
+              onEdit={() => setIsEditModalOpen(true)}
+              onDelete={handleDeletePost}
+            />
           )}
-        </div>
-
-        {/* Category & Date Header */}
-        <div className="flex items-center justify-between gap-4 mb-4">
-          <Text
-            as="span"
-            size="xs"
-            font="bold"
-            color="primary"
-            className="uppercase tracking-wider px-3 py-1 rounded-md bg-primary/10 border border-primary/20"
-          >
-            {translatedCategory}
-          </Text>
-          <div className="flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5 text-textSecondary" />
-            <Text as="span" size="xs" font="medium" color="secondary">
-              {formattedDate}
-            </Text>
-          </div>
         </div>
 
         {/* Article Title */}

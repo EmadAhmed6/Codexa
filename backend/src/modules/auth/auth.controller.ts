@@ -287,8 +287,12 @@ const login = asyncHandler(
       return;
     }
     const token = user.generateToken();
-    const { password, ...others } = user.toObject();
-    res.status(200).json({ success: true, data: { ...others, token } });
+    const { password, otp: _, otpExpired: __, ...others } = user.toObject();
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      data: { ...others, token },
+    });
     return;
   },
 );

@@ -85,21 +85,17 @@ const Navbar = () => {
           />
         </form>
 
-        {/* Right Action Items (Desktop View) */}
-        <div className="hidden md:flex items-center gap-2.5 shrink-0">
-          {/* Language Switcher */}
+        {/* Right Action Items & Mobile Menu Toggle */}
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          {/* Language Switcher (Desktop) */}
           {mounted && (
             <Tooltip
               position="bottom"
-              content={
-                isArabic
-                  ? "تغيير للإنجليزية (English)"
-                  : "تغيير للغة العربية (عامية مصرية)"
-              }
+              content={isArabic ? "Change to English" : "غير لعربي"}
             >
               <button
                 onClick={toggleLanguage}
-                className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/40 text-textSecondary hover:text-textPrimary transition-all cursor-pointer text-xs font-bold"
+                className="hidden md:flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/40 text-textSecondary hover:text-textPrimary transition-all cursor-pointer text-xs font-bold"
                 aria-label="Toggle Language"
               >
                 <Globe className="h-4 w-4 text-primary" />
@@ -110,7 +106,7 @@ const Navbar = () => {
             </Tooltip>
           )}
 
-          {/* Theme Switcher */}
+          {/* Theme Switcher (Desktop) */}
           {mounted && (
             <Tooltip
               position="bottom"
@@ -118,7 +114,7 @@ const Navbar = () => {
             >
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="p-2 rounded-xl bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/40 text-textSecondary hover:text-textPrimary transition-all cursor-pointer"
+                className="hidden md:flex p-2 rounded-xl bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/40 text-textSecondary hover:text-textPrimary transition-all cursor-pointer"
                 aria-label="Toggle Theme"
               >
                 {theme === "dark" ? (
@@ -134,21 +130,20 @@ const Navbar = () => {
           {mounted && token && user?.isAdmin && (
             <Tooltip position="bottom" content={t.nav.adminDashboard}>
               <Link href="/admin/dashboard/users">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="group rounded-xl border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 hover:text-amber-400 text-xs items-center gap-1.5 cursor-pointer font-bold transition-all"
+                <button
+                  className="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 hover:text-amber-400 text-xs flex items-center gap-1.5 cursor-pointer font-bold transition-all"
+                  aria-label="Admin Dashboard"
                 >
-                  <LayoutDashboard className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                  <LayoutDashboard className="h-4 w-4 shrink-0 text-amber-500" />
                   <Text
                     as="span"
                     size="xs"
                     font="bold"
-                    className="text-amber-500 group-hover:text-amber-400 transition-colors"
+                    className="hidden md:inline-block text-amber-500 group-hover:text-amber-400 transition-colors"
                   >
                     {t.nav.dashboard}
                   </Text>
-                </Button>
+                </button>
               </Link>
             </Tooltip>
           )}
@@ -159,17 +154,18 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2 p-1.5 rounded-xl bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/40 transition-all cursor-pointer"
+                  className="flex items-center gap-2 p-1 sm:p-1.5 rounded-xl bg-bgSecondary/60 hover:bg-bgSecondary border border-borderPrimary/40 transition-all cursor-pointer"
+                  aria-label="User profile menu"
                   suppressHydrationWarning
                 >
                   {user?.profilePicture?.url ? (
                     <img
                       src={user.profilePicture.url}
-                      alt={user.fullName}
-                      className="h-7 w-7 rounded-lg object-cover"
+                      alt={user.fullName || "User Avatar"}
+                      className="h-8 w-8 rounded-full object-cover ring-2 ring-primary/20"
                     />
                   ) : (
-                    <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary ring-2 ring-primary/20">
                       <UserIcon className="h-4 w-4" />
                     </div>
                   )}
@@ -178,11 +174,11 @@ const Navbar = () => {
                     size="xs"
                     font="bold"
                     color="primary"
-                    className="max-w-25 truncate"
+                    className="hidden md:inline-block max-w-28 truncate"
                   >
                     {user?.fullName || t.nav.account}
                   </Text>
-                  <ChevronDown className="h-3.5 w-3.5 text-textSecondary" />
+                  <ChevronDown className="hidden md:inline-block h-3.5 w-3.5 text-textSecondary" />
                 </button>
 
                 {dropdownOpen && (
@@ -284,14 +280,12 @@ const Navbar = () => {
                 </Link>
               </div>
             ))}
-        </div>
 
-        {/* Mobile Hamburger Toggle Button */}
-        <div className="flex items-center gap-2 md:hidden">
+          {/* Mobile Hamburger Toggle Button */}
           {mounted && (
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl bg-bgSecondary/60 border border-borderPrimary/40 text-textPrimary cursor-pointer transition-colors"
+              className="p-2 rounded-xl bg-bgSecondary/60 border border-borderPrimary/40 text-textPrimary cursor-pointer transition-colors md:hidden"
               aria-label="Toggle Mobile Menu"
             >
               {mobileMenuOpen ? (
@@ -326,7 +320,7 @@ const Navbar = () => {
               className="flex items-center gap-2 px-3 py-2 rounded-xl bg-bgSecondary border border-borderPrimary/40 text-xs font-bold text-primary cursor-pointer"
             >
               <Globe className="h-4 w-4 text-primary" />
-              <span>{language === "en" ? "العربية (مصري)" : "English"}</span>
+              <span>{language === "en" ? "العربية" : "English"}</span>
             </button>
 
             <button

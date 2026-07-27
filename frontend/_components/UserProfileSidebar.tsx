@@ -1,7 +1,8 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { User as UserIcon, LogIn, FileText, CheckCircle2 } from "lucide-react";
+import { User as UserIcon, LogIn, FileText, CheckCircle2, Briefcase } from "lucide-react";
 import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import { Text } from "@/_components/Text";
 import { Button } from "@/components/ui/button";
@@ -14,10 +15,15 @@ interface UserProfileSidebarProps {
 export default function UserProfileSidebar({
   onOpenCreatePost,
 }: UserProfileSidebarProps) {
+  const [mounted, setMounted] = useState(false);
   const { data: currentUser, isLoading } = useGetAuthMeQuery();
   const { t } = useLanguage();
 
-  if (isLoading) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || isLoading) {
     return (
       <div className="bg-bgSecondary/60 border border-borderPrimary/40 rounded-2xl p-5 shadow-xs animate-pulse space-y-4">
         <div className="flex items-center gap-3">
@@ -119,6 +125,13 @@ export default function UserProfileSidebar({
               </span>
             )}
           </Link>
+
+          {currentUser.jobTitle && (
+            <div className="flex items-center gap-1.5 mt-0.5 text-xs text-textSecondary font-medium">
+              <Briefcase className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span className="truncate max-w-44 text-xs">{currentUser.jobTitle}</span>
+            </div>
+          )}
 
           {userBio && (
             <Text

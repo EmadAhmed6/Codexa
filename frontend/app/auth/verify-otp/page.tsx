@@ -59,14 +59,18 @@ function VerifyOtpForm() {
           toast.success(
             res?.message ||
               res?.data?.message ||
-              (isArabic ? "تم تأكيد الحساب بنجاح! سجل دخول دلوقتي." : "Account verified successfully! Please sign in."),
+              (isArabic
+                ? "تم تأكيد الحساب بنجاح! سجل دخول دلوقتي."
+                : "Account verified successfully! Please sign in."),
           );
           router.push("/auth/login");
         },
         onError: (err: any) => {
           toast.error(
             err?.response?.data?.message ||
-              (isArabic ? "كود الـ OTP غلط أو انتهى. حاول تاني." : "Invalid OTP code or expired code. Please try again."),
+              (isArabic
+                ? "كود الـ OTP غلط أو انتهى. حاول تاني."
+                : "Invalid OTP code or expired code. Please try again."),
           );
         },
       },

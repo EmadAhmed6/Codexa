@@ -26,12 +26,14 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
+import ActionMenu from "@/_components/ActionMenu";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface ReplySectionProps {
   postId: string;
   commentId: string;
   commentAuthorName?: string;
+  commentAuthorId?: string;
   replyCommentsCount?: number;
   currentUser?: any;
   token?: string;
@@ -43,6 +45,7 @@ export default function ReplySection({
   postId,
   commentId,
   commentAuthorName,
+  commentAuthorId,
   replyCommentsCount = 0,
   currentUser,
   token,
@@ -100,19 +103,48 @@ export default function ReplySection({
     replies ? replies.length : 0,
   );
 
-  // Render mention as a clickable Link to user profile
-  const renderReplyTextWithMention = (text: string, userId?: string) => {
+  // Render mention as a clickable Link to target user profile
+  const renderReplyTextWithMention = (text: string, replyAuthorId?: string) => {
     const mentionRegex = /^(@[^\s]+(?:\s+[^\s]+)?)/;
     const match = text.match(mentionRegex);
 
     if (match) {
       const mention = match[1];
       const rest = text.slice(mention.length);
+
+      const mentionNameClean = mention.replace(/^@/, "").trim().toLowerCase();
+
+      let targetUserId: string | undefined = undefined;
+
+      // 1. Check if mention matches the parent comment author
+      if (
+        commentAuthorId &&
+        commentAuthorName &&
+        commentAuthorName.toLowerCase() === mentionNameClean
+      ) {
+        targetUserId = commentAuthorId;
+      }
+
+      // 2. Check if mention matches any replier in the current thread
+      if (!targetUserId && replies) {
+        const foundReply = replies.find(
+          (r) =>
+            (r.user?.fullName && r.user.fullName.toLowerCase() === mentionNameClean) ||
+            (r.user?.username && r.user.username.toLowerCase() === mentionNameClean),
+        );
+        if (foundReply && foundReply.user?._id) {
+          targetUserId = foundReply.user._id;
+        }
+      }
+
+      // 3. Fallback to commentAuthorId if targetUserId is still unknown (never use replyAuthorId)
+      const finalTargetId = targetUserId || commentAuthorId;
+
       return (
         <>
-          {userId ? (
+          {finalTargetId ? (
             <Link
-              href={`/profile/${userId}`}
+              href={`/profile/${finalTargetId}`}
               onClick={(e) => {
                 e.stopPropagation();
                 onCloseModal?.();
@@ -251,30 +283,19 @@ export default function ReplySection({
                       )}
                     </div>
 
-                    {/* Owner / Admin Controls */}
+                    {/* Owner / Admin Controls Menu */}
                     {isReplyOwner && !isEditingReply && (
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => {
-                            setEditingReplyId(reply._id);
-                            setEditReplyText(reply.text);
-                            setEditReplyImagePreview(replyImageSrc || null);
-                            setEditReplyImageFile(null);
-                          }}
-                          className="p-1 rounded-md text-textSecondary hover:text-primary transition-colors cursor-pointer"
-                          title={t.post.editComment}
-                        >
-                          <Edit2 className="h-3 w-3" />
-                        </button>
-                        <button
-                          onClick={() => deleteReplyMutation.mutate(reply._id)}
-                          disabled={deleteReplyMutation.isPending}
-                          className="p-1 rounded-md text-textSecondary hover:text-rose-500 transition-colors cursor-pointer"
-                          title={t.post.deleteComment}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      </div>
+                      <ActionMenu
+                        onEdit={() => {
+                          setEditingReplyId(reply._id);
+                          setEditReplyText(reply.text);
+                          setEditReplyImagePreview(replyImageSrc || null);
+                          setEditReplyImageFile(null);
+                        }}
+                        onDelete={() => deleteReplyMutation.mutate(reply._id)}
+                        editLabel={t.post.editComment}
+                        deleteLabel={t.post.deleteComment}
+                      />
                     )}
                   </div>
 
@@ -284,6 +305,12 @@ export default function ReplySection({
                       <textarea
                         value={editReplyText}
                         onChange={(e) => setEditReplyText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSaveEditReply(reply._id);
+                          }
+                        }}
                         className="w-full p-2.5 text-xs rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary outline-none focus:ring-1 focus:ring-primary"
                       />
 

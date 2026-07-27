@@ -18,7 +18,7 @@ const getAllUsers = asyncHandler(
 const getUserById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const user = await User.findById(req.params.id)
-      .select("-password -email")
+      .select("-password")
       .populate({
         path: "posts",
         populate: [

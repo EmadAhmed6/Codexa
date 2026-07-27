@@ -20,9 +20,11 @@ import {
 } from "@/_features/posts/hooks";
 import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import Cookies from "js-cookie";
-import EditPostModal from "./EditPostModal";
-import DeleteConfirmModal from "./DeleteConfirmModal";
-import CommentsModal from "./CommentsModal";
+import ImageModal from "@/_components/ImageModal";
+import EditPostModal from "@/_components/EditPostModal";
+import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
+import CommentsModal from "@/_components/CommentsModal";
+import ActionMenu from "@/_components/ActionMenu";
 import { formatRelativeTime } from "@/lib/utils";
 import { Text } from "@/_components/Text";
 import Tooltip from "@/_components/Tooltip";
@@ -264,30 +266,12 @@ export default function PostCard({ post }: PostCardProps) {
               </Text>
             )}
 
-            {/* Edit & Delete Controls */}
+            {/* Edit & Delete Action Menu */}
             {isOwnerOrAdmin && (
-              <div className="flex items-center gap-1 ltr:ml-1 ltr:border-l rtl:mr-1 rtl:border-r border-borderPrimary/40 ltr:pl-1.5 rtl:pr-1.5">
-                <Tooltip position="top" content={t.post.edit}>
-                  <button
-                    onClick={handleOpenEdit}
-                    className="p-1 rounded-md text-textSecondary hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
-                    title={t.post.edit}
-                  >
-                    <Edit2 className="h-3.5 w-3.5" />
-                  </button>
-                </Tooltip>
-
-                <Tooltip position="top" content={t.post.delete}>
-                  <button
-                    onClick={handleDelete}
-                    disabled={deletePostMutation.isPending}
-                    className="p-1 rounded-md text-textSecondary hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                    title={t.post.delete}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </Tooltip>
-              </div>
+              <ActionMenu
+                onEdit={() => setIsEditModalOpen(true)}
+                onDelete={() => setIsDeleteModalOpen(true)}
+              />
             )}
           </div>
         </div>

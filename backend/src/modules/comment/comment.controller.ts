@@ -32,13 +32,34 @@ const getAllComments = asyncHandler(
       postId: new Types.ObjectId(postId),
       parentComment: null,
     })
-      .populate("user", ["_id", "username", "fullName", "profilePicture", "jobTitle", "bio"])
-      .populate("likes", ["_id", "username", "fullName", "profilePicture", "jobTitle", "bio"])
+      .populate("user", [
+        "_id",
+        "username",
+        "fullName",
+        "profilePicture",
+        "jobTitle",
+        "bio",
+      ])
+      .populate("likes", [
+        "_id",
+        "username",
+        "fullName",
+        "profilePicture",
+        "jobTitle",
+        "bio",
+      ])
       .populate({
         path: "replies",
         populate: {
           path: "user",
-          select: ["_id", "username", "fullName", "profilePicture", "jobTitle", "bio"],
+          select: [
+            "_id",
+            "username",
+            "fullName",
+            "profilePicture",
+            "jobTitle",
+            "bio",
+          ],
         },
       })
       .skip((pageNumber - 1) * commentsPerPost)
@@ -156,7 +177,9 @@ const updateComment = asyncHandler(
 
     if (req.file) {
       if (existingComment.commentImage?.publicId) {
-        await cloudinary.uploader.destroy(existingComment.commentImage.publicId);
+        await cloudinary.uploader.destroy(
+          existingComment.commentImage.publicId,
+        );
       }
       const result = await cloudinary.uploader.upload(req.file.path);
       commentImage = {
@@ -177,7 +200,14 @@ const updateComment = asyncHandler(
         },
       },
       { new: true, runValidators: true },
-    ).populate("user", ["_id", "username", "fullName", "profilePicture", "jobTitle", "bio"]);
+    ).populate("user", [
+      "_id",
+      "username",
+      "fullName",
+      "profilePicture",
+      "jobTitle",
+      "bio",
+    ]);
 
     res.status(200).json({
       success: true,
@@ -209,7 +239,7 @@ const deleteComment = asyncHandler(
         await cloudinary.uploader.destroy(comment.commentImage.publicId);
       }
       await Comment.findByIdAndDelete(new Types.ObjectId(commentId));
-      await Comment.findByIdAndUpdate(comment.postId, {
+      await Post.findByIdAndUpdate(comment.postId, {
         $inc: { commentsCount: -1 },
       });
       res.status(200).json({
@@ -262,7 +292,14 @@ const likeComment = asyncHandler(
         ? { $pull: { likes: userId }, $inc: { commentLikesCount: -1 } }
         : { $push: { likes: userId }, $inc: { commentLikesCount: 1 } },
       { new: true },
-    ).populate("likes", ["_id", "username", "fullName", "profilePicture", "jobTitle", "bio"]);
+    ).populate("likes", [
+      "_id",
+      "username",
+      "fullName",
+      "profilePicture",
+      "jobTitle",
+      "bio",
+    ]);
 
     res.status(200).json({
       success: true,

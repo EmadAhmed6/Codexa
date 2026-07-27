@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Loader2, Edit3, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
@@ -28,9 +29,14 @@ export default function EditPostModal({
   const queryClient = useQueryClient();
   const updatePostMutation = useUpdatePost();
   const { t, isArabic } = useLanguage();
+  const [mounted, setMounted] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const {
     register,
@@ -41,31 +47,47 @@ export default function EditPostModal({
     formState: { errors },
   } = useForm<IPostForm>({
     resolver: zodResolver(postFormSchema as any),
-    mode: "onBlur",
+    mode: "onChange",
     defaultValues: {
       title: post?.title || "",
     },
   });
 
   useEffect(() => {
-    if (post) {
+    if (isOpen && post) {
       reset({
         title: post.title || "",
       });
       setImagePreview(post.postImage?.url || post.image?.url || null);
       setImageFile(null);
     }
-  }, [post, reset]);
+  }, [post, isOpen, reset]);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   const watchTitle = watch("title") || "";
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image file size should be less than 5MB.");
+        toast.error(
+          isArabic
+            ? "حجم الصورة لازم يكون أقل من 5 ميجابايت."
+            : "Image file size should be less than 5MB.",
+        );
         return;
       }
       setImageFile(file);
@@ -91,25 +113,33 @@ export default function EditPostModal({
       queryClient.invalidateQueries({ queryKey: ["authMe"] });
 
       setImageFile(null);
+      toast.success(
+        isArabic ? "تم تعديل البوست بنجاح!" : "Post updated successfully!",
+      );
       onClose();
-    } catch {
-      // Error handled in mutation
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ||
+          (isArabic
+            ? "حدث خطأ أثناء تعديل البوست."
+            : "Failed to update post. Please try again."),
+      );
     } finally {
       setIsUploading(false);
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-bgSecondary border border-borderPrimary rounded-2xl shadow-2xl p-6 md:p-8 max-h-[90vh] overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+      <div className="relative w-full max-w-lg bg-bgSecondary border border-borderPrimary/60 rounded-2xl shadow-2xl p-6 md:p-7 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-borderPrimary/40 mb-6">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between pb-4 border-b border-borderPrimary/40 mb-5">
+          <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-primary/10 text-primary">
               <Edit3 className="h-5 w-5" />
             </div>
             <div>
-              <Text as="h2" size="xl" font="bold" color="primary">
+              <Text as="h2" size="lg" font="bold" color="primary">
                 {t.createEditPost.editTitle}
               </Text>
               <Text as="p" size="xs" color="secondary">
@@ -119,17 +149,17 @@ export default function EditPostModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-bgPrimary text-textSecondary hover:text-textPrimary transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-bgPrimary/60 text-textSecondary hover:text-textPrimary transition-colors cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Post Content / Title */}
           <div>
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center mb-1.5">
               <Text
                 as="label"
                 size="xs"
@@ -150,10 +180,18 @@ export default function EditPostModal({
             </div>
             <textarea
               rows={3}
+              maxLength={32}
+              placeholder={isArabic ? "اكتب محتوى البوست هنا..." : "Write post content here..."}
               {...register("title", {
                 onChange: () => clearErrors("title"),
               })}
-              className="w-full px-4 py-3 rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary text-sm font-semibold outline-none focus:ring-2 focus:ring-primary transition-all resize-none"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(onSubmit)();
+                }
+              }}
+              className="w-full p-3.5 text-xs sm:text-sm rounded-xl bg-bgPrimary/70 border border-borderPrimary/60 text-textPrimary placeholder:text-textSecondary/50 outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
             />
             <Error error={errors.title?.message} />
           </div>
@@ -165,16 +203,16 @@ export default function EditPostModal({
               size="xs"
               font="semiBold"
               color="secondary"
-              className="block uppercase tracking-wider mb-2"
+              className="block uppercase tracking-wider mb-1.5"
             >
               {t.createEditPost.imageLabel}
             </Text>
-            {imagePreview ? (
-              <div className="relative rounded-xl overflow-hidden border border-borderPrimary max-h-48 mb-2 group">
+            {imagePreview && (
+              <div className="relative rounded-xl overflow-hidden border border-borderPrimary/50 max-h-48 mb-2 group">
                 <img
                   src={imagePreview}
                   alt="Post preview"
-                  className="w-full h-44 object-cover"
+                  className="w-full h-40 object-cover"
                 />
                 <button
                   type="button"
@@ -187,9 +225,9 @@ export default function EditPostModal({
                   <X className="h-4 w-4" />
                 </button>
               </div>
-            ) : null}
+            )}
 
-            <label className="flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed border-borderPrimary hover:border-primary/50 bg-bgPrimary hover:bg-primary/5 text-textSecondary hover:text-primary transition-all cursor-pointer text-xs font-semibold">
+            <label className="flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed border-borderPrimary/60 hover:border-primary/50 bg-bgPrimary/60 hover:bg-primary/5 text-textSecondary hover:text-primary transition-all cursor-pointer text-xs font-semibold">
               <ImageIcon className="h-4 w-4 text-primary" />
               <span>{imagePreview ? t.createEditPost.changeImage : t.createEditPost.uploadImage}</span>
               <input
@@ -202,12 +240,12 @@ export default function EditPostModal({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-borderPrimary/30">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-borderPrimary/30">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="rounded-xl border-borderPrimary cursor-pointer"
+              className="rounded-xl border-borderPrimary/60 cursor-pointer"
             >
               <Text as="span" size="xs" font="semiBold" color="primary">
                 {t.createEditPost.cancel}
@@ -215,8 +253,8 @@ export default function EditPostModal({
             </Button>
             <Button
               type="submit"
-              disabled={updatePostMutation.isPending || isUploading}
-              className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground font-semibold px-6 cursor-pointer"
+              disabled={updatePostMutation.isPending || isUploading || !watchTitle.trim()}
+              className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground font-semibold px-5 cursor-pointer"
             >
               {updatePostMutation.isPending || isUploading ? (
                 <span className="flex items-center gap-2">
@@ -234,6 +272,7 @@ export default function EditPostModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

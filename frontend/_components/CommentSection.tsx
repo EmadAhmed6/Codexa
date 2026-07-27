@@ -38,6 +38,7 @@ import { Text } from "@/_components/Text";
 import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
 import ReplySection from "@/_components/ReplySection";
+import ActionMenu from "@/_components/ActionMenu";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface CommentSectionProps {
@@ -210,7 +211,7 @@ export default function CommentSection({
   const renderCommentForm = () => (
     token ? (
       <form onSubmit={handleSubmit(onSubmitComment)} className="w-full">
-        <div className={`rounded-xl bg-bgSecondary/90 border border-borderPrimary/50 shadow-xs focus-within:border-primary/50 transition-all ${isModal ? "p-2 sm:p-2.5" : "p-4"}`}>
+        <div className="rounded-xl bg-bgSecondary/90 border border-borderPrimary/50 shadow-xs focus-within:border-primary/50 transition-all p-2 sm:p-2.5">
           {/* Active Replying-To Banner */}
           {replyingTo && (
             <div className="flex items-center justify-between px-3 py-1.5 mb-2 rounded-lg bg-primary/10 border border-primary/20 text-xs text-primary font-semibold animate-in fade-in duration-150">
@@ -234,23 +235,12 @@ export default function CommentSection({
             </div>
           )}
 
-          {!isModal && !replyingTo && (
-            <div className="flex justify-between items-center mb-1">
-              <Text as="span" size="xs" font="semiBold" color="secondary">
-                {t.post.writeResponse}
-              </Text>
-              <Text as="span" size="xs" color="secondary" className="text-[10px]">
-                {watchText.length}/500
-              </Text>
-            </div>
-          )}
-
           <textarea
             ref={(e) => {
               registerTextRef(e);
               textareaRef.current = e;
             }}
-            rows={isModal ? 1 : 3}
+            rows={1}
             placeholder={
               replyingTo
                 ? isArabic
@@ -259,7 +249,13 @@ export default function CommentSection({
                 : t.post.commentPlaceholder
             }
             {...textRegisterProps}
-            className={`w-full bg-transparent text-textPrimary placeholder:text-textSecondary/50 outline-none resize-none ${isModal ? "text-xs py-0.5" : "text-xs sm:text-sm"}`}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(onSubmitComment)();
+              }
+            }}
+            className="w-full bg-transparent text-textPrimary placeholder:text-textSecondary/50 outline-none resize-none text-xs py-0.5"
           />
           <Error error={errors.text?.message} />
 
@@ -285,7 +281,7 @@ export default function CommentSection({
           )}
 
           {/* Bottom Actions Bar */}
-          <div className={`flex items-center justify-between border-t border-borderPrimary/30 ${isModal ? "pt-1.5 mt-1" : "pt-3 mt-2"}`}>
+          <div className="flex items-center justify-between border-t border-borderPrimary/30 pt-1.5 mt-1">
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-1 text-xs text-textSecondary hover:text-primary transition-colors cursor-pointer">
                 <ImageIcon className="h-3.5 w-3.5 text-primary" />
@@ -300,11 +296,9 @@ export default function CommentSection({
                 />
               </label>
 
-              {isModal && (
-                <Text as="span" size="xs" color="secondary" className="text-[10px]">
-                  {watchText.length}/500
-                </Text>
-              )}
+              <Text as="span" size="xs" color="secondary" className="text-[10px]">
+                {watchText.length}/500
+              </Text>
             </div>
 
             <Button
@@ -316,16 +310,16 @@ export default function CommentSection({
                 addReplyMutation.isPending ||
                 isUploading
               }
-              className={`rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground font-semibold cursor-pointer ${isModal ? "h-7 text-[11px] px-3 py-1" : "px-4"}`}
+              className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground font-semibold cursor-pointer h-7 text-[11px] px-3 py-1"
             >
               {addCommentMutation.isPending || addReplyMutation.isPending || isUploading ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
                 <>
-                  <Text as="span" size="xs" font="semiBold" color="white" className={isModal ? "text-[11px]" : ""}>
+                  <Text as="span" size="xs" font="semiBold" color="white" className="text-[11px]">
                     {replyingTo ? (isArabic ? "رد" : "Reply") : t.post.postComment}
                   </Text>
-                  <Send className="h-3 w-3 ltr:ml-1 rtl:mr-1 rtl:rotate-180" />
+                  <Send className="h-3 w-3 ltr:ml-1 rtl:mr-1 rtl:-scale-x-1" />
                 </>
               )}
             </Button>
@@ -443,31 +437,19 @@ export default function CommentSection({
                   )}
                 </div>
 
-                {/* Edit & Delete Comment Options */}
+                {/* Edit & Delete Comment Action Menu */}
                 {isOwner && !isEditing && (
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => {
-                        setEditingCommentId(comment._id);
-                        setEditText(comment.text);
-                        setEditImagePreview(comment.commentImage?.url || (comment as any).image?.url || null);
-                        setEditImageFile(null);
-                      }}
-                      className="p-1 rounded-md text-textSecondary hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
-                      title={t.post.editComment}
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </button>
-
-                    <button
-                      onClick={() => deleteCommentMutation.mutate(comment._id)}
-                      disabled={deleteCommentMutation.isPending}
-                      className="p-1 rounded-md text-textSecondary hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                      title={t.post.deleteComment}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
+                  <ActionMenu
+                    onEdit={() => {
+                      setEditingCommentId(comment._id);
+                      setEditText(comment.text);
+                      setEditImagePreview(comment.commentImage?.url || (comment as any).image?.url || null);
+                      setEditImageFile(null);
+                    }}
+                    onDelete={() => deleteCommentMutation.mutate(comment._id)}
+                    editLabel={t.post.editComment}
+                    deleteLabel={t.post.deleteComment}
+                  />
                 )}
               </div>
 
@@ -478,6 +460,12 @@ export default function CommentSection({
                     rows={2}
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSaveEdit(comment._id);
+                      }
+                    }}
                     className="w-full p-2.5 text-xs rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary outline-none focus:ring-1 focus:ring-primary resize-none"
                   />
 
@@ -625,6 +613,7 @@ export default function CommentSection({
                 postId={postId}
                 commentId={comment._id}
                 commentAuthorName={commentAuthorDisplayName}
+                commentAuthorId={comment.user?._id}
                 replyCommentsCount={comment.replyCommentsCount}
                 currentUser={currentUser}
                 token={token}
@@ -665,7 +654,7 @@ export default function CommentSection({
 
   // Standard Page View
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       {!hideHeader && (
         <div className="flex items-center gap-2 pb-3 border-b border-borderPrimary/40">
           <MessageSquare className="h-5 w-5 text-primary" />
@@ -675,8 +664,14 @@ export default function CommentSection({
         </div>
       )}
 
-      {renderCommentForm()}
       {renderCommentsList()}
+
+      {/* Fixed Floating Bottom Comment Box (Sized to box only) */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 sm:px-6 z-40 pointer-events-none">
+        <div className="pointer-events-auto shadow-2xl rounded-2xl">
+          {renderCommentForm()}
+        </div>
+      </div>
     </div>
   );
 }

@@ -160,7 +160,9 @@ export default function AdminPostsPage() {
               {t.admin.dashboard}
             </Text>
             <Text as="p" size="xs" color="secondary">
-              {isArabic ? "إدارة البوستات المنشورة وإحصائيات السيستم" : "Manage system posts and platform metrics"}
+              {isArabic
+                ? "إدارة البوستات المنشورة وإحصائيات السيستم"
+                : "Manage system posts and platform metrics"}
             </Text>
           </div>
         </div>
@@ -251,7 +253,9 @@ export default function AdminPostsPage() {
               ) : filteredPosts.length === 0 ? (
                 <div className="py-16 text-center">
                   <Text as="p" size="xs" color="secondary">
-                    {isArabic ? "ملقيناش أي بوست يطابق البحث بتاعك." : "No posts found matching your search query."}
+                    {isArabic
+                      ? "ملقيناش أي بوست يطابق البحث بتاعك."
+                      : "No posts found matching your search query."}
                   </Text>
                 </div>
               ) : (
@@ -259,12 +263,23 @@ export default function AdminPostsPage() {
                   <table className="w-full ltr:text-left rtl:text-right text-xs">
                     <thead className="bg-bgSecondary/90 text-textSecondary font-semibold uppercase tracking-wider border-b border-borderPrimary/40">
                       <tr>
-                        <th className="px-6 py-4">{isArabic ? "عنوان البوست" : "Post Title"}</th>
-                        <th className="px-6 py-4">{isArabic ? "الكاتب" : "Author"}</th>
-                        <th className="px-6 py-4">{t.createEditPost.categoryLabel}</th>
-                        <th className="px-6 py-4">{isArabic ? "التفاعلات والكومنتات" : "Reactions & Comments"}</th>
-                        <th className="px-6 py-4">{isArabic ? "تاريخ النشر" : "Published Date"}</th>
-                        <th className="px-6 py-4 ltr:text-right rtl:text-left">{t.admin.actions}</th>
+                        <th className="px-6 py-4">
+                          {isArabic ? "عنوان البوست" : "Post Title"}
+                        </th>
+                        <th className="px-6 py-4">
+                          {isArabic ? "الكاتب" : "Author"}
+                        </th>
+                        <th className="px-6 py-4">
+                          {isArabic
+                            ? "التفاعلات والكومنتات"
+                            : "Reactions & Comments"}
+                        </th>
+                        <th className="px-6 py-4">
+                          {isArabic ? "تاريخ النشر" : "Published Date"}
+                        </th>
+                        <th className="px-6 py-4 ltr:text-right rtl:text-left">
+                          {t.admin.actions}
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-borderPrimary/30 text-textPrimary font-medium">
@@ -284,12 +299,6 @@ export default function AdminPostsPage() {
                         const sharesCount = postItem.shares?.length || 0;
                         const commentsCount = postItem.comments?.length || 0;
 
-                        const translatedCat =
-                          postItem.category &&
-                          t.categories[postItem.category as keyof typeof t.categories]
-                            ? t.categories[postItem.category as keyof typeof t.categories]
-                            : postItem.category || t.post.general;
-
                         return (
                           <tr
                             key={postItem._id}
@@ -300,9 +309,13 @@ export default function AdminPostsPage() {
                                 href={`/posts/${postItem._id}`}
                                 className="group/article flex items-center gap-3 max-w-xs cursor-pointer"
                               >
-                                {(postItem.postImage?.url || postItem.image?.url) ? (
+                                {postItem.postImage?.url ||
+                                postItem.image?.url ? (
                                   <img
-                                    src={postItem.postImage?.url || postItem.image?.url}
+                                    src={
+                                      postItem.postImage?.url ||
+                                      postItem.image?.url
+                                    }
                                     alt={postItem.title}
                                     className="h-10 w-14 rounded-lg object-cover border border-borderPrimary group-hover/article:border-primary/50 group-hover/article:scale-105 transition-all duration-200 shrink-0"
                                   />
@@ -390,12 +403,6 @@ export default function AdminPostsPage() {
                             </td>
 
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="px-2.5 py-1 rounded-md bg-primary/10 text-primary border border-primary/20 text-[10px] font-semibold">
-                                {translatedCat}
-                              </span>
-                            </td>
-
-                            <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center gap-2.5 text-[11px]">
                                 <Tooltip
                                   position="bottom"
@@ -412,7 +419,10 @@ export default function AdminPostsPage() {
                                   </span>
                                 </Tooltip>
 
-                                <Tooltip position="bottom" content={t.post.viewComments}>
+                                <Tooltip
+                                  position="bottom"
+                                  content={t.post.viewComments}
+                                >
                                   <Link
                                     href={`/posts/${postItem._id}#comments`}
                                     className="flex items-center gap-1 text-sky-500 hover:bg-sky-500/10 px-2 py-1 rounded-lg transition-colors font-semibold border border-transparent hover:border-sky-500/20"
@@ -444,11 +454,14 @@ export default function AdminPostsPage() {
                                 <Text as="span" size="xs" color="secondary">
                                   {new Date(
                                     postItem.createdAt,
-                                  ).toLocaleDateString(isArabic ? "ar-EG" : "en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  })}
+                                  ).toLocaleDateString(
+                                    isArabic ? "ar-EG" : "en-US",
+                                    {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    },
+                                  )}
                                 </Text>
                               ) : (
                                 <Text

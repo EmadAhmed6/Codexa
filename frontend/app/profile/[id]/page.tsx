@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Navbar from "@/_components/Navbar";
@@ -21,12 +22,15 @@ import {
   Loader2,
   FileText,
   Edit,
+  Edit2,
   Trash2,
   X,
   ShieldCheck,
   Calendar,
   Briefcase,
+  Eye,
 } from "lucide-react";
+import ImageModal from "@/_components/ImageModal";
 import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
@@ -66,12 +70,20 @@ export default function UserProfilePage() {
   const updateUserMutation = useUpdateUser(targetUserId);
   const deleteUserMutation = useDeleteUser();
 
+  const [mounted, setMounted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteUserModalOpen, setIsDeleteUserModalOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const userToDisplay =
     profileUser || (isOwnProfile ? currentUser : null) || currentUser;
+
+  const currentEmail = userToDisplay?.email || currentUser?.email || "";
 
   const handleDeleteAccount = async () => {
     const deleteId = targetUserId || currentUser?._id;
@@ -107,9 +119,21 @@ export default function UserProfilePage() {
       username: userToDisplay?.username || "",
       jobTitle: userToDisplay?.jobTitle || "",
       bio: (userToDisplay as any)?.bio || "",
-      email: userToDisplay?.email || "",
+      email: currentEmail,
     },
   });
+
+  useEffect(() => {
+    if (userToDisplay) {
+      reset({
+        fullName: userToDisplay.fullName || "",
+        username: userToDisplay.username || "",
+        jobTitle: userToDisplay.jobTitle || "",
+        bio: (userToDisplay as any)?.bio || "",
+        email: userToDisplay.email || currentUser?.email || "",
+      });
+    }
+  }, [userToDisplay, currentUser, reset]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -129,7 +153,7 @@ export default function UserProfilePage() {
       username: userToDisplay?.username || "",
       jobTitle: userToDisplay?.jobTitle || "",
       bio: (userToDisplay as any)?.bio || "",
-      email: userToDisplay?.email || "",
+      email: userToDisplay?.email || currentUser?.email || "",
     });
     setIsEditModalOpen(true);
   };
@@ -188,37 +212,54 @@ export default function UserProfilePage() {
           ) : (
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 relative z-10">
               {/* Avatar Section */}
-              <div className="relative group shrink-0">
-                {userToDisplay?.profilePicture?.url ? (
-                  <img
-                    src={userToDisplay.profilePicture.url}
-                    alt={userToDisplay.fullName || userToDisplay.username}
-                    className="h-28 w-28 md:h-32 md:w-32 rounded-3xl object-cover border-2 border-primary/30 shadow-md"
-                  />
-                ) : (
-                  <div className="h-28 w-28 md:h-32 md:w-32 rounded-3xl bg-primary/15 flex items-center justify-center text-primary border-2 border-primary/30 shadow-md">
-                    <UserIcon className="h-14 w-14" />
-                  </div>
-                )}
+              <div className="relative shrink-0 group">
+                <div
+                  onClick={() => {
+                    if (userToDisplay?.profilePicture?.url) {
+                      setPreviewImage(userToDisplay.profilePicture.url);
+                    }
+                  }}
+                  className={`relative ${userToDisplay?.profilePicture?.url ? "cursor-pointer" : ""}`}
+                  title={
+                    userToDisplay?.profilePicture?.url
+                      ? isArabic
+                        ? "اضغط لتكبير الصورة"
+                        : "Click to view photo"
+                      : undefined
+                  }
+                >
+                  {userToDisplay?.profilePicture?.url ? (
+                    <div className="relative rounded-full overflow-hidden">
+                      <img
+                        src={userToDisplay.profilePicture.url}
+                        alt={userToDisplay.fullName || userToDisplay.username}
+                        className="h-28 w-28 md:h-32 md:w-32 rounded-full object-cover border-2 border-primary/30 shadow-md group-hover:scale-105 transition-transform duration-200"
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white pointer-events-none z-10">
+                        <Eye className="h-6 w-6 text-white mb-0.5" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">
+                          {isArabic ? "عرض الصورة" : "View Image"}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-28 w-28 md:h-32 md:w-32 rounded-full bg-primary/15 flex items-center justify-center text-primary border-2 border-primary/30 shadow-md">
+                      <UserIcon className="h-14 w-14" />
+                    </div>
+                  )}
+                </div>
 
-                {/* Upload Avatar Overlay (Owner Only) */}
+                {/* Edit Avatar Pen Button (Owner Only) */}
                 {isOwnProfile && (
-                  <label className="absolute inset-0 rounded-3xl bg-black/60 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  <label
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute -bottom-1 ltr:-right-1 rtl:-left-1 p-2.5 rounded-2xl bg-primary hover:bg-primaryHover text-white shadow-lg border-2 border-bgSecondary transition-transform hover:scale-110 cursor-pointer z-20"
+                    title={t.profile.changePhoto}
+                  >
                     {isUploading ? (
-                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin text-white" />
                     ) : (
-                      <>
-                        <Camera className="h-6 w-6 mb-1" />
-                        <Text
-                          as="span"
-                          size="xs"
-                          font="bold"
-                          color="white"
-                          className="text-[10px] uppercase"
-                        >
-                          {t.profile.changePhoto}
-                        </Text>
-                      </>
+                      <Edit2 className="h-4 w-4 text-white" />
                     )}
                     <input
                       type="file"
@@ -243,7 +284,9 @@ export default function UserProfilePage() {
                         color="primary"
                         className="tracking-tight md:text-4xl"
                       >
-                        {userToDisplay?.fullName || userToDisplay?.username || "Developer"}
+                        {userToDisplay?.fullName ||
+                          userToDisplay?.username ||
+                          "Developer"}
                       </Text>
                       {userToDisplay?.isAdmin ? (
                         <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1">
@@ -303,14 +346,15 @@ export default function UserProfilePage() {
                         onClick={handleOpenEditModal}
                         variant="outline"
                         size="sm"
-                        className="rounded-xl border-borderPrimary text-xs flex items-center gap-1.5 cursor-pointer"
+                        className="group/editBtn rounded-xl border border-borderPrimary hover:border-primary/50 hover:bg-primary/10 transition-all duration-200 text-xs flex items-center gap-1.5 cursor-pointer hover:shadow-md hover:scale-105 active:scale-95"
                       >
-                        <Edit className="h-3.5 w-3.5" />
+                        <Edit className="h-3.5 w-3.5 text-textPrimary group-hover/editBtn:text-primary transition-colors" />
                         <Text
                           as="span"
                           size="xs"
                           font="semiBold"
                           color="primary"
+                          className="group-hover/editBtn:text-primary transition-colors"
                         >
                           {t.profile.editProfile}
                         </Text>
@@ -332,7 +376,11 @@ export default function UserProfilePage() {
                           font="semiBold"
                           className="text-rose-700 group-hover/delBtn:text-white transition-colors"
                         >
-                          {isOwnProfile ? (isArabic ? "مسح الحساب" : "Delete Account") : t.admin.deleteUser}
+                          {isOwnProfile
+                            ? isArabic
+                              ? "مسح الحساب"
+                              : "Delete Account"
+                            : t.admin.deleteUser}
                         </Text>
                       </Button>
                     )}
@@ -362,24 +410,26 @@ export default function UserProfilePage() {
         </div>
 
         {/* Profile User Posts Section */}
-        <div className="space-y-6">
-          <div className="max-w-2xl mx-auto w-full flex items-center justify-between pb-2 border-b border-borderPrimary/40">
-            <div className="flex items-center gap-2">
+        <div className="space-y-6 max-w-2xl mx-auto w-full">
+          <div className="flex items-center pb-2 border-b border-borderPrimary/40 w-full">
+            <div className="flex items-center gap-2.5">
               <FileText className="h-5 w-5 text-primary" />
               <Text as="h2" size="xl" font="bold" color="primary">
                 {isOwnProfile
-                  ? (isArabic ? "البوستات بتاعتي" : "My Published Posts")
+                  ? isArabic
+                    ? "البوستات بتاعتي"
+                    : "My Published Posts"
                   : `${userToDisplay?.fullName || userToDisplay?.username || ""} - ${t.profile.userPosts}`}
               </Text>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                {displayUserPosts.length}
+              </span>
             </div>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
-              {displayUserPosts.length}
-            </span>
           </div>
 
           {/* Inline Create Post Box if viewing own profile */}
           {isOwnProfile && (
-            <div className="max-w-2xl mx-auto w-full">
+            <div className="w-full">
               <CreatePostCard />
             </div>
           )}
@@ -389,14 +439,14 @@ export default function UserProfilePage() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : displayUserPosts.length === 0 ? (
-            <div className="text-center py-12 p-8 rounded-2xl bg-bgSecondary/40 border border-borderPrimary/40">
+            <div className="text-center py-12 p-8 rounded-2xl bg-bgSecondary/40 border border-borderPrimary/40 w-full">
               <FileText className="h-10 w-10 text-textSecondary mx-auto mb-3 opacity-40" />
               <Text as="p" size="sm" font="semiBold" color="primary">
                 {t.profile.noPostsYet}
               </Text>
             </div>
           ) : (
-            <div className="space-y-6 max-w-2xl mx-auto w-full">
+            <div className="space-y-6 w-full">
               {displayUserPosts.map((post: Post) => (
                 <PostCard key={post._id} post={post} />
               ))}
@@ -406,174 +456,208 @@ export default function UserProfilePage() {
       </main>
 
       {/* Edit Profile Modal */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md bg-bgSecondary border border-borderPrimary rounded-2xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-borderPrimary/40 pb-3">
-              <Text as="h3" size="lg" font="bold" color="primary">
-                {t.profile.editProfile}
-              </Text>
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="p-1.5 rounded-lg text-textSecondary hover:text-textPrimary cursor-pointer"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <form
-              onSubmit={handleSubmit(handleUpdateProfile)}
-              className="space-y-4"
+      {isEditModalOpen &&
+        mounted &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => setIsEditModalOpen(false)}
+          >
+            <div
+              className="relative w-full max-w-md bg-bgSecondary border border-borderPrimary rounded-2xl p-6 shadow-2xl space-y-4"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div>
-                <Text
-                  as="label"
-                  size="xs"
-                  font="semiBold"
-                  color="secondary"
-                  className="block mb-1"
-                >
-                  {isArabic ? "الاسم بالكامل" : "Full Name"}
+              <div className="flex items-center justify-between border-b border-borderPrimary/40 pb-3">
+                <Text as="h3" size="lg" font="bold" color="primary">
+                  {t.profile.editProfile}
                 </Text>
-                <Input
-                  type="text"
-                  icon="user"
-                  placeholder={isArabic ? "الاسم بالكامل" : "Full Name"}
-                  {...register("fullName", {
-                    onChange: () => clearErrors("fullName"),
-                  })}
-                />
-                <Error error={errors.fullName?.message} />
-              </div>
-
-              <div>
-                <Text
-                  as="label"
-                  size="xs"
-                  font="semiBold"
-                  color="secondary"
-                  className="block mb-1"
-                >
-                  {t.nav.user}
-                </Text>
-                <Input
-                  type="text"
-                  icon="user"
-                  placeholder="Username"
-                  {...register("username", {
-                    onChange: () => clearErrors("username"),
-                  })}
-                />
-                <Error error={errors.username?.message} />
-              </div>
-
-              <div>
-                <Text
-                  as="label"
-                  size="xs"
-                  font="semiBold"
-                  color="secondary"
-                  className="block mb-1"
-                >
-                  {t.profile.jobTitle}
-                </Text>
-                <Input
-                  type="text"
-                  icon="briefcase"
-                  placeholder="e.g. Frontend Developer"
-                  {...register("jobTitle" as any, {
-                    onChange: () => clearErrors("jobTitle" as any),
-                  })}
-                />
-                <Error error={(errors as any).jobTitle?.message} />
-              </div>
-
-              <div>
-                <Text
-                  as="label"
-                  size="xs"
-                  font="semiBold"
-                  color="secondary"
-                  className="block mb-1"
-                >
-                  {t.profile.bio}
-                </Text>
-                <Input
-                  type="text"
-                  icon="file"
-                  placeholder="Tell us about yourself..."
-                  {...register("bio" as any, {
-                    onChange: () => clearErrors("bio" as any),
-                  })}
-                />
-                <Error error={(errors as any).bio?.message} />
-              </div>
-
-              <div>
-                <Text
-                  as="label"
-                  size="xs"
-                  font="semiBold"
-                  color="secondary"
-                  className="block mb-1"
-                >
-                  Email Address
-                </Text>
-                <Input
-                  type="email"
-                  icon="mail"
-                  placeholder="Email"
-                  {...register("email", {
-                    onChange: () => clearErrors("email"),
-                  })}
-                />
-                <Error error={errors.email?.message} />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
+                <button
                   onClick={() => setIsEditModalOpen(false)}
-                  className="rounded-xl text-xs cursor-pointer"
+                  className="p-1.5 rounded-lg text-textSecondary hover:text-textPrimary cursor-pointer"
                 >
-                  <Text as="span" size="xs" color="secondary">
-                    {t.post.cancel}
-                  </Text>
-                </Button>
-                <Button
-                  type="submit"
-                  size="sm"
-                  disabled={updateUserMutation.isPending}
-                  className="rounded-xl bg-primary text-primary-foreground text-xs cursor-pointer"
-                >
-                  <Text as="span" size="xs" font="semiBold" color="white">
-                    {updateUserMutation.isPending
-                      ? t.post.saving
-                      : t.profile.saveProfile}
-                  </Text>
-                </Button>
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+
+              <form
+                onSubmit={handleSubmit(handleUpdateProfile)}
+                className="space-y-4"
+              >
+                <div>
+                  <Text
+                    as="label"
+                    size="xs"
+                    font="semiBold"
+                    color="secondary"
+                    className="block mb-1"
+                  >
+                    {isArabic ? "الاسم بالكامل" : "Full Name"}
+                  </Text>
+                  <Input
+                    type="text"
+                    icon="user"
+                    placeholder={isArabic ? "الاسم بالكامل" : "Full Name"}
+                    {...register("fullName", {
+                      onChange: () => clearErrors("fullName"),
+                    })}
+                  />
+                  <Error error={errors.fullName?.message} />
+                </div>
+
+                <div>
+                  <Text
+                    as="label"
+                    size="xs"
+                    font="semiBold"
+                    color="secondary"
+                    className="block mb-1"
+                  >
+                    {t.auth.usernameLabel}
+                  </Text>
+                  <Input
+                    type="text"
+                    icon="user"
+                    placeholder="Username"
+                    {...register("username", {
+                      onChange: () => clearErrors("username"),
+                    })}
+                  />
+                  <Error error={errors.username?.message} />
+                </div>
+
+                <div>
+                  <Text
+                    as="label"
+                    size="xs"
+                    font="semiBold"
+                    color="secondary"
+                    className="block mb-1"
+                  >
+                    {t.profile.jobTitle}
+                  </Text>
+                  <Input
+                    type="text"
+                    icon="briefcase"
+                    placeholder="e.g. Frontend Developer"
+                    {...register("jobTitle" as any, {
+                      onChange: () => clearErrors("jobTitle" as any),
+                    })}
+                  />
+                  <Error error={(errors as any).jobTitle?.message} />
+                </div>
+
+                <div>
+                  <Text
+                    as="label"
+                    size="xs"
+                    font="semiBold"
+                    color="secondary"
+                    className="block mb-1"
+                  >
+                    {t.profile.bio}
+                  </Text>
+                  <Input
+                    type="text"
+                    icon="file"
+                    placeholder="Tell us about yourself..."
+                    {...register("bio" as any, {
+                      onChange: () => clearErrors("bio" as any),
+                    })}
+                  />
+                  <Error error={(errors as any).bio?.message} />
+                </div>
+
+                <div>
+                  <Text
+                    as="label"
+                    size="xs"
+                    font="semiBold"
+                    color="secondary"
+                    className="block mb-1"
+                  >
+                    Email Address
+                  </Text>
+                  <Input
+                    type="email"
+                    icon="mail"
+                    placeholder="Email"
+                    {...register("email", {
+                      onChange: () => clearErrors("email"),
+                    })}
+                  />
+                  <Error error={errors.email?.message} />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="rounded-xl text-xs cursor-pointer"
+                  >
+                    <Text as="span" size="xs" color="secondary">
+                      {t.post.cancel}
+                    </Text>
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={updateUserMutation.isPending}
+                    className="rounded-xl bg-primary text-primary-foreground text-xs cursor-pointer"
+                  >
+                    <Text as="span" size="xs" font="semiBold" color="white">
+                      {updateUserMutation.isPending
+                        ? t.post.saving
+                        : t.profile.saveProfile}
+                    </Text>
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {/* Delete User Modal */}
       <DeleteConfirmModal
         isOpen={isDeleteUserModalOpen}
         onClose={() => setIsDeleteUserModalOpen(false)}
         onConfirm={handleDeleteAccount}
-        title={isOwnProfile ? (isArabic ? "مسح الحساب" : "Delete My Account") : t.admin.deleteUser}
+        title={
+          isOwnProfile
+            ? isArabic
+              ? "مسح الحساب"
+              : "Delete My Account"
+            : t.admin.deleteUser
+        }
         description={
           isOwnProfile
-            ? (isArabic ? "انت متأكد انك عايز تمسح حسابك؟ كل البيانات والبوستات هتتمسح نهائياً." : "Are you sure you want to delete your account? All associated posts and data will be permanently removed.")
-            : (isArabic ? "انت متأكد انك عايز تمسح حساب اليوزر ده؟ كل بياناته وهتتمسح." : "Are you sure you want to delete this user account?")
+            ? isArabic
+              ? "انت متأكد انك عايز تمسح حسابك؟ كل البيانات والبوستات هتتمسح نهائياً."
+              : "Are you sure you want to delete your account? All associated posts and data will be permanently removed."
+            : isArabic
+              ? "انت متأكد انك عايز تمسح حساب اليوزر ده؟ كل بياناته وهتتمسح."
+              : "Are you sure you want to delete this user account?"
         }
-        confirmText={isOwnProfile ? (isArabic ? "امسح حسابي" : "Delete My Account") : t.admin.deleteUser}
+        confirmText={
+          isOwnProfile
+            ? isArabic
+              ? "امسح حسابي"
+              : "Delete My Account"
+            : t.admin.deleteUser
+        }
         isPending={deleteUserMutation.isPending}
       />
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <ImageModal
+          src={previewImage}
+          alt={userToDisplay?.fullName || userToDisplay?.username}
+          onClose={() => setPreviewImage(null)}
+        />
+      )}
     </div>
   );
 }

@@ -115,18 +115,29 @@ export default function CreatePostCard() {
           </Link>
 
           <div className="flex-1 space-y-1">
-            <textarea
-              rows={2}
-              placeholder={
-                isArabic
-                  ? `بماذا تفكر يا ${currentUser.fullName || currentUser.username}؟`
-                  : `What's on your mind, ${currentUser.fullName || currentUser.username}?`
-              }
-              {...register("title", {
-                onChange: () => clearErrors("title"),
-              })}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-bgPrimary/60 border border-borderPrimary/40 text-textPrimary text-sm placeholder:text-textSecondary/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
-            />
+            {(() => {
+              const firstName = (currentUser.fullName || currentUser.username || "").split(" ")[0];
+              return (
+                <textarea
+                  rows={2}
+                  placeholder={
+                    isArabic
+                      ? `بماذا تفكر يا ${firstName}؟`
+                      : `What's on your mind, ${firstName}?`
+                  }
+                  {...register("title", {
+                    onChange: () => clearErrors("title"),
+                  })}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit(onSubmit)();
+                    }
+                  }}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-bgPrimary/60 border border-borderPrimary/40 text-textPrimary text-sm placeholder:text-textSecondary/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
+                />
+              );
+            })()}
             <Error error={errors.title?.message} />
           </div>
         </div>

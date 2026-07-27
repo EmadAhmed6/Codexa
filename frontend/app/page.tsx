@@ -173,8 +173,8 @@ function HomeContent() {
 
         {/* Main 2-Column Social Feed Layout (Sticky Sidebar + Single Vertical Column Feed) */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sticky Left Sidebar */}
-          <aside className="lg:col-span-1 lg:sticky lg:top-24 self-start order-2 lg:order-1">
+          {/* Sticky Left Sidebar (Desktop Only) */}
+          <aside className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24 self-start order-2 lg:order-1">
             <UserProfileSidebar onOpenCreatePost={scrollToTop} />
           </aside>
 
@@ -257,7 +257,7 @@ function HomeContent() {
                     <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-bgSecondary/40 border border-borderPrimary/30 text-xs text-textSecondary">
                       <Sparkles className="h-3.5 w-3.5 text-primary" />
                       <Text as="span" size="xs" color="secondary">
-                        You've reached the end of the feed
+                        {t.home.reachedEnd}
                       </Text>
                     </div>
                   )}
