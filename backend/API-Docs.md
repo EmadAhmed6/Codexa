@@ -7,10 +7,12 @@ By Emad Ahmed
 ## General Info
 
 ### Base URL
+
 The API is deployed locally and can be accessed at:
 `http://localhost:5000`
 
 ### Response Wrapping
+
 - **Success Responses**: Wrapped in a consistent envelope structure containing a `success` boolean set to `true` and a `data` field holding the returned resource(s) or success metadata. Deletion responses return `success: true` and a direct `message` field.
   ```json
   {
@@ -26,12 +28,14 @@ The API is deployed locally and can be accessed at:
   ```
 
 ### Authentication
+
 Protected routes require JSON Web Token (JWT) authentication. To authenticate, include the token in the HTTP `Authorization` header as a Bearer token:
 `Authorization: Bearer <your_jwt_token>`
 
 ---
 
 ### Rate Limiting & Security
+
 - **Auth Limiter (`/auth/login`, `/auth/forgot-password`, `/auth/resend-otp`)**: Restricted to **10 requests per minute** to prevent brute-force attacks while allowing standard user interactions.
 - **API Limiter (`/users/*`, `/posts/*`)**: Restricted to **100 requests per 15 minutes** to ensure server availability and protection against denial-of-service attempts.
 
@@ -39,37 +43,37 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 
 ## Endpoints Overview Table
 
-| # | Method | Endpoint | Description | Auth | Rate Limit |
-| :--- | :--- | :--- | :--- | :---: | :---: |
-| 1 | POST | `/auth/register` | Register a new user account with DB OTP | ❌ | — |
-| 2 | POST | `/auth/login` | Authenticate user and retrieve JWT token | ❌ | 🔒 10 req/min |
-| 3 | POST | `/auth/verify-otp` | Verify user email using 6-digit DB OTP code | ❌ | — |
-| 4 | POST | `/auth/resend-otp` | Resend 6-digit OTP code to unverified email | ❌ | 🔒 10 req/min |
-| 5 | POST | `/auth/forgot-password` | Send password reset link to user's email | ❌ | 🔒 10 req/min |
-| 6 | POST | `/auth/reset-password/:userId/:token` | Validate reset token and update password | ❌ | — |
-| 7 | GET | `/auth/me` | Retrieve currently authenticated user profile | 🔒 | — |
-| 8 | GET | `/users` | Retrieve list of all users | 🔒 | 🔒 100 req/15min |
-| 9 | GET | `/users/:id` | Retrieve detailed user profile | 🔒 | 🔒 100 req/15min |
-| 10 | PUT | `/users/:id` | Update profile details, jobTitle, bio, avatar, and credentials | 🔒 | 🔒 100 req/15min |
-| 11 | PATCH | `/users/:id/toggle-admin` | Toggle user Admin role status (Super Admin Only) | 🔒 | 🔒 100 req/15min |
-| 12 | DELETE | `/users/:id` | Delete user account from the database | 🔒 | 🔒 100 req/15min |
-| 13 | GET | `/posts` | Retrieve all blog posts with populated user, likes, and shares | 🔒 | 🔒 100 req/15min |
-| 14 | POST | `/posts` | Create a new blog post with postImage metadata | 🔒 | 🔒 100 req/15min |
-| 15 | POST | `/posts/:postId/share` | Share an existing post & update shares count | 🔒 | 🔒 100 req/15min |
-| 16 | GET | `/posts/:postId` | Retrieve detailed view of a single post by ID | 🔒 | 🔒 100 req/15min |
-| 17 | PUT | `/posts/:postId` | Update title, description, category, or postImage of a post | 🔒 | 🔒 100 req/15min |
-| 18 | DELETE | `/posts/:postId` | Delete a post and clear its associated media | 🔒 | 🔒 100 req/15min |
-| 19 | PUT | `/posts/:postId/like` | Toggle like/unlike status on a blog post | 🔒 | 🔒 100 req/15min |
-| 20 | GET | `/posts/:postId/comments` | Retrieve comments for a post | 🔒 | 🔒 100 req/15min |
-| 21 | POST | `/posts/:postId/comments` | Post a new comment (with optional commentImage) | 🔒 | 🔒 100 req/15min |
-| 22 | PUT | `/posts/:postId/comments/:commentId/like` | Toggle like/unlike on a comment | 🔒 | 🔒 100 req/15min |
-| 23 | PUT | `/posts/:postId/comments/:commentId` | Update text or commentImage of a comment | 🔒 | 🔒 100 req/15min |
-| 24 | DELETE | `/posts/:postId/comments/:commentId` | Remove comment & decrement commentsCount on post | 🔒 | 🔒 100 req/15min |
-| 25 | GET | `/posts/:postId/comments/:commentId/replies` | Get all replies for a parent comment | 🔒 | 🔒 100 req/15min |
-| 26 | POST | `/posts/:postId/comments/:commentId/replies` | Create a reply under a parent comment (with optional replyImage) | 🔒 | 🔒 100 req/15min |
-| 27 | PUT | `/posts/:postId/comments/:commentId/replies/:replyCommentId` | Update text content or replyImage of a reply comment | 🔒 | 🔒 100 req/15min |
-| 28 | DELETE | `/posts/:postId/comments/:commentId/replies/:replyCommentId` | Remove reply comment & decrement replyCommentsCount | 🔒 | 🔒 100 req/15min |
-| 29 | PUT | `/posts/:postId/comments/:commentId/replies/:replyCommentId/like` | Toggle like/unlike on a reply comment | 🔒 | 🔒 100 req/15min |
+| #   | Method | Endpoint                                                          | Description                                                      | Auth |    Rate Limit    |
+| :-- | :----- | :---------------------------------------------------------------- | :--------------------------------------------------------------- | :--: | :--------------: |
+| 1   | POST   | `/auth/register`                                                  | Register a new user account with DB OTP                          |  ❌  |        —         |
+| 2   | POST   | `/auth/login`                                                     | Authenticate user and retrieve JWT token                         |  ❌  |  🔒 10 req/min   |
+| 3   | POST   | `/auth/verify-otp`                                                | Verify user email using 6-digit DB OTP code                      |  ❌  |        —         |
+| 4   | POST   | `/auth/resend-otp`                                                | Resend 6-digit OTP code to unverified email                      |  ❌  |  🔒 10 req/min   |
+| 5   | POST   | `/auth/forgot-password`                                           | Send password reset link to user's email                         |  ❌  |  🔒 10 req/min   |
+| 6   | POST   | `/auth/reset-password/:userId/:token`                             | Validate reset token and update password                         |  ❌  |        —         |
+| 7   | GET    | `/auth/me`                                                        | Retrieve currently authenticated user profile                    |  🔒  |        —         |
+| 8   | GET    | `/users`                                                          | Retrieve list of all users                                       |  🔒  | 🔒 100 req/15min |
+| 9   | GET    | `/users/:id`                                                      | Retrieve detailed user profile                                   |  🔒  | 🔒 100 req/15min |
+| 10  | PUT    | `/users/:id`                                                      | Update profile details, jobTitle, bio, avatar, and credentials   |  🔒  | 🔒 100 req/15min |
+| 11  | PATCH  | `/users/:id/toggle-admin`                                         | Toggle user Admin role status (Super Admin Only)                 |  🔒  | 🔒 100 req/15min |
+| 12  | DELETE | `/users/:id`                                                      | Delete user account from the database                            |  🔒  | 🔒 100 req/15min |
+| 13  | GET    | `/posts`                                                          | Retrieve all blog posts with populated user, likes, and shares   |  🔒  | 🔒 100 req/15min |
+| 14  | POST   | `/posts`                                                          | Create a new blog post with postImage metadata                   |  🔒  | 🔒 100 req/15min |
+| 15  | POST   | `/posts/:postId/share`                                            | Share an existing post & update shares count                     |  🔒  | 🔒 100 req/15min |
+| 16  | GET    | `/posts/:postId`                                                  | Retrieve detailed view of a single post by ID                    |  🔒  | 🔒 100 req/15min |
+| 17  | PUT    | `/posts/:postId`                                                  | Update title, description, category, or postImage of a post      |  🔒  | 🔒 100 req/15min |
+| 18  | DELETE | `/posts/:postId`                                                  | Delete a post and clear its associated media                     |  🔒  | 🔒 100 req/15min |
+| 19  | PUT    | `/posts/:postId/like`                                             | Toggle like/unlike status on a blog post                         |  🔒  | 🔒 100 req/15min |
+| 20  | GET    | `/posts/:postId/comments`                                         | Retrieve comments for a post                                     |  🔒  | 🔒 100 req/15min |
+| 21  | POST   | `/posts/:postId/comments`                                         | Post a new comment (with optional commentImage)                  |  🔒  | 🔒 100 req/15min |
+| 22  | PUT    | `/posts/:postId/comments/:commentId/like`                         | Toggle like/unlike on a comment                                  |  🔒  | 🔒 100 req/15min |
+| 23  | PUT    | `/posts/:postId/comments/:commentId`                              | Update text or commentImage of a comment                         |  🔒  | 🔒 100 req/15min |
+| 24  | DELETE | `/posts/:postId/comments/:commentId`                              | Remove comment & decrement commentsCount on post                 |  🔒  | 🔒 100 req/15min |
+| 25  | GET    | `/posts/:postId/comments/:commentId/replies`                      | Get all replies for a parent comment                             |  🔒  | 🔒 100 req/15min |
+| 26  | POST   | `/posts/:postId/comments/:commentId/replies`                      | Create a reply under a parent comment (with optional replyImage) |  🔒  | 🔒 100 req/15min |
+| 27  | PUT    | `/posts/:postId/comments/:commentId/replies/:replyCommentId`      | Update text content or replyImage of a reply comment             |  🔒  | 🔒 100 req/15min |
+| 28  | DELETE | `/posts/:postId/comments/:commentId/replies/:replyCommentId`      | Remove reply comment & decrement replyCommentsCount              |  🔒  | 🔒 100 req/15min |
+| 29  | PUT    | `/posts/:postId/comments/:commentId/replies/:replyCommentId/like` | Toggle like/unlike on a reply comment                            |  🔒  | 🔒 100 req/15min |
 
 ---
 
@@ -86,19 +90,23 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 ## Authentication Endpoints
 
 ### POST /auth/register
+
 Register a new user account on the platform.
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `username` | string | ✅ | Username of the user (Min length: 3, Max length: 10). |
-| `email` | string | ✅ | Valid and unique email address (Min length: 4). |
-| `password` | string | ✅ | Secure password (Min length: 6, Max length: 72, must contain uppercase, lowercase, and numeric characters). |
+
+| Field      | Type   | Required | Description                                                                                                 |
+| :--------- | :----- | :------: | :---------------------------------------------------------------------------------------------------------- |
+| `username` | string |    ✅    | Username of the user (Min length: 3, Max length: 10).                                                       |
+| `email`    | string |    ✅    | Valid and unique email address (Min length: 4).                                                             |
+| `password` | string |    ✅    | Secure password (Min length: 6, Max length: 72, must contain uppercase, lowercase, and numeric characters). |
 
 #### Responses
 
 ##### Response 200
+
 User registered successfully. Returns user details along with an auto-generated JWT token.
+
 ```json
 {
   "success": true,
@@ -109,6 +117,7 @@ User registered successfully. Returns user details along with an auto-generated 
     "username": "ahmed",
     "email": "ahmed@example.com",
     "isAdmin": false,
+    "isSuperAdmin": false,
     "isVerified": false,
     "postsCount": 0,
     "profilePicture": {
@@ -122,7 +131,9 @@ User registered successfully. Returns user details along with an auto-generated 
 ```
 
 ##### Response 400
+
 Invalid input validation or email already exists.
+
 ```json
 {
   "message": "Email is already exist"
@@ -132,18 +143,22 @@ Invalid input validation or email already exists.
 ---
 
 ### POST /auth/login
+
 Log in an existing user and retrieve their JWT session token.
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `email` | string | ✅ | The registered email address. |
-| `password` | string | ✅ | The account password. |
+
+| Field      | Type   | Required | Description                   |
+| :--------- | :----- | :------: | :---------------------------- |
+| `email`    | string |    ✅    | The registered email address. |
+| `password` | string |    ✅    | The account password.         |
 
 #### Responses
 
 ##### Response 200
+
 Login successful. Returns user account details and the authorization token.
+
 ```json
 {
   "success": true,
@@ -152,6 +167,7 @@ Login successful. Returns user account details and the authorization token.
     "username": "ahmed",
     "email": "ahmed@example.com",
     "isAdmin": false,
+    "isSuperAdmin": false,
     "isVerified": true,
     "postsCount": 0,
     "profilePicture": {
@@ -166,7 +182,9 @@ Login successful. Returns user account details and the authorization token.
 ```
 
 ##### Response 400
+
 Invalid email/password, or Zod validation failed.
+
 ```json
 {
   "message": "Invalid email or password"
@@ -176,18 +194,22 @@ Invalid email/password, or Zod validation failed.
 ---
 
 ### POST /auth/verify-otp
+
 Verify the user's email address using the 6-digit OTP code sent during registration.
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `email` | string | ✅ | The registered email address to verify. |
-| `otp` | number | ✅ | The 6-digit verification code. |
+
+| Field   | Type   | Required | Description                             |
+| :------ | :----- | :------: | :-------------------------------------- |
+| `email` | string |    ✅    | The registered email address to verify. |
+| `otp`   | number |    ✅    | The 6-digit verification code.          |
 
 #### Responses
 
 ##### Response 200
+
 Account verified successfully. Returns user account details.
+
 ```json
 {
   "success": true,
@@ -197,6 +219,7 @@ Account verified successfully. Returns user account details.
     "username": "ahmed",
     "email": "ahmed@example.com",
     "isAdmin": false,
+    "isSuperAdmin": false,
     "isVerified": true,
     "postsCount": 0,
     "profilePicture": {
@@ -210,7 +233,9 @@ Account verified successfully. Returns user account details.
 ```
 
 ##### Response 400
+
 Invalid or expired OTP token.
+
 ```json
 {
   "success": false,
@@ -219,7 +244,9 @@ Invalid or expired OTP token.
 ```
 
 ##### Response 404
+
 Email was not found.
+
 ```json
 {
   "success": false,
@@ -230,17 +257,21 @@ Email was not found.
 ---
 
 ### POST /auth/resend-otp
+
 Resend a 6-digit OTP verification code to an unverified email account.
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `email` | string | ✅ | The unverified email address. |
+
+| Field   | Type   | Required | Description                   |
+| :------ | :----- | :------: | :---------------------------- |
+| `email` | string |    ✅    | The unverified email address. |
 
 #### Responses
 
 ##### Response 200
+
 OTP code sent successfully.
+
 ```json
 {
   "success": true,
@@ -251,7 +282,9 @@ OTP code sent successfully.
 ```
 
 ##### Response 400
+
 Account is already verified or email format is invalid.
+
 ```json
 {
   "message": "This account is already verified"
@@ -259,7 +292,9 @@ Account is already verified or email format is invalid.
 ```
 
 ##### Response 404
+
 Email was not found.
+
 ```json
 {
   "message": "User was not found"
@@ -269,17 +304,21 @@ Email was not found.
 ---
 
 ### POST /auth/forgot-password
+
 Send a secure temporary password reset URL link to the user's registered email address.
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `email` | string | ✅ | The email address associated with the account. |
+
+| Field   | Type   | Required | Description                                    |
+| :------ | :----- | :------: | :--------------------------------------------- |
+| `email` | string |    ✅    | The email address associated with the account. |
 
 #### Responses
 
 ##### Response 200
+
 Password reset email dispatched successfully.
+
 ```json
 {
   "success": true,
@@ -290,7 +329,9 @@ Password reset email dispatched successfully.
 ```
 
 ##### Response 404
+
 User account with the provided email address does not exist.
+
 ```json
 {
   "message": "User was not found"
@@ -300,24 +341,29 @@ User account with the provided email address does not exist.
 ---
 
 ### POST /auth/reset-password/:userId/:token
+
 Verify the reset token in the URL parameters and change the user's password.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `userId` | string | ✅ | Hexadecimal MongoDB ObjectId of the user account. |
-| `token` | string | ✅ | Temporary signed JWT password reset token. |
+
+| Parameter | Type   | Required | Description                                       |
+| :-------- | :----- | :------: | :------------------------------------------------ |
+| `userId`  | string |    ✅    | Hexadecimal MongoDB ObjectId of the user account. |
+| `token`   | string |    ✅    | Temporary signed JWT password reset token.        |
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `password` | string | ✅ | The new secure password. |
-| `confirmPassword` | string | ✅ | Password confirmation (must exactly match `password`). |
+
+| Field             | Type   | Required | Description                                            |
+| :---------------- | :----- | :------: | :----------------------------------------------------- |
+| `password`        | string |    ✅    | The new secure password.                               |
+| `confirmPassword` | string |    ✅    | Password confirmation (must exactly match `password`). |
 
 #### Responses
 
 ##### Response 200
+
 Password updated successfully.
+
 ```json
 {
   "data": {
@@ -327,7 +373,9 @@ Password updated successfully.
 ```
 
 ##### Response 400
+
 Mismatch in passwords, validation error, or the reset token has expired or is invalid.
+
 ```json
 {
   "message": "Passwords do not match"
@@ -335,7 +383,9 @@ Mismatch in passwords, validation error, or the reset token has expired or is in
 ```
 
 ##### Response 404
+
 The user target was not found in the database.
+
 ```json
 {
   "message": "User was not found"
@@ -347,12 +397,15 @@ The user target was not found in the database.
 ## User Management Endpoints
 
 ### GET /users 🔒
+
 Retrieve a list of all registered users on the system.
 
 #### Responses
 
 ##### Response 200
+
 Successfully retrieved users list.
+
 ```json
 {
   "success": true,
@@ -362,6 +415,7 @@ Successfully retrieved users list.
       "username": "Ahmed",
       "email": "ahmed@example.com",
       "isAdmin": false,
+      "isSuperAdmin": false,
       "isVerified": true,
       "postsCount": 0,
       "profilePicture": {
@@ -376,7 +430,9 @@ Successfully retrieved users list.
 ```
 
 ##### Response 401
+
 Missing or invalid JWT token.
+
 ```json
 {
   "message": "No token provided"
@@ -386,17 +442,21 @@ Missing or invalid JWT token.
 ---
 
 ### GET /users/:id 🔒
+
 Retrieve profile information of a single user by their database ID.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `id` | string | ✅ | The target user ID. |
+
+| Parameter | Type   | Required | Description         |
+| :-------- | :----- | :------: | :------------------ |
+| `id`      | string |    ✅    | The target user ID. |
 
 #### Responses
 
 ##### Response 200
+
 Successfully retrieved user details.
+
 ```json
 {
   "success": true,
@@ -405,6 +465,7 @@ Successfully retrieved user details.
     "username": "Ahmed",
     "email": "ahmed@example.com",
     "isAdmin": false,
+    "isSuperAdmin": false,
     "isVerified": true,
     "postsCount": 0,
     "profilePicture": {
@@ -418,7 +479,9 @@ Successfully retrieved user details.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "Invalid token"
@@ -426,7 +489,9 @@ Not authorized.
 ```
 
 ##### Response 404
+
 User with specified ID was not found.
+
 ```json
 {
   "message": "User not found"
@@ -436,24 +501,29 @@ User with specified ID was not found.
 ---
 
 ### PUT /users/:id 🔒
+
 Update user profile information (Username, Email, or Password). Access is restricted to the profile owner or users with Admin privileges.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `id` | string | ✅ | The ID of the user to update. |
+
+| Parameter | Type   | Required | Description                   |
+| :-------- | :----- | :------: | :---------------------------- |
+| `id`      | string |    ✅    | The ID of the user to update. |
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `username` | string | ❌ | Updated username (Min length: 3, Max length: 10). |
-| `email` | string | ❌ | Updated email address. |
-| `password` | string | ❌ | Updated password (must pass validation checks). |
+
+| Field      | Type   | Required | Description                                       |
+| :--------- | :----- | :------: | :------------------------------------------------ |
+| `username` | string |    ❌    | Updated username (Min length: 3, Max length: 10). |
+| `email`    | string |    ❌    | Updated email address.                            |
+| `password` | string |    ❌    | Updated password (must pass validation checks).   |
 
 #### Responses
 
 ##### Response 200
+
 Profile updated successfully. Returns updated user document.
+
 ```json
 {
   "success": true,
@@ -462,6 +532,7 @@ Profile updated successfully. Returns updated user document.
     "username": "AhmedUpdated",
     "email": "ahmed.new@example.com",
     "isAdmin": false,
+    "isSuperAdmin": false,
     "isVerified": true,
     "postsCount": 0,
     "profilePicture": {
@@ -475,7 +546,9 @@ Profile updated successfully. Returns updated user document.
 ```
 
 ##### Response 400
+
 Zod schema input validation failure.
+
 ```json
 {
   "message": "String must contain at least 3 character(s)"
@@ -483,7 +556,9 @@ Zod schema input validation failure.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "No token provided"
@@ -491,7 +566,9 @@ Not authorized.
 ```
 
 ##### Response 403
+
 Access Forbidden. The requesting user is not the owner of this account and is not an Administrator.
+
 ```json
 {
   "message": "You are not allowed"
@@ -499,7 +576,9 @@ Access Forbidden. The requesting user is not the owner of this account and is no
 ```
 
 ##### Response 404
+
 The user target profile was not found.
+
 ```json
 {
   "message": "User not found"
@@ -509,17 +588,21 @@ The user target profile was not found.
 ---
 
 ### PATCH /users/:id/toggle-admin 🔒
+
 Toggle the `isAdmin` boolean role of a target user account. **Super Admin-only endpoint.** Super Admin status cannot be self-toggled.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `id` | string | ✅ | The target user ID to update. |
+
+| Parameter | Type   | Required | Description                   |
+| :-------- | :----- | :------: | :---------------------------- |
+| `id`      | string |    ✅    | The target user ID to update. |
 
 #### Responses
 
 ##### Response 200
+
 Admin status toggled successfully.
+
 ```json
 {
   "success": true,
@@ -531,7 +614,9 @@ Admin status toggled successfully.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "No token provided"
@@ -539,7 +624,9 @@ Not authorized.
 ```
 
 ##### Response 403
+
 Forbidden. Requesting user is not a Super Administrator or attempted forbidden operation.
+
 ```json
 {
   "success": false,
@@ -551,7 +638,9 @@ Forbidden. Requesting user is not a Super Administrator or attempted forbidden o
 ```
 
 ##### Response 404
+
 User target was not found.
+
 ```json
 {
   "message": "User not found"
@@ -561,17 +650,21 @@ User target was not found.
 ---
 
 ### DELETE /users/:id 🔒
+
 Delete a user from the database. Restricted to profile owner or Admins. **Owner / Super Admin profiles cannot be deleted by regular Admins.**
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `id` | string | ✅ | The target user ID to delete. |
+
+| Parameter | Type   | Required | Description                   |
+| :-------- | :----- | :------: | :---------------------------- |
+| `id`      | string |    ✅    | The target user ID to delete. |
 
 #### Responses
 
 ##### Response 200
+
 User deleted successfully.
+
 ```json
 {
   "success": true,
@@ -580,7 +673,9 @@ User deleted successfully.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "No token provided"
@@ -588,7 +683,9 @@ Not authorized.
 ```
 
 ##### Response 403
+
 Forbidden. Attempted to delete Super Admin (Owner) profile or user is not allowed.
+
 ```json
 {
   "success": false,
@@ -600,7 +697,9 @@ Forbidden. Attempted to delete Super Admin (Owner) profile or user is not allowe
 ```
 
 ##### Response 404
+
 User was not found in the system database.
+
 ```json
 {
   "message": "User was not found"
@@ -612,17 +711,21 @@ User was not found in the system database.
 ## Post Management Endpoints
 
 ### GET /posts 🔒
+
 Retrieve a paginated list of blog posts. Populates comments and authors.
 
 #### Query Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `pageNumber` | integer | ❌ | Page number to fetch (Min: 1, Default: 1). |
+
+| Parameter    | Type    | Required | Description                                |
+| :----------- | :------ | :------: | :----------------------------------------- |
+| `pageNumber` | integer |    ❌    | Page number to fetch (Min: 1, Default: 1). |
 
 #### Responses
 
 ##### Response 200
+
 List of posts returned successfully.
+
 ```json
 {
   "success": true,
@@ -658,7 +761,9 @@ List of posts returned successfully.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "No token provided"
@@ -668,20 +773,22 @@ Not authorized.
 ---
 
 ### POST /posts 🔒
+
 Create a new blog post.
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `title` | string | ✅ | Title of the blog post (Min length: 2, Max length: 32). |
-| `description` | string | ✅ | Content text details of the post (Min length: 10, Max length: 250). |
-| `category` | string | ✅ | Category category/genre for grouping posts. |
-| `postImage` | object | ❌ | Nested image properties object containing `url` and `publicId`. |
+
+| Field       | Type   | Required | Description                                                     |
+| :---------- | :----- | :------: | :-------------------------------------------------------------- |
+| `title`     | string |    ✅    | Title of the blog post (Min length: 2, Max length: 32).         |
+| `postImage` | object |    ❌    | Nested image properties object containing `url` and `publicId`. |
 
 #### Responses
 
 ##### Response 201
+
 Post created successfully. Returns the populated post resource.
+
 ```json
 {
   "success": true,
@@ -710,7 +817,9 @@ Post created successfully. Returns the populated post resource.
 ```
 
 ##### Response 400
+
 Validation failure (e.g. description is too short).
+
 ```json
 {
   "message": "String must contain at least 10 character(s)"
@@ -718,7 +827,9 @@ Validation failure (e.g. description is too short).
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "Invalid token"
@@ -728,25 +839,27 @@ Not authorized.
 ---
 
 ### GET /posts/:postId 🔒
+
 Retrieve a single post details with all associated populated child structures.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | MongoDB ObjectId of the blog post. |
+
+| Parameter | Type   | Required | Description                        |
+| :-------- | :----- | :------: | :--------------------------------- |
+| `postId`  | string |    ✅    | MongoDB ObjectId of the blog post. |
 
 #### Responses
 
 ##### Response 200
+
 Post retrieved successfully.
+
 ```json
 {
   "success": true,
   "data": {
     "_id": "65f1a2b3c4d5e6f789012345",
     "title": "My First Blog Post",
-    "description": "This is my first blog post description.",
-    "category": "Technology",
     "user": {
       "_id": "65f1a2b3c4d5e6f789012347",
       "username": "Ahmed"
@@ -767,7 +880,9 @@ Post retrieved successfully.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "No token provided"
@@ -775,7 +890,9 @@ Not authorized.
 ```
 
 ##### Response 404
+
 Post was not found in the database.
+
 ```json
 {
   "message": "Post not found"
@@ -785,25 +902,28 @@ Post was not found in the database.
 ---
 
 ### PUT /posts/:postId 🔒
+
 Update post parameters. Access is allowed only to the post author owner or Admins.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | Post database record ID. |
+
+| Parameter | Type   | Required | Description              |
+| :-------- | :----- | :------: | :----------------------- |
+| `postId`  | string |    ✅    | Post database record ID. |
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `title` | string | ❌ | Updated title (Min: 2, Max: 32). |
-| `description` | string | ❌ | Updated content description body (Min: 10, Max: 250). |
-| `category` | string | ❌ | Updated category structure. |
-| `postImage` | object | ❌ | Updated nested image object. |
+
+| Field       | Type   | Required | Description                      |
+| :---------- | :----- | :------: | :------------------------------- |
+| `title`     | string |    ❌    | Updated title (Min: 2, Max: 32). |
+| `postImage` | object |    ❌    | Updated nested image object.     |
 
 #### Responses
 
 ##### Response 200
+
 Post updated successfully. Returns updated post document.
+
 ```json
 {
   "success": true,
@@ -828,7 +948,9 @@ Post updated successfully. Returns updated post document.
 ```
 
 ##### Response 400
+
 Zod payload validation error.
+
 ```json
 {
   "message": "Invalid input"
@@ -836,7 +958,9 @@ Zod payload validation error.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "Invalid token"
@@ -844,7 +968,9 @@ Not authorized.
 ```
 
 ##### Response 403
+
 Forbidden. The user does not own this post and is not an Admin.
+
 ```json
 {
   "message": "You are not allowed"
@@ -852,7 +978,9 @@ Forbidden. The user does not own this post and is not an Admin.
 ```
 
 ##### Response 404
+
 Post was not found.
+
 ```json
 {
   "message": "Post was not found"
@@ -862,17 +990,21 @@ Post was not found.
 ---
 
 ### DELETE /posts/:postId 🔒
+
 Delete a blog post and remove its media assets. Restricted to the post owner or Admins.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | Database record ID of the post. |
+
+| Parameter | Type   | Required | Description                     |
+| :-------- | :----- | :------: | :------------------------------ |
+| `postId`  | string |    ✅    | Database record ID of the post. |
 
 #### Responses
 
 ##### Response 200
+
 Post deleted successfully.
+
 ```json
 {
   "success": true,
@@ -881,7 +1013,9 @@ Post deleted successfully.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "No token provided"
@@ -889,7 +1023,9 @@ Not authorized.
 ```
 
 ##### Response 403
+
 Forbidden. User has no ownership rights and is not an Admin.
+
 ```json
 {
   "message": "You are not allowed"
@@ -897,7 +1033,9 @@ Forbidden. User has no ownership rights and is not an Admin.
 ```
 
 ##### Response 404
+
 Post target was not found in the database.
+
 ```json
 {
   "message": "Post was not found"
@@ -907,25 +1045,27 @@ Post target was not found in the database.
 ---
 
 ### PUT /posts/:postId/like 🔒
+
 Toggle a user's like/unlike status on a specific post.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | The blog post ID. |
+
+| Parameter | Type   | Required | Description       |
+| :-------- | :----- | :------: | :---------------- |
+| `postId`  | string |    ✅    | The blog post ID. |
 
 #### Responses
 
 ##### Response 200
+
 Post liked status updated. Returns the updated post object showing the new likes array.
+
 ```json
 {
   "success": true,
   "data": {
     "_id": "65f1a2b3c4d5e6f789012345",
     "title": "My First Blog Post",
-    "description": "This is my first blog post description.",
-    "category": "Technology",
     "user": "65f1a2b3c4d5e6f789012347",
     "postImage": {
       "url": "https://example.com/image.jpg",
@@ -947,7 +1087,9 @@ Post liked status updated. Returns the updated post object showing the new likes
 ```
 
 ##### Response 401
+
 Missing or invalid authentication token.
+
 ```json
 {
   "message": "You are not logged in"
@@ -955,7 +1097,9 @@ Missing or invalid authentication token.
 ```
 
 ##### Response 404
+
 Post was not found.
+
 ```json
 {
   "message": "Post was not found"
@@ -965,22 +1109,27 @@ Post was not found.
 ---
 
 ### POST /posts/:postId/share 🔒
+
 Share an existing blog post. Creates a new post record referencing the original post.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | ID of the original post to share. |
+
+| Parameter | Type   | Required | Description                       |
+| :-------- | :----- | :------: | :-------------------------------- |
+| `postId`  | string |    ✅    | ID of the original post to share. |
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `description` | string | ❌ | Optional comment or text addition for the shared post. |
+
+| Field         | Type   | Required | Description                                            |
+| :------------ | :----- | :------: | :----------------------------------------------------- |
+| `description` | string |    ❌    | Optional comment or text addition for the shared post. |
 
 #### Responses
 
 ##### Response 201
+
 Post shared successfully.
+
 ```json
 {
   "success": true,
@@ -989,8 +1138,6 @@ Post shared successfully.
     "savedSharedPost": {
       "_id": "65f1a2b3c4d5e6f789012349",
       "title": "My First Blog Post",
-      "description": "Check this out!",
-      "category": "Technology",
       "user": "65f1a2b3c4d5e6f789012347",
       "postImage": {
         "url": "https://example.com/image.jpg",
@@ -1009,7 +1156,9 @@ Post shared successfully.
 ```
 
 ##### Response 401
+
 Missing or invalid authentication token.
+
 ```json
 {
   "message": "Not authorized"
@@ -1017,37 +1166,42 @@ Missing or invalid authentication token.
 ```
 
 ##### Response 404
+
 Original post was not found.
+
 ```json
 {
   "message": "Post was not found"
 }
 ```
 
-
-
 ---
 
 ## Comment Management Endpoints
 
 ### GET /posts/:postId/comments 🔒
+
 Retrieve a paginated list of comments associated with a specific blog post.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | MongoDB ID of the parent post. |
+
+| Parameter | Type   | Required | Description                    |
+| :-------- | :----- | :------: | :----------------------------- |
+| `postId`  | string |    ✅    | MongoDB ID of the parent post. |
 
 #### Query Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `pageNumber` | integer | ❌ | Page index page parameter (Min: 1, Default: 1). |
-| `commentsPerPost` | integer | ❌ | Number of comments loaded per page (Default: 5). |
+
+| Parameter         | Type    | Required | Description                                      |
+| :---------------- | :------ | :------: | :----------------------------------------------- |
+| `pageNumber`      | integer |    ❌    | Page index page parameter (Min: 1, Default: 1).  |
+| `commentsPerPost` | integer |    ❌    | Number of comments loaded per page (Default: 5). |
 
 #### Responses
 
 ##### Response 200
+
 Comments retrieved successfully.
+
 ```json
 {
   "success": true,
@@ -1074,7 +1228,9 @@ Comments retrieved successfully.
 ```
 
 ##### Response 400
+
 Required path parameters missing.
+
 ```json
 {
   "message": "Post ID is required"
@@ -1082,7 +1238,9 @@ Required path parameters missing.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "No token provided"
@@ -1092,23 +1250,28 @@ Not authorized.
 ---
 
 ### POST /posts/:postId/comments 🔒
+
 Create and post a new comment under a specific post.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | The ID of the post. |
+
+| Parameter | Type   | Required | Description         |
+| :-------- | :----- | :------: | :------------------ |
+| `postId`  | string |    ✅    | The ID of the post. |
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `text` | string | ✅ | Text content of the comment. |
-| `commentImage` | object | ❌ | Optional comment image attachment. |
+
+| Field          | Type   | Required | Description                        |
+| :------------- | :----- | :------: | :--------------------------------- |
+| `text`         | string |    ✅    | Text content of the comment.       |
+| `commentImage` | object |    ❌    | Optional comment image attachment. |
 
 #### Responses
 
 ##### Response 201
+
 Comment created successfully. Returns the populated comment payload.
+
 ```json
 {
   "success": true,
@@ -1133,7 +1296,9 @@ Comment created successfully. Returns the populated comment payload.
 ```
 
 ##### Response 400
+
 Invalid comment structure validation or missing path parameters.
+
 ```json
 {
   "message": "Post ID is required"
@@ -1141,7 +1306,9 @@ Invalid comment structure validation or missing path parameters.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "Invalid token"
@@ -1151,24 +1318,29 @@ Not authorized.
 ---
 
 ### PUT /posts/:postId/comments/:commentId 🔒
+
 Update the text body of an existing comment. Access restricted to comment author owner or Admins.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | ID of the parent post. |
-| `commentId` | string | ✅ | ID of the comment to update. |
+
+| Parameter   | Type   | Required | Description                  |
+| :---------- | :----- | :------: | :--------------------------- |
+| `postId`    | string |    ✅    | ID of the parent post.       |
+| `commentId` | string |    ✅    | ID of the comment to update. |
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `text` | string | ❌ | Updated comment body text content. |
-| `commentImage` | binary file | ❌ | Updated comment image file attachment. |
+
+| Field          | Type        | Required | Description                            |
+| :------------- | :---------- | :------: | :------------------------------------- |
+| `text`         | string      |    ❌    | Updated comment body text content.     |
+| `commentImage` | binary file |    ❌    | Updated comment image file attachment. |
 
 #### Responses
 
 ##### Response 200
+
 Comment text updated successfully.
+
 ```json
 {
   "success": true,
@@ -1193,7 +1365,9 @@ Comment text updated successfully.
 ```
 
 ##### Response 400
+
 Validation failure or comment ID missing.
+
 ```json
 {
   "message": "Comment ID is required"
@@ -1201,7 +1375,9 @@ Validation failure or comment ID missing.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "No token provided"
@@ -1209,7 +1385,9 @@ Not authorized.
 ```
 
 ##### Response 403
+
 Forbidden. Requesting user lacks ownership rights and is not an Admin.
+
 ```json
 {
   "message": "You are not allowed"
@@ -1217,7 +1395,9 @@ Forbidden. Requesting user lacks ownership rights and is not an Admin.
 ```
 
 ##### Response 404
+
 Comment not found in the database.
+
 ```json
 {
   "message": "Comment was not found"
@@ -1227,18 +1407,22 @@ Comment not found in the database.
 ---
 
 ### DELETE /posts/:postId/comments/:commentId 🔒
+
 Remove a comment. Access restricted to comment owner or Admins.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | Parent post ID. |
-| `commentId` | string | ✅ | The comment database ID. |
+
+| Parameter   | Type   | Required | Description              |
+| :---------- | :----- | :------: | :----------------------- |
+| `postId`    | string |    ✅    | Parent post ID.          |
+| `commentId` | string |    ✅    | The comment database ID. |
 
 #### Responses
 
 ##### Response 200
+
 Comment deleted successfully.
+
 ```json
 {
   "success": true,
@@ -1247,7 +1431,9 @@ Comment deleted successfully.
 ```
 
 ##### Response 400
+
 Comment identifier path parameter missing.
+
 ```json
 {
   "message": "Comment ID is required"
@@ -1255,7 +1441,9 @@ Comment identifier path parameter missing.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "Invalid token"
@@ -1263,7 +1451,9 @@ Not authorized.
 ```
 
 ##### Response 403
+
 Forbidden. User lacks ownership rights and is not an Admin.
+
 ```json
 {
   "message": "You are not allowed"
@@ -1271,7 +1461,9 @@ Forbidden. User lacks ownership rights and is not an Admin.
 ```
 
 ##### Response 404
+
 Comment was not found.
+
 ```json
 {
   "message": "Comment was not found"
@@ -1281,18 +1473,22 @@ Comment was not found.
 ---
 
 ### PUT /posts/:postId/comments/:commentId/like 🔒
+
 Toggle user's like/unlike status on a specific comment.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | Parent post ID. |
-| `commentId` | string | ✅ | Target comment ID. |
+
+| Parameter   | Type   | Required | Description        |
+| :---------- | :----- | :------: | :----------------- |
+| `postId`    | string |    ✅    | Parent post ID.    |
+| `commentId` | string |    ✅    | Target comment ID. |
 
 #### Responses
 
 ##### Response 200
+
 Comment like status updated successfully.
+
 ```json
 {
   "success": true,
@@ -1322,7 +1518,9 @@ Comment like status updated successfully.
 ```
 
 ##### Response 401
+
 Missing or invalid authentication token.
+
 ```json
 {
   "message": "You must be logged in to like this comment"
@@ -1330,7 +1528,9 @@ Missing or invalid authentication token.
 ```
 
 ##### Response 404
+
 Comment was not found.
+
 ```json
 {
   "message": "Comment was not found"
@@ -1340,18 +1540,22 @@ Comment was not found.
 ---
 
 ### GET /posts/:postId/comments/:commentId/replies 🔒
+
 Retrieve all replies for a specific parent comment.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | ID of the parent post. |
-| `commentId` | string | ✅ | ID of the parent comment. |
+
+| Parameter   | Type   | Required | Description               |
+| :---------- | :----- | :------: | :------------------------ |
+| `postId`    | string |    ✅    | ID of the parent post.    |
+| `commentId` | string |    ✅    | ID of the parent comment. |
 
 #### Responses
 
 ##### Response 200
+
 Replies retrieved successfully.
+
 ```json
 {
   "success": true,
@@ -1387,24 +1591,29 @@ Replies retrieved successfully.
 ---
 
 ### POST /posts/:postId/comments/:commentId/replies 🔒
+
 Post a new reply under a specific parent comment. Increments `replyCommentsCount` on the parent comment.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | ID of the parent post. |
-| `commentId` | string | ✅ | ID of the parent comment being replied to. |
+
+| Parameter   | Type   | Required | Description                                |
+| :---------- | :----- | :------: | :----------------------------------------- |
+| `postId`    | string |    ✅    | ID of the parent post.                     |
+| `commentId` | string |    ✅    | ID of the parent comment being replied to. |
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `text` | string | ✅ | Reply comment text body. |
-| `replyImage` | binary file | ❌ | Optional reply image attachment file. |
+
+| Field        | Type        | Required | Description                           |
+| :----------- | :---------- | :------: | :------------------------------------ |
+| `text`       | string      |    ✅    | Reply comment text body.              |
+| `replyImage` | binary file |    ❌    | Optional reply image attachment file. |
 
 #### Responses
 
 ##### Response 201
+
 Reply comment created successfully.
+
 ```json
 {
   "success": true,
@@ -1434,7 +1643,9 @@ Reply comment created successfully.
 ```
 
 ##### Response 400
+
 Invalid Post ID or Parent Comment ID.
+
 ```json
 {
   "success": false,
@@ -1443,7 +1654,9 @@ Invalid Post ID or Parent Comment ID.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "No token provided"
@@ -1451,7 +1664,9 @@ Not authorized.
 ```
 
 ##### Response 404
+
 Parent comment was not found in this post.
+
 ```json
 {
   "success": false,
@@ -1462,25 +1677,30 @@ Parent comment was not found in this post.
 ---
 
 ### PUT /posts/:postId/comments/:commentId/replies/:replyCommentId 🔒
+
 Update the text body or image of an existing reply comment. Restricted to reply comment owner or Admins.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | ID of the parent post. |
-| `commentId` | string | ✅ | ID of the parent comment. |
-| `replyCommentId` | string | ✅ | ID of the reply comment to update. |
+
+| Parameter        | Type   | Required | Description                        |
+| :--------------- | :----- | :------: | :--------------------------------- |
+| `postId`         | string |    ✅    | ID of the parent post.             |
+| `commentId`      | string |    ✅    | ID of the parent comment.          |
+| `replyCommentId` | string |    ✅    | ID of the reply comment to update. |
 
 #### Request Body
-| Field | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `text` | string | ❌ | Updated text for the reply comment. |
-| `replyImage` | binary file | ❌ | Updated reply image file attachment. |
+
+| Field        | Type        | Required | Description                          |
+| :----------- | :---------- | :------: | :----------------------------------- |
+| `text`       | string      |    ❌    | Updated text for the reply comment.  |
+| `replyImage` | binary file |    ❌    | Updated reply image file attachment. |
 
 #### Responses
 
 ##### Response 200
+
 Reply comment updated successfully.
+
 ```json
 {
   "success": true,
@@ -1501,7 +1721,9 @@ Reply comment updated successfully.
 ```
 
 ##### Response 400
+
 Invalid IDs or input validation failed.
+
 ```json
 {
   "success": false,
@@ -1510,7 +1732,9 @@ Invalid IDs or input validation failed.
 ```
 
 ##### Response 401
+
 Not authorized.
+
 ```json
 {
   "message": "Invalid token"
@@ -1518,7 +1742,9 @@ Not authorized.
 ```
 
 ##### Response 403
+
 Forbidden. Requesting user lacks ownership rights.
+
 ```json
 {
   "message": "You are not allowed"
@@ -1526,24 +1752,29 @@ Forbidden. Requesting user lacks ownership rights.
 ```
 
 ##### Response 404
+
 Reply comment was not found.
 
 ---
 
 ### DELETE /posts/:postId/comments/:commentId/replies/:replyCommentId 🔒
+
 Delete a reply comment and decrement `replyCommentsCount` on its parent comment. Restricted to reply owner or Admins.
 
 #### Path Parameters
-| Parameter | Type | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `postId` | string | ✅ | ID of the parent post. |
-| `commentId` | string | ✅ | ID of the parent comment. |
-| `replyCommentId` | string | ✅ | ID of the reply comment to delete. |
+
+| Parameter        | Type   | Required | Description                        |
+| :--------------- | :----- | :------: | :--------------------------------- |
+| `postId`         | string |    ✅    | ID of the parent post.             |
+| `commentId`      | string |    ✅    | ID of the parent comment.          |
+| `replyCommentId` | string |    ✅    | ID of the reply comment to delete. |
 
 #### Responses
 
 ##### Response 200
+
 Deleted reply comment successfully.
+
 ```json
 {
   "success": true,
@@ -1552,17 +1783,22 @@ Deleted reply comment successfully.
 ```
 
 ##### Response 400
+
 Invalid ID parameters.
 
 ##### Response 401
+
 Not authorized.
 
 ##### Response 403
+
 Forbidden. User lacks ownership rights.
 
 ##### Response 404
+
 Reply comment was not found.
-```json
+
+````json
 {
   "success": false,
   "message": "Reply comment was not found"
@@ -1601,16 +1837,20 @@ Reply comment liked or unliked successfully.
     ]
   }
 }
-```
+````
 
 ##### Response 400
+
 Invalid parent comment, post, or reply comment ID.
 
 ##### Response 401
+
 Not authorized.
 
 ##### Response 404
+
 Comment or reply comment was not found.
+
 ```json
 {
   "success": false,
@@ -1624,12 +1864,12 @@ Comment or reply comment was not found.
 
 ## Common HTTP Status Codes
 
-| Code | Status Text | Description in Context |
-| :--- | :--- | :--- |
-| `200` | OK | The request succeeded, and the payload is returned in the response. |
-| `201` | Created | The resource (post/comment) was successfully created. |
-| `400` | Bad Request | The request parameters are invalid or missing, or fail Zod validation rules. |
-| `401` | Unauthorized | The request lacks a valid JWT token in the Authorization header. |
-| `403` | Forbidden | The authenticated user lacks the required ownership permissions or Admin flag. |
-| `404` | Not Found | The requested route, user, post, or comment could not be found. |
-| `500` | Internal Server Error | An unexpected server error occurred during database access or image upload. |
+| Code  | Status Text           | Description in Context                                                         |
+| :---- | :-------------------- | :----------------------------------------------------------------------------- |
+| `200` | OK                    | The request succeeded, and the payload is returned in the response.            |
+| `201` | Created               | The resource (post/comment) was successfully created.                          |
+| `400` | Bad Request           | The request parameters are invalid or missing, or fail Zod validation rules.   |
+| `401` | Unauthorized          | The request lacks a valid JWT token in the Authorization header.               |
+| `403` | Forbidden             | The authenticated user lacks the required ownership permissions or Admin flag. |
+| `404` | Not Found             | The requested route, user, post, or comment could not be found.                |
+| `500` | Internal Server Error | An unexpected server error occurred during database access or image upload.    |
