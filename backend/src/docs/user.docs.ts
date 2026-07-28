@@ -88,7 +88,7 @@
  * /users/{id}:
  *   put:
  *     summary: Update user profile
- *     description: Update username, job title, bio, email, password, or isAdmin status of a user account.
+ *     description: Update username, job title, bio, email, password, or profile picture. Access is allowed for account owner or Admins. Super Admin (Owner) profile cannot be updated by regular Admins.
  *     tags:
  *       - Users
  *     security:
@@ -147,17 +147,19 @@
  *         description: Invalid input
  *       401:
  *         description: Not authorized
+ *       403:
+ *         description: Cannot modify Owner/Super Admin profile
  *       404:
  *         description: User not found
  */
 
-// PATCH  /users/{id}
+// PATCH  /users/{id}/toggle-admin
 /**
  * @swagger
- * /users/{id}:
+ * /users/{id}/toggle-admin:
  *   patch:
- *     summary: Toggle user Admin status (Admin Only)
- *     description: Toggle the isAdmin boolean role of a target user account. Restricted to Administrators.
+ *     summary: Toggle user Admin status (Super Admin Only)
+ *     description: Toggle the isAdmin boolean role of a target user account. Restricted strictly to Super Administrators. Super Admin status cannot be self-toggled.
  *     tags:
  *       - Users
  *     security:
@@ -193,7 +195,7 @@
  *       401:
  *         description: Not authorized
  *       403:
- *         description: Only admin allowed
+ *         description: Only Super Admin allowed or forbidden operation
  *       404:
  *         description: User not found
  */
@@ -205,7 +207,7 @@
  * /users/{id}:
  *   delete:
  *     summary: Delete user
- *     description: Delete a user account from database. Restricted to profile owner or Admins.
+ *     description: Delete a user account from database. Restricted to profile owner or Admins. Super Admin (Owner) profile cannot be deleted by regular Admins.
  *     tags:
  *       - Users
  *     security:
@@ -234,6 +236,8 @@
  *                   example: User has been deleted successfully
  *       401:
  *         description: Not authorized
+ *       403:
+ *         description: Cannot delete Owner/Super Admin profile or insufficient permissions
  *       404:
  *         description: User was not found
  */
@@ -262,6 +266,9 @@
  *           format: email
  *           example: ahmed@example.com
  *         isAdmin:
+ *           type: boolean
+ *           example: false
+ *         isSuperAdmin:
  *           type: boolean
  *           example: false
  *         isVerified:

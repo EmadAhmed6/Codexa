@@ -127,7 +127,7 @@ const Navbar = () => {
           )}
 
           {/* Admin Dashboard Quick Button */}
-          {mounted && token && user?.isAdmin && (
+          {mounted && token && (user?.isAdmin || user?.isSuperAdmin) && (
             <Tooltip position="bottom" content={t.nav.adminDashboard}>
               <Link href="/admin/dashboard/users">
                 <button

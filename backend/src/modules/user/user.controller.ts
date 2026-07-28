@@ -122,7 +122,7 @@ const updateUser = asyncHandler(
       });
       return;
     }
-    
+
     if (user.isSuperAdmin && req.user?.id !== user._id.toString()) {
       res.status(403).json({
         success: false,
@@ -179,6 +179,14 @@ const updateUser = asyncHandler(
 const deleteUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const user = await User.findById(req.params.id);
+    if (user?.isSuperAdmin && req.user?.id !== user.id.toString()) {
+      res.status(403).json({
+        success: false,
+        message: "Request failed",
+        data: { message: "You cannot delete Owner's profile" },
+      });
+      return;
+    }
     if (user) {
       await User.findByIdAndDelete(req.params.id);
       res

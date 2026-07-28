@@ -32,7 +32,7 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 ---
 
 ### Rate Limiting & Security
-- **Auth Limiter (`/auth/login`, `/auth/forgot-password`)**: Restricted to **5 requests per minute** to prevent brute-force attacks.
+- **Auth Limiter (`/auth/login`, `/auth/forgot-password`, `/auth/resend-otp`)**: Restricted to **10 requests per minute** to prevent brute-force attacks while allowing standard user interactions.
 - **API Limiter (`/users/*`, `/posts/*`)**: Restricted to **100 requests per 15 minutes** to ensure server availability and protection against denial-of-service attempts.
 
 ---
@@ -42,16 +42,16 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 | # | Method | Endpoint | Description | Auth | Rate Limit |
 | :--- | :--- | :--- | :--- | :---: | :---: |
 | 1 | POST | `/auth/register` | Register a new user account with DB OTP | ❌ | — |
-| 2 | POST | `/auth/login` | Authenticate user and retrieve JWT token | ❌ | 🔒 5 req/min |
+| 2 | POST | `/auth/login` | Authenticate user and retrieve JWT token | ❌ | 🔒 10 req/min |
 | 3 | POST | `/auth/verify-otp` | Verify user email using 6-digit DB OTP code | ❌ | — |
-| 4 | POST | `/auth/resend-otp` | Resend 6-digit OTP code to unverified email | ❌ | — |
-| 5 | POST | `/auth/forgot-password` | Send password reset link to user's email | ❌ | 🔒 5 req/min |
+| 4 | POST | `/auth/resend-otp` | Resend 6-digit OTP code to unverified email | ❌ | 🔒 10 req/min |
+| 5 | POST | `/auth/forgot-password` | Send password reset link to user's email | ❌ | 🔒 10 req/min |
 | 6 | POST | `/auth/reset-password/:userId/:token` | Validate reset token and update password | ❌ | — |
 | 7 | GET | `/auth/me` | Retrieve currently authenticated user profile | 🔒 | — |
 | 8 | GET | `/users` | Retrieve list of all users | 🔒 | 🔒 100 req/15min |
 | 9 | GET | `/users/:id` | Retrieve detailed user profile | 🔒 | 🔒 100 req/15min |
-| 10 | PUT | `/users/:id` | Update profile details, bio, and isAdmin status | 🔒 | 🔒 100 req/15min |
-| 11 | PATCH | `/users/:id` | Toggle user Admin role status (Admin Only) | 🔒 | 🔒 100 req/15min |
+| 10 | PUT | `/users/:id` | Update profile details, jobTitle, bio, avatar, and credentials | 🔒 | 🔒 100 req/15min |
+| 11 | PATCH | `/users/:id/toggle-admin` | Toggle user Admin role status (Super Admin Only) | 🔒 | 🔒 100 req/15min |
 | 12 | DELETE | `/users/:id` | Delete user account from the database | 🔒 | 🔒 100 req/15min |
 | 13 | GET | `/posts` | Retrieve all blog posts with populated user, likes, and shares | 🔒 | 🔒 100 req/15min |
 | 14 | POST | `/posts` | Create a new blog post with postImage metadata | 🔒 | 🔒 100 req/15min |
@@ -508,8 +508,8 @@ The user target profile was not found.
 
 ---
 
-### PATCH /users/:id 🔒
-Toggle the `isAdmin` boolean role of a target user account. **Admin-only endpoint.**
+### PATCH /users/:id/toggle-admin 🔒
+Toggle the `isAdmin` boolean role of a target user account. **Super Admin-only endpoint.** Super Admin status cannot be self-toggled.
 
 #### Path Parameters
 | Parameter | Type | Required | Description |
@@ -539,10 +539,14 @@ Not authorized.
 ```
 
 ##### Response 403
-Forbidden. Requesting user is not an administrator.
+Forbidden. Requesting user is not a Super Administrator or attempted forbidden operation.
 ```json
 {
-  "message": "You are not allowed, only admin allowed"
+  "success": false,
+  "message": "Forbidden",
+  "data": {
+    "message": "Only super admin is allowed"
+  }
 }
 ```
 
@@ -557,7 +561,7 @@ User target was not found.
 ---
 
 ### DELETE /users/:id 🔒
-Delete a user from the database. **Admin-only endpoint.**
+Delete a user from the database. Restricted to profile owner or Admins. **Owner / Super Admin profiles cannot be deleted by regular Admins.**
 
 #### Path Parameters
 | Parameter | Type | Required | Description |
@@ -584,10 +588,14 @@ Not authorized.
 ```
 
 ##### Response 403
-Forbidden. Requesting user is not an administrator.
+Forbidden. Attempted to delete Super Admin (Owner) profile or user is not allowed.
 ```json
 {
-  "message": "You are not allowed, only admin allowed"
+  "success": false,
+  "message": "Request failed",
+  "data": {
+    "message": "You cannot delete Owner's profile"
+  }
 }
 ```
 

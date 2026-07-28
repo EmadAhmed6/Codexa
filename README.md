@@ -15,16 +15,22 @@
 ### 💻 Client Side (Frontend)
 - **⚡ Next.js 16 App Router & React 19**: Powered by client/server components, SSR, and dynamic route optimization.
 - **🎨 Glassmorphism & High-Contrast Design**: Tailored theme palette with dark mode support, smooth micro-interactions, and custom typography system (`<Text />`).
+- **👑 Multi-Tiered Role System (Super Admin / Admin / User)**:
+  - **Super Admin (OWNER)**: Dynamic database-driven role (`isSuperAdmin`) with top priority sorting, distinct golden 👑 OWNER badge with Egyptian Arabic localized translations (`صاحب الموقع`), exclusive ability to promote/demote admins, and immunity from deletion/editing by regular admins.
+  - **Admin**: Has administrative access to dashboard and user editing, with custom 🛡️ Admin badge (`أدمن`).
+  - **User**: Standard user role.
 - **🔄 Single Atomic Multipart Uploads**: Text and image uploads (`postImage`, `commentImage`, `replyImage`) are processed in single atomic `FormData` HTTP requests to eliminate image flickering and premature toasts.
 - **💬 Nested Comments & Inline Replies**: Real-time comment threads supporting multi-level replies (`ReplySection`), inline editing, image attachments, and likes.
-- **🗂️ React Query Cache Strategy**: Instant UI updates across Feed, Single Post Pages, and Profile Pages via global cache invalidation (`["posts"]`, `["post", postId]`, `["userProfile"]`, `["authMe"]`).
+- **🗂️ React Query Cache Strategy**: Instant UI updates across Feed, Single Post Pages, Profile Pages, and Admin Dashboard via global cache invalidation (`["posts"]`, `["post", postId]`, `["userProfile"]`, `["users"]`, `["authMe"]`).
 - **🎴 Interactive Hover Cards**: Hover over any username or avatar (in posts, comments, replies, or admin dashboard) to reveal user profile details (`<UserHoverCard />`) or reaction lists (`<UserListTooltip />`).
 - **👤 Profile & Bio Management**: Editable profile fields (`username` up to 50 chars, `jobTitle` up to 50 chars, `bio` up to 250 chars) and profile avatar uploads.
-- **🛡️ Admin Dashboard**: Dedicated administrative panels (`/admin/dashboard/users` & `/admin/dashboard/posts`) with real-time search, stat cards, user role badges, and item deletion.
+- **🛡️ Admin Dashboard**: Dedicated administrative panels (`/admin/dashboard/users` & `/admin/dashboard/posts`) with real-time search, role-based filter cards, top-sorted Super Admin listing, and role management buttons.
 
 ### ⚙️ Server Side (Backend)
 - **🚀 Node.js & Express.js REST API**: Modular controller architecture written in TypeScript.
-- **🔐 Bulletproof Authentication**: JWT authorization, bcrypt password hashing, rate-limiting (`express-rate-limit`), and email verification (OTP via Nodemailer).
+- **🔐 Role-Based Access Control (RBAC)**: Fine-grained token verification middlewares (`verifyToken`, `verifyAdminToken`, `verifySuperAdminToken`).
+- **🛡️ Super Admin Protection**: Strict server-side safeguards preventing regular admins from editing or deleting Super Admin (Owner) profiles, and restricting `PATCH /users/:id/toggle-admin` to Super Admins.
+- **🔐 Bulletproof Authentication**: JWT authorization, bcrypt password hashing, rate-limiting (`express-rate-limit`), and email verification (OTP via Nodemailer with hidden schema selection).
 - **🗄️ MongoDB & Mongoose ORM**: Schema definitions with deep populates (`user`, `likes`, `shares`, `comments`, `replies`).
 - **☁️ Cloudinary Integration**: Automated image uploading and legacy Cloudinary asset cleanup on file replacements or deletions.
 - **🛡️ Validation & Sanitation**: Strict Zod schemas validating user inputs across register, login, profile updates, posts, comments, and replies.

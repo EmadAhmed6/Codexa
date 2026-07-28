@@ -66,7 +66,7 @@ export default function AdminUsersPage() {
 
   const BackIcon = isArabic ? ArrowRight : ArrowLeft;
 
-  if (!currentUser?.isAdmin) {
+  if (!currentUser?.isAdmin && !currentUser?.isSuperAdmin) {
     return (
       <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col justify-between">
         <Navbar />
@@ -452,23 +452,26 @@ export default function AdminUsersPage() {
 
                           <td className="px-6 py-4 whitespace-nowrap ltr:text-right rtl:text-left">
                             <div className="flex items-center justify-end gap-2">
-                              <Tooltip
-                                position="top"
-                                content={
-                                  isArabic
-                                    ? "تعديل بيانات اليوزر"
-                                    : "Edit User Profile"
-                                }
-                              >
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setUserToEdit(userItem._id)}
-                                  className="h-8 w-8 p-0 rounded-xl cursor-pointer hover:border-primary hover:text-primary transition-all hover:scale-105"
+                              {/* Edit button: hidden for non-superAdmin users when viewing superAdmin rows */}
+                              {(!userItem.isSuperAdmin || currentUser?.isSuperAdmin) && (
+                                <Tooltip
+                                  position="top"
+                                  content={
+                                    isArabic
+                                      ? "تعديل بيانات اليوزر"
+                                      : "Edit User Profile"
+                                  }
                                 >
-                                  <Edit className="h-3.5 w-3.5 text-textSecondary hover:text-primary" />
-                                </Button>
-                              </Tooltip>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setUserToEdit(userItem._id)}
+                                    className="h-8 w-8 p-0 rounded-xl cursor-pointer hover:border-primary hover:text-primary transition-all hover:scale-105"
+                                  >
+                                    <Edit className="h-3.5 w-3.5 text-textSecondary hover:text-primary" />
+                                  </Button>
+                                </Tooltip>
+                              )}
 
                               {userItem._id && (
                                 <Tooltip

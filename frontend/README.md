@@ -49,12 +49,13 @@ All post, comment, reply, and profile mutations trigger targeted invalidation ac
 - `["posts"]`: Main feed posts
 - `["post", postId]`: Single post view
 - `["userProfile", userId]`: User profile details & post history
+- `["users"]`: All users list (admin dashboard table & user dropdowns)
 - `["authMe"]`: Current authenticated user session
 
 ---
 
 ### 4. Interactive Hover Cards & Reaction Popovers
-- **`<UserHoverCard />`**: Hovering over author links (post author, comment author, reply author, or table rows) opens an interactive popover showing avatar, username, role, clickable profile link (`/profile/${userId}`), and administrative actions (**Set as Admin / Remove Admin**, **Edit User**).
+- **`<UserHoverCard />`**: Hovering over author links (post author, comment author, reply author, or table rows) opens an interactive popover showing avatar, username, role badges (👑 OWNER, 🛡️ Admin, or User), clickable profile link (`/profile/${userId}`), and administrative actions (**Set as Admin / Remove Admin** for Super Admin, and **Edit User** for Admins on non-SuperAdmin targets).
 - **`<UserListTooltip />`**: Hovering over like or share buttons displays a popover list of users who reacted (featuring avatars and usernames).
 - **`<AuthorProfileTooltip />`**: Displays comprehensive profile details in Admin Dashboard tables.
 
@@ -78,11 +79,11 @@ import { Text } from "@/_components/Text";
 
 ---
 
-### 6. Admin Dashboard & Admin Privileges
-Dedicated administrative routes guarded for admin users:
-- **`/admin/dashboard/users`**: Manage registered user accounts, view credentials, filter by role (Admins/Users), search by username/email, edit profiles, toggle admin status, and delete accounts.
+### 6. Admin Dashboard & Multi-Tiered Access Privileges
+Dedicated administrative routes guarded for `isAdmin` and `isSuperAdmin` users:
+- **`/admin/dashboard/users`**: Manage registered user accounts, filter by role (All/Admins/Users), search by username/email/jobTitle, edit user profiles, toggle admin status (Super Admin only), and delete accounts. Super Admins are sorted at the top of the table automatically. Regular admins cannot edit or delete Super Admin profiles or toggle admin statuses.
 - **`/admin/dashboard/posts`**: Manage published articles, inspect engagement counts, search articles, and delete posts.
-- **Admin Profile Editing**: Admins can edit any user's profile details and change their profile photo directly from their profile page or hover card.
+- **Admin Profile Editing**: Admins can edit user profile details and change profile photos directly from profile pages or hover cards, with protection for Super Admin (Owner) profiles.
 
 ---
 
