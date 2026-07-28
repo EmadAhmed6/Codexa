@@ -49,10 +49,16 @@ export default function PostCard({ post }: PostCardProps) {
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
 
   const currentUserId = currentUser?._id || (currentUser as any)?.id;
+  const currentUsername = currentUser?.username?.toLowerCase();
+
   const postUserId =
     typeof post.user === "string"
       ? post.user
       : post.user?._id || (post.user as any)?.id;
+  const postUsername =
+    typeof post.user === "object"
+      ? post.user?.username?.toLowerCase()
+      : undefined;
 
   // Determine display author (If shared post, display original post author)
   const displayAuthor =
@@ -62,15 +68,45 @@ export default function PostCard({ post }: PostCardProps) {
       ? post.sharedPost.user
       : post.user;
 
+  const displayAuthorId =
+    typeof displayAuthor === "string"
+      ? displayAuthor
+      : displayAuthor?._id || (displayAuthor as any)?.id;
+  const displayAuthorUsername =
+    typeof displayAuthor === "object"
+      ? displayAuthor?.username?.toLowerCase()
+      : undefined;
+
   const authorDisplayName = displayAuthor?.fullName || t.post.anonymous;
 
-  // Check if current user is owner of this post OR Admin
-  const isOwnerOrAdmin = Boolean(
+  // Check if current user is owner of this post
+  const isPostOwner = Boolean(
     currentUser &&
-    currentUserId &&
-    postUserId &&
-    (String(postUserId) === String(currentUserId) || currentUser.isAdmin),
+    ((currentUserId &&
+      postUserId &&
+      String(postUserId) === String(currentUserId)) ||
+      (currentUserId &&
+        displayAuthorId &&
+        String(displayAuthorId) === String(currentUserId)) ||
+      (currentUsername && postUsername && postUsername === currentUsername) ||
+      (currentUsername &&
+        displayAuthorUsername &&
+        displayAuthorUsername === currentUsername)),
   );
+
+  // Is the post's author a SuperAdmin? Admins cannot delete SuperAdmin posts.
+  const postAuthorIsSuperAdmin = Boolean(
+    typeof post.user === "object" && (post.user as any)?.isSuperAdmin,
+  );
+
+  // Admin can act on posts UNLESS the post belongs to a SuperAdmin
+  const canAdminDelete = Boolean(
+    (currentUser?.isAdmin || currentUser?.isSuperAdmin) &&
+    !(currentUser?.isAdmin && !currentUser?.isSuperAdmin && postAuthorIsSuperAdmin),
+  );
+
+  // Show action menu to owner or to admins (with superadmin restriction)
+  const isOwnerOrAdmin = Boolean(isPostOwner || canAdminDelete);
 
   // Derived like status from server data
   const isLikedFromServer = Boolean(
@@ -196,7 +232,7 @@ export default function PostCard({ post }: PostCardProps) {
         />
 
         {/* 1. TOP HEADER: Author Info & Controls */}
-        <div className="flex items-center justify-between gap-2 mb-4 relative z-10">
+        <div className="flex items-center justify-between gap-2 mb-4 relative z-30">
           {/* Author Details */}
           <Link
             href={`/profile/${displayAuthor?._id || "me"}`}
@@ -252,7 +288,7 @@ export default function PostCard({ post }: PostCardProps) {
           </Link>
 
           {/* Shared Post Badge & Owner/Admin Controls */}
-          <div className="flex items-center gap-2 pointer-events-auto relative z-10">
+          <div className="flex items-center gap-2 pointer-events-auto relative z-30">
             {post.sharedPost && (
               <Text
                 as="span"
@@ -266,10 +302,12 @@ export default function PostCard({ post }: PostCardProps) {
               </Text>
             )}
 
-            {/* Edit & Delete Action Menu */}
+            {/* Action Menu: Edit for Post Owner only, Delete for Owner or Admin */}
             {isOwnerOrAdmin && (
               <ActionMenu
-                onEdit={() => setIsEditModalOpen(true)}
+                onEdit={
+                  isPostOwner ? () => setIsEditModalOpen(true) : undefined
+                }
                 onDelete={() => setIsDeleteModalOpen(true)}
               />
             )}
@@ -277,7 +315,7 @@ export default function PostCard({ post }: PostCardProps) {
         </div>
 
         {/* 2. POST CONTENT */}
-        <div className="flex-1 flex flex-col justify-between relative z-10 pointer-events-none mb-3">
+        <div className="flex-1 flex flex-col justify-between relative z-0 pointer-events-none mb-3">
           <div>
             {post.title && (
               <Text
@@ -285,7 +323,8 @@ export default function PostCard({ post }: PostCardProps) {
                 size="lg"
                 font="extraBold"
                 color="primary"
-                className="group-hover:text-primary transition-colors line-clamp-2 mb-2 leading-snug md:text-xl"
+                dir="auto"
+                className="group-hover:text-primary transition-colors mb-2 leading-snug md:text-xl bidi-text"
               >
                 {post.title}
               </Text>
@@ -400,6 +439,7 @@ export default function PostCard({ post }: PostCardProps) {
         postId={post._id}
         postTitle={post.title}
         postAuthorName={authorDisplayName}
+        sharesCount={displaySharesCount}
       />
 
       {/* Edit Modal */}

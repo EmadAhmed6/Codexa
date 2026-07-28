@@ -109,11 +109,14 @@ export default function UserProfilePage() {
     setIsEditModalOpen(true);
   };
 
+  // Always prefer userPosts (from dedicated query) for live updates.
+  // Fall back to embedded posts in user profile only if userPosts is not yet loaded.
   const rawPosts: any[] =
-    Array.isArray((userToDisplay as any)?.posts) &&
-    (userToDisplay as any).posts.length > 0
-      ? (userToDisplay as any).posts
-      : userPosts || [];
+    userPosts && userPosts.length > 0
+      ? userPosts
+      : Array.isArray((userToDisplay as any)?.posts)
+        ? (userToDisplay as any).posts
+        : [];
 
   const displayUserPosts = rawPosts.filter((post: any) => {
     if (!targetUserId) return true;
@@ -185,10 +188,10 @@ export default function UserProfilePage() {
                   )}
                 </div>
 
-                {/* Edit Avatar Pen Button (Owner or Admin) */}
+                {/* Edit Avatar Pen Button (Owner or Admin — but not admin on SuperAdmin profile) */}
                 {(isOwnProfile ||
-                  currentUser?.isAdmin ||
-                  currentUser?.isSuperAdmin) && (
+                  currentUser?.isSuperAdmin ||
+                  (currentUser?.isAdmin && !userToDisplay?.isSuperAdmin)) && (
                   <label
                     onClick={(e) => e.stopPropagation()}
                     className="absolute -bottom-1 ltr:-right-1 rtl:-left-1 p-2.5 rounded-2xl bg-primary hover:bg-primaryHover text-white shadow-lg border-2 border-bgSecondary transition-transform hover:scale-110 cursor-pointer z-20"
@@ -211,10 +214,10 @@ export default function UserProfilePage() {
               </div>
 
               {/* User Info Details */}
-              <div className="flex-1 text-center ltr:md:text-left rtl:md:text-right space-y-3">
+              <div className="flex-1 space-y-3">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2 justify-center ltr:md:justify-start rtl:md:justify-end">
+                  <div className="flex flex-col items-center md:items-start text-center md:text-start w-full md:w-auto">
+                    <div className="flex items-center gap-2 justify-center md:justify-start flex-wrap">
                       <Text
                         as="h1"
                         size="2xl"
@@ -251,17 +254,19 @@ export default function UserProfilePage() {
                     )}
 
                     {userToDisplay?.jobTitle && (
-                      <div className="flex items-center justify-center ltr:md:justify-start rtl:md:justify-end gap-1.5 mt-1">
-                        <Briefcase className="h-3.5 w-3.5 text-primary" />
+                      <div className="flex items-center justify-center md:justify-start gap-1.5 mt-1 w-full">
+                        <Briefcase className="h-3.5 w-3.5 text-primary shrink-0" />
                         <Text as="p" size="xs" font="semiBold" color="primary">
                           {userToDisplay.jobTitle}
                         </Text>
                       </div>
                     )}
-                    {(isOwnProfile || currentUser?.isAdmin) &&
+                    {(isOwnProfile ||
+                      currentUser?.isAdmin ||
+                      currentUser?.isSuperAdmin) &&
                       userToDisplay?.email && (
-                        <div className="flex items-center justify-center ltr:md:justify-start rtl:md:justify-end gap-1.5 mt-1">
-                          <Mail className="h-3.5 w-3.5 text-textSecondary" />
+                        <div className="flex items-center justify-center md:justify-start gap-1.5 mt-1 w-full">
+                          <Mail className="h-3.5 w-3.5 text-textSecondary shrink-0" />
                           <Text as="p" size="xs" color="secondary">
                             {userToDisplay.email}
                           </Text>
@@ -280,7 +285,10 @@ export default function UserProfilePage() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {(isOwnProfile || currentUser?.isAdmin) && (
+                    {/* Edit Profile — hidden from admins on SuperAdmin profiles */}
+                    {(isOwnProfile ||
+                      currentUser?.isSuperAdmin ||
+                      (currentUser?.isAdmin && !userToDisplay?.isSuperAdmin)) && (
                       <Button
                         onClick={handleOpenEditModal}
                         variant="outline"
@@ -300,7 +308,10 @@ export default function UserProfilePage() {
                       </Button>
                     )}
 
-                    {(isOwnProfile || currentUser?.isAdmin) && (
+                    {/* Delete User — hidden from admins on SuperAdmin profiles */}
+                    {(isOwnProfile ||
+                      currentUser?.isSuperAdmin ||
+                      (currentUser?.isAdmin && !userToDisplay?.isSuperAdmin)) && (
                       <Button
                         onClick={() => setIsDeleteUserModalOpen(true)}
                         variant="destructive"

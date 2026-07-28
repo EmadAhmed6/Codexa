@@ -155,6 +155,13 @@
     @apply focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bgPrimary;
   }
 
+  /* BiDi Text Isolation for Mixed Arabic/English Content */
+  [dir="auto"],
+  .bidi-text {
+    unicode-bidi: plaintext;
+    text-align: start;
+  }
+
   /* Glassmorphism Wrapper card */
   .glass-card {
     @apply relative overflow-hidden bg-bgSecondary/60 backdrop-blur-xl border border-borderPrimary/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.4)];

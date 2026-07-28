@@ -53,18 +53,38 @@ export default function SinglePostPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const currentUserId = currentUser?._id || (currentUser as any)?.id;
+  const currentUsername = currentUser?.username?.toLowerCase();
+
   const postUserId =
     typeof post?.user === "string"
       ? post.user
       : post?.user?._id || (post?.user as any)?.id;
+  const postUsername =
+    typeof post?.user === "object"
+      ? (post.user as any)?.username?.toLowerCase()
+      : undefined;
 
-  const isOwnerOrAdmin = Boolean(
+  const isPostOwner = Boolean(
     currentUser &&
     post &&
-    currentUserId &&
-    postUserId &&
-    (String(postUserId) === String(currentUserId) || currentUser.isAdmin),
+    ((currentUserId &&
+      postUserId &&
+      String(postUserId) === String(currentUserId)) ||
+      (currentUsername && postUsername && postUsername === currentUsername)),
   );
+
+  // Is the post's author a SuperAdmin? Admins cannot delete SuperAdmin posts.
+  const postAuthorIsSuperAdmin = Boolean(
+    post && typeof post.user === "object" && (post.user as any)?.isSuperAdmin,
+  );
+
+  // Admin can act on posts UNLESS the post belongs to a SuperAdmin
+  const canAdminDelete = Boolean(
+    (currentUser?.isAdmin || currentUser?.isSuperAdmin) &&
+    !(currentUser?.isAdmin && !currentUser?.isSuperAdmin && postAuthorIsSuperAdmin),
+  );
+
+  const isOwnerOrAdmin = Boolean(isPostOwner || canAdminDelete);
 
   const isLiked = Boolean(
     currentUserId &&
@@ -210,10 +230,10 @@ export default function SinglePostPage() {
             </Link>
           </UserHoverCard>
 
-          {/* Owner / Admin Actions Menu */}
+          {/* Owner / Admin Actions Menu: Edit for Post Owner only, Delete for Owner or Admin */}
           {isOwnerOrAdmin && (
             <ActionMenu
-              onEdit={() => setIsEditModalOpen(true)}
+              onEdit={isPostOwner ? () => setIsEditModalOpen(true) : undefined}
               onDelete={handleDeletePost}
             />
           )}
@@ -222,10 +242,11 @@ export default function SinglePostPage() {
         {/* Article Title */}
         <Text
           as="h1"
-          size="3xl"
-          font="black"
+          size="xl"
+          font="bold"
           color="primary"
-          className="leading-tight tracking-tight mb-6 md:text-5xl"
+          dir="auto"
+          className="leading-snug tracking-tight mb-6 text-xl md:text-2xl bidi-text"
         >
           {post.title}
         </Text>
@@ -246,7 +267,8 @@ export default function SinglePostPage() {
           as="article"
           size="default"
           color="primary"
-          className="prose prose-slate dark:prose-invert max-w-none text-textPrimary leading-relaxed whitespace-pre-line mb-10 text-base md:text-lg"
+          dir="auto"
+          className="prose prose-slate dark:prose-invert max-w-none text-textPrimary leading-relaxed whitespace-pre-line mb-10 text-base md:text-lg bidi-text"
         >
           {post.description}
         </Text>
@@ -305,7 +327,7 @@ export default function SinglePostPage() {
         </div>
 
         {/* Comments Section */}
-        <CommentSection postId={postId} />
+        <CommentSection postId={postId} sharesCount={sharesCount} />
       </main>
 
       {/* Edit Modal */}

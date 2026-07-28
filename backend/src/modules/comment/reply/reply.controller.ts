@@ -9,6 +9,7 @@ import {
 } from "../comment.model.js";
 import cloudinary from "../../../utils/cloudinary.js";
 import { Post } from "../../posts/post.model.js";
+import { User } from "../../user/user.model.js";
 
 // GET ALL REPLIES
 const getAllReplies = asyncHandler(
@@ -188,6 +189,15 @@ const updateReplyComment = asyncHandler(
       return;
     }
 
+    const replyOwner = await User.findById(existingReply.user);
+    if (replyOwner?.isSuperAdmin && !req.user?.isSuperAdmin) {
+      res.status(403).json({
+        success: false,
+        message: "You cannot edit a SuperAdmin's reply",
+      });
+      return;
+    }
+
     let replyImage: { url: string; publicId: string | null } | undefined =
       undefined;
 
@@ -253,6 +263,15 @@ const deleteReplyComment = asyncHandler(
       res.status(404).json({
         success: false,
         message: "Reply comment was not found",
+      });
+      return;
+    }
+
+    const replyOwner = await User.findById(replyComment.user);
+    if (replyOwner?.isSuperAdmin && !req.user?.isSuperAdmin) {
+      res.status(403).json({
+        success: false,
+        message: "You cannot delete a SuperAdmin's reply",
       });
       return;
     }

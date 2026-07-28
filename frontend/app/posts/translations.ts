@@ -84,8 +84,7 @@ export const postTranslations: Record<Language, PostTranslations> = {
     attachImage: "Attach Image",
     changeImage: "Change Image",
     postComment: "Post Comment",
-    loginToComment:
-      "Please log in to join the conversation and post comments.",
+    loginToComment: "Please log in to join the conversation and post comments.",
     noCommentsYet: "No comments yet. Be the first to share your thoughts!",
     editComment: "Edit Comment",
     deleteComment: "Delete Comment",
@@ -138,8 +137,7 @@ export const createEditPostTranslations: Record<
 > = {
   en: {
     createTitle: "Create New Post",
-    createSubtitle:
-      "Share your technical insights with the Fluxion community",
+    createSubtitle: "Share your technical insights with the Fluxion community",
     editTitle: "Edit Post",
     editSubtitle: "Update post details",
     titleLabel: "Title",

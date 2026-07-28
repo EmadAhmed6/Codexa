@@ -13,6 +13,7 @@ import {
   Loader2,
   User as UserIcon,
   Reply as ReplyIcon,
+  Repeat,
 } from "lucide-react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import {
@@ -23,6 +24,7 @@ import {
   useLikeComment,
 } from "@/_features/posts/hooks";
 import { addReply } from "@/_features/posts/api/addReply";
+import { updateReply } from "@/_features/posts/api/updateReply";
 import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import Cookies from "js-cookie";
 import { useForm } from "react-hook-form";
@@ -39,6 +41,7 @@ import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
 import ReplySection from "@/_components/ReplySection";
 import ActionMenu from "@/_components/ActionMenu";
+import ImageModal from "@/_components/ImageModal";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface CommentSectionProps {
@@ -46,6 +49,7 @@ interface CommentSectionProps {
   hideHeader?: boolean;
   isModal?: boolean;
   onCloseModal?: () => void;
+  sharesCount?: number;
 }
 
 interface ReplyingToState {
@@ -59,6 +63,7 @@ export default function CommentSection({
   hideHeader = false,
   isModal = false,
   onCloseModal,
+  sharesCount,
 }: CommentSectionProps) {
   const queryClient = useQueryClient();
   const token = Cookies.get("token");
@@ -90,11 +95,14 @@ export default function CommentSection({
   // Active reply state
   const [replyingTo, setReplyingTo] = useState<ReplyingToState | null>(null);
 
-  // Edit Comment state
-  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
-  const [editText, setEditText] = useState("");
-  const [editImageFile, setEditImageFile] = useState<File | null>(null);
-  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+  // Unified edit mode — covers both edit-comment and edit-reply
+  type EditingMode =
+    | { type: "comment"; commentId: string; imageUrl?: string }
+    | { type: "reply"; replyId: string; commentId: string; imageUrl?: string }
+    | null;
+  const [editingMode, setEditingMode] = useState<EditingMode>(null);
+
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -124,13 +132,18 @@ export default function CommentSection({
     }
   };
 
-  const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setEditImageFile(file);
-      setEditImagePreview(URL.createObjectURL(file));
-    }
-  };
+  // Direct updateReply mutation used from CommentSection when editing a reply
+  const updateReplyMutation = useMutation({
+    mutationFn: (data: { commentId: string; replyId: string; text: string; imageFile?: File | null }) =>
+      updateReply({ postId, commentId: data.commentId, replyCommentId: data.replyId, text: data.text, replyImageFile: data.imageFile }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["replies", postId, variables.commentId] });
+    },
+    onError: (err: any) => {
+      const { toast } = require("@/lib/toast");
+      toast.error(err?.response?.data?.message || "Failed to update reply.");
+    },
+  });
 
   // Start Reply Callback from any comment or sub-reply
   const handleStartReply = (commentId: string, authorName: string, authorUserId?: string) => {
@@ -152,11 +165,26 @@ export default function CommentSection({
 
   const onSubmitComment = async (data: ICommentForm) => {
     try {
-      if (imageFile) {
-        setIsUploading(true);
-      }
+      if (imageFile) setIsUploading(true);
 
-      if (replyingTo) {
+      if (editingMode?.type === "comment") {
+        // Save edit for comment
+        await updateCommentMutation.mutateAsync({
+          commentId: editingMode.commentId,
+          text: data.text.trim(),
+          commentImageFile: imageFile,
+        });
+        setEditingMode(null);
+      } else if (editingMode?.type === "reply") {
+        // Save edit for reply
+        await updateReplyMutation.mutateAsync({
+          commentId: editingMode.commentId,
+          replyId: editingMode.replyId,
+          text: data.text.trim(),
+          imageFile,
+        });
+        setEditingMode(null);
+      } else if (replyingTo) {
         await addReplyMutation.mutateAsync({
           commentId: replyingTo.commentId,
           text: data.text.trim(),
@@ -180,25 +208,39 @@ export default function CommentSection({
     }
   };
 
-  const handleSaveEdit = async (commentId: string) => {
-    if (!editText.trim()) return;
-    try {
-      setIsUploading(true);
-      await updateCommentMutation.mutateAsync({
-        commentId,
-        text: editText.trim(),
-        commentImageFile: editImageFile,
-      });
+  /** Start editing a comment — populates the bottom form */
+  const handleStartEditComment = (commentId: string, text: string, imageUrl?: string) => {
+    setReplyingTo(null);
+    setEditingMode({ type: "comment", commentId, imageUrl });
+    setValue("text", text);
+    setImageFile(null);
+    setImagePreview(imageUrl || null);
+    setTimeout(() => {
+      textareaRef.current?.focus();
+      const len = textareaRef.current?.value.length || 0;
+      textareaRef.current?.setSelectionRange(len, len);
+    }, 60);
+  };
 
-      setEditingCommentId(null);
-      setEditText("");
-      setEditImageFile(null);
-      setEditImagePreview(null);
-    } catch {
-      // Handled in mutation
-    } finally {
-      setIsUploading(false);
-    }
+  /** Start editing a reply — populates the bottom form */
+  const handleStartEditReply = (replyId: string, commentId: string, text: string, imageUrl?: string) => {
+    setReplyingTo(null);
+    setEditingMode({ type: "reply", replyId, commentId, imageUrl });
+    setValue("text", text);
+    setImageFile(null);
+    setImagePreview(imageUrl || null);
+    setTimeout(() => {
+      textareaRef.current?.focus();
+      const len = textareaRef.current?.value.length || 0;
+      textareaRef.current?.setSelectionRange(len, len);
+    }, 60);
+  };
+
+  const cancelEditMode = () => {
+    setEditingMode(null);
+    reset();
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const commentsCount = comments ? comments.length : 0;
@@ -212,8 +254,30 @@ export default function CommentSection({
     token ? (
       <form onSubmit={handleSubmit(onSubmitComment)} className="w-full">
         <div className="rounded-xl bg-bgSecondary/90 border border-borderPrimary/50 shadow-xs focus-within:border-primary/50 transition-all p-2 sm:p-2.5">
-          {/* Active Replying-To Banner */}
-          {replyingTo && (
+          {/* Edit Mode Banner */}
+          {editingMode && (
+            <div className="flex items-center justify-between px-3 py-1.5 mb-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400 font-semibold animate-in fade-in duration-150">
+              <div className="flex items-center gap-1.5">
+                <Edit2 className="h-3.5 w-3.5" />
+                <span>
+                  {editingMode.type === "comment"
+                    ? (isArabic ? "تعديل الكومنت" : "Editing comment")
+                    : (isArabic ? "تعديل الرد" : "Editing reply")}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={cancelEditMode}
+                className="p-0.5 rounded-md hover:bg-amber-500/20 transition-colors cursor-pointer"
+                title="Cancel edit"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Active Replying-To Banner (only when not in edit mode) */}
+          {!editingMode && replyingTo && (
             <div className="flex items-center justify-between px-3 py-1.5 mb-2 rounded-lg bg-primary/10 border border-primary/20 text-xs text-primary font-semibold animate-in fade-in duration-150">
               <div className="flex items-center gap-1.5">
                 <ReplyIcon className="h-3.5 w-3.5" />
@@ -261,11 +325,11 @@ export default function CommentSection({
 
           {/* Optional Image Preview */}
           {imagePreview && (
-            <div className="relative inline-block mt-1 rounded-lg overflow-hidden border border-borderPrimary max-h-20">
+            <div className="relative inline-block mt-2 rounded-xl overflow-hidden border border-borderPrimary/60 max-h-32 bg-bgPrimary/40 p-1">
               <img
                 src={imagePreview}
                 alt="Upload preview"
-                className="h-16 object-cover"
+                className="h-24 max-w-xs object-contain rounded-lg"
               />
               <button
                 type="button"
@@ -273,9 +337,9 @@ export default function CommentSection({
                   setImageFile(null);
                   setImagePreview(null);
                 }}
-                className="absolute top-1 ltr:right-1 rtl:left-1 p-0.5 bg-black/70 rounded-full text-white hover:bg-black transition-colors cursor-pointer"
+                className="absolute top-1.5 ltr:right-1.5 rtl:left-1.5 p-1 bg-black/70 rounded-full text-white hover:bg-black transition-colors cursor-pointer"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
           )}
@@ -308,16 +372,22 @@ export default function CommentSection({
                 !watchText.trim() ||
                 addCommentMutation.isPending ||
                 addReplyMutation.isPending ||
+                updateCommentMutation.isPending ||
+                updateReplyMutation.isPending ||
                 isUploading
               }
               className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground font-semibold cursor-pointer h-7 text-[11px] px-3 py-1"
             >
-              {addCommentMutation.isPending || addReplyMutation.isPending || isUploading ? (
+              {addCommentMutation.isPending || addReplyMutation.isPending || updateCommentMutation.isPending || updateReplyMutation.isPending || isUploading ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
                 <>
                   <Text as="span" size="xs" font="semiBold" color="white" className="text-[11px]">
-                    {replyingTo ? (isArabic ? "رد" : "Reply") : t.post.postComment}
+                    {editingMode
+                      ? (isArabic ? "حفظ" : "Save")
+                      : replyingTo
+                        ? (isArabic ? "رد" : "Reply")
+                        : t.post.postComment}
                   </Text>
                   <Send className="h-3 w-3 ltr:ml-1 rtl:mr-1 rtl:-scale-x-1" />
                 </>
@@ -350,9 +420,11 @@ export default function CommentSection({
                 (currentUser as any)?.id === comment.user?._id)
           );
           const isOwnerOrAdmin = Boolean(
-            currentUser && (isOwner || currentUser.isAdmin)
+            currentUser &&
+            (isOwner ||
+              currentUser.isSuperAdmin ||
+              (currentUser.isAdmin && !(comment.user as any)?.isSuperAdmin))
           );
-          const isEditing = editingCommentId === comment._id;
           const likesCount =
             comment.commentLikesCount !== undefined
               ? comment.commentLikesCount
@@ -444,20 +516,15 @@ export default function CommentSection({
                 </div>
 
                 {/* Edit & Delete Comment Action Menu */}
-                {isOwnerOrAdmin && !isEditing && (
+                {isOwnerOrAdmin && (
                   <ActionMenu
                     onEdit={
                       isOwner
-                        ? () => {
-                            setEditingCommentId(comment._id);
-                            setEditText(comment.text);
-                            setEditImagePreview(
-                              comment.commentImage?.url ||
-                                (comment as any).image?.url ||
-                                null,
-                            );
-                            setEditImageFile(null);
-                          }
+                        ? () => handleStartEditComment(
+                            comment._id,
+                            comment.text,
+                            comment.commentImage?.url || (comment as any).image?.url,
+                          )
                         : undefined
                     }
                     onDelete={() => deleteCommentMutation.mutate(comment._id)}
@@ -467,107 +534,33 @@ export default function CommentSection({
                 )}
               </div>
 
-              {/* Comment Content / Edit Form */}
-              {isEditing ? (
-                <div className="space-y-2 pt-1">
-                  <textarea
-                    rows={2}
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSaveEdit(comment._id);
-                      }
-                    }}
-                    className="w-full p-2.5 text-xs rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary outline-none focus:ring-1 focus:ring-primary resize-none"
+              {/* Comment Content */}
+              <Text
+                as="p"
+                size="xs"
+                color="primary"
+                dir="auto"
+                className="leading-relaxed whitespace-pre-wrap text-xs sm:text-sm bidi-text"
+              >
+                {comment.text}
+              </Text>
+
+              {/* Comment Image */}
+              {(comment.commentImage?.url || comment.image?.url) && (
+                <div className="mt-2.5 rounded-xl overflow-hidden border border-borderPrimary/40 max-w-lg bg-bgPrimary/30 inline-block group/img">
+                  <img
+                    src={comment.commentImage?.url || comment.image?.url}
+                    alt="Comment attachment"
+                    onClick={() =>
+                      setSelectedImage(
+                        comment.commentImage?.url ||
+                          comment.image?.url ||
+                          null,
+                      )
+                    }
+                    className="max-h-96 w-auto h-auto object-contain rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
                   />
-
-                  {/* Edit Image Preview */}
-                  {editImagePreview && (
-                    <div className="relative inline-block rounded-xl overflow-hidden border border-borderPrimary max-h-24">
-                      <img
-                        src={editImagePreview}
-                        alt="Edit preview"
-                        className="h-20 object-cover rounded-xl"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditImageFile(null);
-                          setEditImagePreview(null);
-                        }}
-                        className="absolute top-1 ltr:right-1 rtl:left-1 p-0.5 bg-black/70 rounded-full text-white hover:bg-black transition-colors cursor-pointer"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between pt-1">
-                    <label className="flex items-center gap-1 text-xs text-textSecondary hover:text-primary transition-colors cursor-pointer">
-                      <ImageIcon className="h-3.5 w-3.5 text-primary" />
-                      <Text as="span" size="xs" font="medium" color="secondary" className="text-[11px]">
-                        {editImagePreview ? t.post.changeImage : t.post.attachImage}
-                      </Text>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleEditImageChange}
-                        className="hidden"
-                      />
-                    </label>
-
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          setEditingCommentId(null);
-                          setEditImageFile(null);
-                          setEditImagePreview(null);
-                        }}
-                        className="h-7 text-xs rounded-lg px-2.5 cursor-pointer"
-                      >
-                        {t.post.cancel}
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => handleSaveEdit(comment._id)}
-                        disabled={updateCommentMutation.isPending || isUploading}
-                        className="h-7 text-xs rounded-lg bg-primary text-primary-foreground px-3 cursor-pointer"
-                      >
-                        {updateCommentMutation.isPending || isUploading ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          t.post.save
-                        )}
-                      </Button>
-                    </div>
-                  </div>
                 </div>
-              ) : (
-                <>
-                  <Text
-                    as="p"
-                    size="xs"
-                    color="primary"
-                    className="leading-relaxed whitespace-pre-wrap text-xs sm:text-sm"
-                  >
-                    {comment.text}
-                  </Text>
-
-                  {/* Comment Image */}
-                  {(comment.commentImage?.url || comment.image?.url) && (
-                    <div className="mt-2 rounded-xl overflow-hidden border border-borderPrimary/40 max-w-md">
-                      <img
-                        src={comment.commentImage?.url || comment.image?.url}
-                        alt="Comment attachment"
-                        className="w-full h-auto max-h-64 object-cover"
-                      />
-                    </div>
-                  )}
-                </>
               )}
 
               {/* Like Button & Reply Action for Comment */}
@@ -635,6 +628,9 @@ export default function CommentSection({
                   handleStartReply(comment._id, targetAuthorName, targetUserId)
                 }
                 onCloseModal={onCloseModal}
+                onEditReply={(replyId, replyCommentId, text, imageUrl) =>
+                  handleStartEditReply(replyId, replyCommentId, text, imageUrl)
+                }
               />
             </div>
           );
@@ -662,6 +658,12 @@ export default function CommentSection({
         <div className="p-4 border-t border-borderPrimary/40 bg-bgSecondary/95 backdrop-blur-md shrink-0">
           {renderCommentForm()}
         </div>
+
+        {/* Full Image Preview Modal */}
+        <ImageModal
+          src={selectedImage}
+          onClose={() => setSelectedImage(null)}
+        />
       </div>
     );
   }
@@ -670,11 +672,24 @@ export default function CommentSection({
   return (
     <div className="space-y-6 pb-24">
       {!hideHeader && (
-        <div className="flex items-center gap-2 pb-3 border-b border-borderPrimary/40">
-          <MessageSquare className="h-5 w-5 text-primary" />
-          <Text as="h3" size="lg" font="bold" color="primary">
-            {t.post.discussionComments} ({commentsCount})
-          </Text>
+        <div className="flex items-center justify-between pb-3 border-b border-borderPrimary/40">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-primary" />
+            <Text as="h3" size="lg" font="bold" color="primary">
+              {t.post.discussionComments} ({commentsCount})
+            </Text>
+          </div>
+          {sharesCount !== undefined && (
+            <div
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-primary/10 text-primary text-xs font-semibold"
+              title={t.post.shared || "Shares"}
+            >
+              <Repeat className="h-3.5 w-3.5 text-primary" />
+              <Text as="span" size="xs" font="semiBold" color="primary">
+                {sharesCount}
+              </Text>
+            </div>
+          )}
         </div>
       )}
 
@@ -686,6 +701,12 @@ export default function CommentSection({
           {renderCommentForm()}
         </div>
       </div>
+
+      {/* Full Image Preview Modal */}
+      <ImageModal
+        src={selectedImage}
+        onClose={() => setSelectedImage(null)}
+      />
     </div>
   );
 }

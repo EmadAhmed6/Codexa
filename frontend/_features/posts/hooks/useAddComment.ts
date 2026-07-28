@@ -11,6 +11,8 @@ export const useAddComment = (postId: string) => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
       queryClient.invalidateQueries({ queryKey: ["post", postId] });
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["authMe"] });
 
       queryClient.setQueryData(["post", postId], (oldPost: any) => {
         if (!oldPost) return oldPost;

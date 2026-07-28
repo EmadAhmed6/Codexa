@@ -9,6 +9,7 @@ import {
 import cloudinary from "../../utils/cloudinary.js";
 import { Types } from "mongoose";
 import { Post } from "../posts/post.model.js";
+import { User } from "../user/user.model.js";
 
 // GET ALL COMMENTS
 const getAllComments = asyncHandler(
@@ -172,14 +173,21 @@ const updateComment = asyncHandler(
       return;
     }
 
+    const commentOwner = await User.findById(comment.user);
+    if (commentOwner?.isSuperAdmin && !req.user?.isSuperAdmin) {
+      res.status(403).json({
+        success: false,
+        message: "You cannot edit a SuperAdmin's comment",
+      });
+      return;
+    }
+
     let commentImage: { url: string; publicId: string | null } | undefined =
       undefined;
 
     if (req.file) {
       if (comment.commentImage?.publicId) {
-        await cloudinary.uploader.destroy(
-          comment.commentImage.publicId,
-        );
+        await cloudinary.uploader.destroy(comment.commentImage.publicId);
       }
       const result = await cloudinary.uploader.upload(req.file.path);
       commentImage = {
@@ -232,8 +240,15 @@ const deleteComment = asyncHandler(
         .json({ success: false, message: "Valid Comment ID is required" });
       return;
     }
-
     const comment = await Comment.findById(new Types.ObjectId(commentId));
+    const commentOwner = await User.findById(comment?.user);
+    if (commentOwner?.isSuperAdmin && !req.user?.isSuperAdmin) {
+      res.status(403).json({
+        success: false,
+        message: "You cannot delete a SuperAdmin's comment",
+      });
+      return;
+    }
     if (comment) {
       if (comment.commentImage?.publicId) {
         await cloudinary.uploader.destroy(comment.commentImage.publicId);

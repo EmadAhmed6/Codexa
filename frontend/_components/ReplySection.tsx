@@ -6,27 +6,21 @@ import {
   CornerDownRight,
   Heart,
   User as UserIcon,
-  Edit2,
-  Trash2,
   Loader2,
-  Image as ImageIcon,
-  X,
-  Reply as ReplyIcon,
 } from "lucide-react";
 import {
   useGetReplies,
-  useUpdateReply,
   useDeleteReply,
   useLikeReply,
 } from "@/_features/posts/hooks";
 import { Reply } from "@/_features/posts/types/Post";
 import { formatRelativeTime } from "@/lib/utils";
 import { Text } from "@/_components/Text";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
 import ActionMenu from "@/_components/ActionMenu";
+import ImageModal from "@/_components/ImageModal";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface ReplySectionProps {
@@ -39,6 +33,8 @@ interface ReplySectionProps {
   token?: string;
   onReplyTo?: (targetAuthorName: string, targetUserId?: string) => void;
   onCloseModal?: () => void;
+  /** Called when user clicks "Edit Reply" — passes data up to CommentSection's shared bottom form */
+  onEditReply?: (replyId: string, commentId: string, text: string, imageUrl?: string) => void;
 }
 
 export default function ReplySection({
@@ -51,45 +47,15 @@ export default function ReplySection({
   token,
   onReplyTo,
   onCloseModal,
+  onEditReply,
 }: ReplySectionProps) {
   const { t, isArabic } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-
-  // Edit Reply state
-  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
-  const [editReplyText, setEditReplyText] = useState("");
-  const [editReplyImageFile, setEditReplyImageFile] = useState<File | null>(null);
-  const [editReplyImagePreview, setEditReplyImagePreview] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const { data: replies, isLoading } = useGetReplies(postId, commentId, isOpen);
-  const updateReplyMutation = useUpdateReply(postId, commentId);
   const deleteReplyMutation = useDeleteReply(postId, commentId);
   const likeReplyMutation = useLikeReply(postId, commentId);
-
-  const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setEditReplyImageFile(file);
-      setEditReplyImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleSaveEditReply = async (replyCommentId: string) => {
-    if (!editReplyText.trim() || updateReplyMutation.isPending) return;
-    try {
-      await updateReplyMutation.mutateAsync({
-        replyCommentId,
-        text: editReplyText.trim(),
-        replyImageFile: editReplyImageFile,
-      });
-      setEditingReplyId(null);
-      setEditReplyText("");
-      setEditReplyImageFile(null);
-      setEditReplyImagePreview(null);
-    } catch {
-      // Handled in mutation
-    }
-  };
 
   const handleTriggerReply = (authorName?: string, userId?: string) => {
     const targetAuthor = authorName || commentAuthorName || "User";
@@ -137,7 +103,7 @@ export default function ReplySection({
         }
       }
 
-      // 3. Fallback to commentAuthorId if targetUserId is still unknown (never use replyAuthorId)
+      // 3. Fallback to commentAuthorId if targetUserId is still unknown
       const finalTargetId = targetUserId || commentAuthorId;
 
       return (
@@ -204,9 +170,11 @@ export default function ReplySection({
                     (currentUser as any)?.id === reply.user?._id)
               );
               const isReplyOwnerOrAdmin = Boolean(
-                currentUser && (isReplyOwner || currentUser.isAdmin)
+                currentUser &&
+                (isReplyOwner ||
+                  currentUser.isSuperAdmin ||
+                  (currentUser.isAdmin && !(reply.user as any)?.isSuperAdmin))
               );
-              const isEditingReply = editingReplyId === reply._id;
               const replyImageSrc =
                 reply.commentImage?.url || reply.image?.url;
 
@@ -288,17 +256,12 @@ export default function ReplySection({
                       )}
                     </div>
 
-                    {/* Owner / Admin Controls Menu */}
-                    {isReplyOwnerOrAdmin && !isEditingReply && (
+                    {/* Owner / Admin Controls Menu — Edit triggers parent form */}
+                    {isReplyOwnerOrAdmin && (
                       <ActionMenu
                         onEdit={
-                          isReplyOwner
-                            ? () => {
-                                setEditingReplyId(reply._id);
-                                setEditReplyText(reply.text);
-                                setEditReplyImagePreview(replyImageSrc || null);
-                                setEditReplyImageFile(null);
-                              }
+                          isReplyOwner && onEditReply
+                            ? () => onEditReply(reply._id, commentId, reply.text, replyImageSrc)
                             : undefined
                         }
                         onDelete={() => deleteReplyMutation.mutate(reply._id)}
@@ -308,102 +271,30 @@ export default function ReplySection({
                     )}
                   </div>
 
-                  {/* Reply Content or Edit Form */}
-                  {isEditingReply ? (
-                    <div className="space-y-2 pt-1">
-                      <textarea
-                        value={editReplyText}
-                        onChange={(e) => setEditReplyText(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSaveEditReply(reply._id);
-                          }
-                        }}
-                        className="w-full p-2.5 text-xs rounded-xl bg-bgPrimary border border-borderPrimary text-textPrimary outline-none focus:ring-1 focus:ring-primary"
-                      />
-
-                      {editReplyImagePreview && (
-                        <div className="relative inline-block rounded-xl overflow-hidden border border-borderPrimary max-h-24">
-                          <img
-                            src={editReplyImagePreview}
-                            alt="Edit preview"
-                            className="h-20 object-cover rounded-xl"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditReplyImageFile(null);
-                              setEditReplyImagePreview(null);
-                            }}
-                            className="absolute top-1 ltr:right-1 rtl:left-1 p-0.5 bg-black/70 rounded-full text-white hover:bg-black transition-colors"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between pt-1">
-                        <label className="flex items-center gap-1 text-[11px] text-textSecondary hover:text-primary transition-colors cursor-pointer">
-                          <ImageIcon className="h-3.5 w-3.5 text-primary" />
-                          <span>
-                            {editReplyImagePreview ? t.post.changeImage : t.post.attachImage}
-                          </span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleEditImageChange}
-                            className="hidden"
-                          />
-                        </label>
-
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              setEditingReplyId(null);
-                              setEditReplyImageFile(null);
-                              setEditReplyImagePreview(null);
-                            }}
-                            className="h-7 text-xs rounded-lg px-2.5 cursor-pointer"
-                          >
-                            {t.post.cancel}
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handleSaveEditReply(reply._id)}
-                            disabled={updateReplyMutation.isPending}
-                            className="h-7 text-xs rounded-lg bg-primary text-primary-foreground px-3 font-semibold cursor-pointer"
-                          >
-                            {updateReplyMutation.isPending ? t.post.saving : t.post.save}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <Text
-                      as="p"
-                      size="xs"
-                      color="primary"
-                      className="leading-relaxed whitespace-pre-line text-xs sm:text-sm"
-                    >
-                      {renderReplyTextWithMention(reply.text, reply.user?._id)}
-                    </Text>
-                  )}
+                  {/* Reply Text */}
+                  <Text
+                    as="p"
+                    size="xs"
+                    color="primary"
+                    dir="auto"
+                    className="leading-relaxed whitespace-pre-line text-xs sm:text-sm bidi-text"
+                  >
+                    {renderReplyTextWithMention(reply.text, reply.user?._id)}
+                  </Text>
 
                   {/* Attached Reply Image */}
-                  {!isEditingReply && replyImageSrc && (
-                    <div className="mt-1.5 overflow-hidden rounded-xl border border-borderPrimary/40 max-w-xs">
+                  {replyImageSrc && (
+                    <div className="mt-2 overflow-hidden rounded-xl border border-borderPrimary/40 max-w-md bg-bgPrimary/30 inline-block group/replyImg">
                       <img
                         src={replyImageSrc}
                         alt="Reply Attachment"
-                        className="max-h-36 object-cover rounded-xl"
+                        onClick={() => setSelectedImage(replyImageSrc)}
+                        className="max-h-80 w-auto h-auto object-contain rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
                       />
                     </div>
                   )}
 
-                  {/* Reply Action Row: Like */}
+                  {/* Reply Action Row: Like + Reply */}
                   <div className="flex items-center gap-4 pt-1">
                     <Tooltip
                       position="top"
@@ -433,6 +324,17 @@ export default function ReplySection({
                         <span>{likesCount}</span>
                       </button>
                     </Tooltip>
+
+                    {token && (
+                      <button
+                        type="button"
+                        onClick={() => handleTriggerReply(replyAuthorDisplayName, reply.user?._id)}
+                        className="flex items-center gap-1 text-[11px] font-semibold text-textSecondary hover:text-primary transition-colors cursor-pointer"
+                      >
+                        <CornerDownRight className="h-3 w-3" />
+                        <span>{t.post.reply}</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -444,6 +346,12 @@ export default function ReplySection({
           )}
         </div>
       )}
+
+      {/* Full Image Preview Modal */}
+      <ImageModal
+        src={selectedImage}
+        onClose={() => setSelectedImage(null)}
+      />
     </div>
   );
 }

@@ -141,9 +141,7 @@ export default function UserProfileSidebar({
           {currentUser.jobTitle && (
             <div className="flex items-center gap-1.5 mt-0.5 text-xs text-textSecondary font-medium">
               <Briefcase className="h-3.5 w-3.5 text-primary shrink-0" />
-              <span className="truncate max-w-44 text-xs">
-                {currentUser.jobTitle}
-              </span>
+              <span className="text-xs">{currentUser.jobTitle}</span>
             </div>
           )}
 
@@ -152,7 +150,7 @@ export default function UserProfileSidebar({
               as="p"
               size="xs"
               color="secondary"
-              className="truncate max-w-44 text-xs font-medium italic mt-0.5"
+              className="text-xs font-medium italic mt-0.5 wrap-gbreak-words"
             >
               {userBio}
             </Text>

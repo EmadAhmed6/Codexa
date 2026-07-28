@@ -52,7 +52,7 @@ const verifyAuthorizedToken = (
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
-    if (req.user.id === id || req.user.isAdmin) {
+    if (req.user.id === id || req.user.isAdmin || req.user.isSuperAdmin) {
       next();
     } else {
       return res.status(403).json({ message: "You are not allowed" });
@@ -118,7 +118,7 @@ const verifyPostOwner = (req: Request, res: Response, next: NextFunction) => {
       return res.status(404).json({ message: "Post was not found" });
     }
 
-    if (post.user?.toString() === req.user.id || req.user.isAdmin) {
+    if (post.user?.toString() === req.user.id || req.user.isAdmin || req.user.isSuperAdmin) {
       next();
     } else {
       return res.status(403).json({ message: "You are not allowed" });
@@ -150,7 +150,7 @@ const verifyCommentOwner = (
       return res.status(404).json({ message: "Comment was not found" });
     }
 
-    if (comment.user.toString() === req.user.id || req.user.isAdmin) {
+    if (comment.user.toString() === req.user.id || req.user.isAdmin || req.user.isSuperAdmin) {
       next();
     } else {
       return res.status(403).json({ message: "You are not allowed" });

@@ -24,7 +24,7 @@ const PostSchema = new Schema<IPost>(
       required: true,
       trim: true,
       minlength: 1,
-      maxlength: 32,
+      maxlength: 250,
     },
     user: {
       type: Schema.Types.ObjectId,

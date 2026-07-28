@@ -56,7 +56,13 @@ const getAllPosts = asyncHandler(
 const getPostById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const posts = await Post.findById(req.params.postId)
-      .populate("user", ["_id", "username", "fullName", "profilePicture", "jobTitle"])
+      .populate("user", [
+        "_id",
+        "username",
+        "fullName",
+        "profilePicture",
+        "jobTitle",
+      ])
       .populate("likes", ["_id", "username", "fullName", "profilePicture"])
       .populate("shares", ["_id", "username", "fullName", "profilePicture"])
       .populate({
@@ -128,7 +134,11 @@ const createPost = asyncHandler(
       "jobTitle",
       "bio",
     ]);
-    res.status(201).json({ success: true, data: finalPost });
+    res.status(201).json({
+      success: true,
+      message: "Post created successfully",
+      data: finalPost,
+    });
     return;
   },
 );
@@ -198,6 +208,13 @@ const deletePost = asyncHandler(
       return;
     }
 
+    const postOwner = await User.findById(post.user);
+    if (postOwner?.isSuperAdmin && !req.user?.isSuperAdmin) {
+      res
+        .status(403)
+        .json({ success: false, message: "You can't delete Owner post" });
+      return;
+    }
     if (post.postImage && post.postImage.publicId) {
       await cloudinary.uploader.destroy(post.postImage.publicId);
     }

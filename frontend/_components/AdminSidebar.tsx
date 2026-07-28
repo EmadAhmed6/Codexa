@@ -34,9 +34,27 @@ export default function AdminSidebar({
     pathname === "/admin/dashboard/users" || pathname === "/admin/dashboard";
   const isPostsActive = pathname === "/admin/dashboard/posts";
 
-  const allUsersList = Array.isArray(users) ? users : [];
+  const rawUsersList = Array.isArray(users) ? users : [];
+  const allUsersList = rawUsersList.map((u) => {
+    const isCurrent =
+      currentUser &&
+      (u._id === currentUser._id ||
+        u._id === (currentUser as any).id ||
+        (currentUser.username &&
+          u.username?.toLowerCase() === currentUser.username?.toLowerCase()));
+    return {
+      ...u,
+      isSuperAdmin: isCurrent
+        ? Boolean(currentUser?.isSuperAdmin || u.isSuperAdmin)
+        : Boolean(u.isSuperAdmin),
+      isAdmin: isCurrent
+        ? Boolean(currentUser?.isAdmin || u.isAdmin || currentUser?.isSuperAdmin)
+        : Boolean(u.isAdmin),
+    };
+  });
+
   const adminUsers = allUsersList
-    .filter((u) => u.isAdmin)
+    .filter((u) => u.isAdmin || u.isSuperAdmin)
     .sort((a, b) => {
       if (a.isSuperAdmin && !b.isSuperAdmin) return -1;
       if (!a.isSuperAdmin && b.isSuperAdmin) return 1;
@@ -46,7 +64,7 @@ export default function AdminSidebar({
   const displayAdmins =
     adminUsers.length > 0
       ? adminUsers
-      : currentUser && currentUser.isAdmin
+      : currentUser && (currentUser.isAdmin || currentUser.isSuperAdmin)
         ? [currentUser]
         : [];
 
@@ -171,7 +189,15 @@ export default function AdminSidebar({
 
           <div className="space-y-1">
             {displayAdmins.map((adminItem) => {
-              const isOwner = !!adminItem.isSuperAdmin;
+              const isOwner = Boolean(
+                adminItem.isSuperAdmin ||
+                  (currentUser &&
+                    currentUser.isSuperAdmin &&
+                    (currentUser._id === adminItem._id ||
+                      (currentUser as any).id === adminItem._id ||
+                      (currentUser.username &&
+                        currentUser.username?.toLowerCase() === adminItem.username?.toLowerCase())))
+              );
               const isLoading = updatingId === adminItem._id;
 
               return (
@@ -224,7 +250,7 @@ export default function AdminSidebar({
                   </Link>
 
                   {/* Right: Remove Admin button - only visible to superAdmin, hidden for owner */}
-                  {currentUser?.isSuperAdmin && !adminItem.isSuperAdmin && adminItem._id && (
+                  {currentUser?.isSuperAdmin && !isOwner && adminItem._id && (
                     <Tooltip
                       position="top"
                       content={t.admin.removeAdmin}

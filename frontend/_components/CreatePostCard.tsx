@@ -2,7 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Loader2, Image as ImageIcon, X, Send, User as UserIcon } from "lucide-react";
+import {
+  Loader2,
+  Image as ImageIcon,
+  X,
+  Send,
+  User as UserIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -116,7 +122,11 @@ export default function CreatePostCard() {
 
           <div className="flex-1 space-y-1">
             {(() => {
-              const firstName = (currentUser.fullName || currentUser.username || "").split(" ")[0];
+              const firstName = (
+                currentUser.fullName ||
+                currentUser.username ||
+                ""
+              ).split(" ")[0];
               return (
                 <textarea
                   rows={2}
@@ -168,7 +178,15 @@ export default function CreatePostCard() {
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-borderPrimary/40 hover:border-primary/40 bg-bgPrimary/40 hover:bg-primary/5 text-textSecondary hover:text-primary transition-all cursor-pointer text-xs font-semibold">
               <ImageIcon className="h-4 w-4 text-primary" />
-              <span>{imagePreview ? (isArabic ? "تغيير الصورة" : "Change Image") : (isArabic ? "صورة" : "Image")}</span>
+              <span>
+                {imagePreview
+                  ? isArabic
+                    ? "تغيير الصورة"
+                    : "Change Image"
+                  : isArabic
+                    ? "صورة"
+                    : "Image"}
+              </span>
               <input
                 type="file"
                 accept="image/*"
@@ -189,7 +207,9 @@ export default function CreatePostCard() {
 
           <Button
             type="submit"
-            disabled={createPostMutation.isPending || isUploading || !watchTitle.trim()}
+            disabled={
+              createPostMutation.isPending || isUploading || !watchTitle.trim()
+            }
             size="sm"
             className="rounded-xl bg-primary hover:bg-primaryHover text-primary-foreground font-semibold px-5 cursor-pointer text-xs flex items-center gap-1.5 shadow-sm shadow-primary/20"
           >

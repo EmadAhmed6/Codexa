@@ -42,7 +42,7 @@ export default function ActionMenu({
   }, [isOpen]);
 
   return (
-    <div className="relative inline-block text-left" ref={menuRef}>
+    <div className={`relative inline-block text-left ${isOpen ? "z-50" : ""}`} ref={menuRef}>
       <button
         type="button"
         onClick={(e) => {
@@ -71,7 +71,7 @@ export default function ActionMenu({
                 : align === "right"
                   ? "right-0"
                   : "left-0"
-            } top-full mt-1 w-36 rounded-xl bg-bgSecondary border border-borderPrimary/60 shadow-xl z-50 p-1.5 space-y-0.5`}
+            } top-full mt-1 w-36 rounded-xl bg-bgSecondary border border-borderPrimary/60 shadow-2xl z-100 p-1.5 space-y-0.5`}
             onClick={(e) => e.stopPropagation()}
           >
             {onEdit && (
