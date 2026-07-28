@@ -5,6 +5,7 @@ declare global {
         id: string;
         isAdmin: boolean;
         username?: string;
+        isSuperAdmin: boolean;
       };
     }
   }

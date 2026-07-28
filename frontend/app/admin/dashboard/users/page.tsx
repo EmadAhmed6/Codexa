@@ -5,13 +5,14 @@ import Link from "next/link";
 import Navbar from "@/_components/Navbar";
 import AdminSidebar from "@/_components/AdminSidebar";
 import { Text } from "@/_components/Text";
-import { useGetAllUsers, useDeleteUser } from "@/_features/user/hooks";
+import { useGetAllUsers, useDeleteUser, useToggleAdminStatus } from "@/_features/user/hooks";
 import { useGetPosts } from "@/_features/posts/hooks";
 import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import {
   Users,
   ShieldCheck,
   ShieldAlert,
+  ShieldOff,
   Trash2,
   Loader2,
   Mail,
@@ -36,12 +37,13 @@ export default function AdminUsersPage() {
   const { data: users, isLoading: isUsersLoading } = useGetAllUsers();
   const { data: posts } = useGetPosts();
   const deleteUserMutation = useDeleteUser();
+  const toggleAdminMutation = useToggleAdminStatus();
   const { t, isArabic } = useLanguage();
 
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "user">("all");
-  const [userToEdit, setUserToEdit] = useState<any | null>(null);
+  const [userToEdit, setUserToEdit] = useState<string | null>(null);
   const [selectedUserToDelete, setSelectedUserToDelete] = useState<{
     id: string;
     username: string;
@@ -122,13 +124,8 @@ export default function AdminUsersPage() {
       );
     })
     .sort((a, b) => {
-      const nameA = `${a.username || ""}`.toLowerCase();
-      const nameB = `${b.username || ""}`.toLowerCase();
-      const isEmadA = nameA === "emad_v8";
-      const isEmadB = nameB === "emad_v8";
-
-      if (isEmadA && !isEmadB) return -1;
-      if (!isEmadA && isEmadB) return 1;
+      if (a.isSuperAdmin && !b.isSuperAdmin) return -1;
+      if (!a.isSuperAdmin && b.isSuperAdmin) return 1;
 
       if (a.isAdmin && !b.isAdmin) return -1;
       if (!a.isAdmin && b.isAdmin) return 1;
@@ -407,7 +404,7 @@ export default function AdminUsersPage() {
                           </td>
 
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {userItem.username?.toLowerCase() === "emad_v8" ? (
+                            {userItem.isSuperAdmin ? (
                               <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full text-amber-400 border border-amber-400/40 flex items-center gap-1.5 w-fit">
                                 <Crown className="h-3 w-3 text-amber-400" />
                                 OWNER
@@ -466,7 +463,7 @@ export default function AdminUsersPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => setUserToEdit(userItem)}
+                                  onClick={() => setUserToEdit(userItem._id)}
                                   className="h-8 w-8 p-0 rounded-xl cursor-pointer hover:border-primary hover:text-primary transition-all hover:scale-105"
                                 >
                                   <Edit className="h-3.5 w-3.5 text-textSecondary hover:text-primary" />
@@ -489,6 +486,34 @@ export default function AdminUsersPage() {
                                   </Link>
                                 </Tooltip>
                               )}
+
+                              {/* Remove Admin button - visible only to superAdmin, only on admin users (not superAdmin themselves) */}
+                              {currentUser?.isSuperAdmin &&
+                                userItem.isAdmin &&
+                                !userItem.isSuperAdmin && (
+                                  <Tooltip
+                                    position="top"
+                                    content={
+                                      isArabic
+                                        ? "إلغاء صلاحية الأدمن"
+                                        : "Remove Admin"
+                                    }
+                                  >
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() =>
+                                        toggleAdminMutation.mutate(userItem._id)
+                                      }
+                                      disabled={
+                                        toggleAdminMutation.isPending
+                                      }
+                                      className="h-8 w-8 p-0 rounded-xl cursor-pointer bg-amber-500/10 text-amber-500 border border-amber-500/30 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all hover:scale-105"
+                                    >
+                                      <ShieldOff className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </Tooltip>
+                                )}
 
                               <Tooltip
                                 position="top"
@@ -526,14 +551,18 @@ export default function AdminUsersPage() {
       </main>
 
       {/* Edit User Modal */}
-      {userToEdit && (
-        <EditProfileModal
-          isOpen={!!userToEdit}
-          onClose={() => setUserToEdit(null)}
-          user={userToEdit}
-          targetUserId={userToEdit._id}
-        />
-      )}
+      {userToEdit && (() => {
+        const freshUser = allUsersList.find((u) => u._id === userToEdit);
+        if (!freshUser) return null;
+        return (
+          <EditProfileModal
+            isOpen={true}
+            onClose={() => setUserToEdit(null)}
+            user={freshUser}
+            targetUserId={freshUser._id}
+          />
+        );
+      })()}
 
       {/* Delete User Modal */}
       <DeleteConfirmModal

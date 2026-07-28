@@ -9,6 +9,7 @@ export const useUpdateUser = (userId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
       queryClient.invalidateQueries({ queryKey: ["authMe"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       toast.success("Profile updated successfully!");
     },
     onError: (err: any) => {

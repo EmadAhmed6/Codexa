@@ -14,6 +14,7 @@ export interface ProfileTranslations {
   bio: string;
   saveProfile: string;
   owner: string;
+  admin: string;
   editUser: string;
   setAdmin: string;
   removeAdmin: string;
@@ -35,6 +36,7 @@ export const profileTranslations: Record<Language, ProfileTranslations> = {
     bio: "Bio",
     saveProfile: "Save Profile",
     owner: "Owner",
+    admin: "Admin",
     editUser: "Edit User",
     setAdmin: "Set as Admin",
     removeAdmin: "Remove Admin",
@@ -54,6 +56,7 @@ export const profileTranslations: Record<Language, ProfileTranslations> = {
     bio: "نبذة عنه",
     saveProfile: "حفظ البروفايل",
     owner: "صاحب الموقع",
+    admin: "أدمن",
     editUser: "تعديل بيانات اليوزر",
     setAdmin: "خليه أدمن",
     removeAdmin: "شيل صلاحية الأدمن",

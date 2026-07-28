@@ -2,7 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { User as UserIcon, LogIn, FileText, CheckCircle2, Briefcase } from "lucide-react";
+import {
+  User as UserIcon,
+  LogIn,
+  FileText,
+  CheckCircle2,
+  Briefcase,
+  Crown,
+} from "lucide-react";
 import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import { Text } from "@/_components/Text";
 import { Button } from "@/components/ui/button";
@@ -119,17 +126,24 @@ export default function UserProfileSidebar({
             {currentUser.isVerified && (
               <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
             )}
-            {currentUser.isAdmin && (
-              <span className="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                Admin
+            {currentUser.isSuperAdmin ? (
+              <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full text-amber-400 border border-amber-400/40 flex items-center gap-1.5 w-fit">
+                <Crown className="h-3 w-3 text-amber-400" />
+                {t.profile.owner}
               </span>
-            )}
+            ) : currentUser.isAdmin ? (
+              <span className="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                {t.profile.admin}
+              </span>
+            ) : null}
           </Link>
 
           {currentUser.jobTitle && (
             <div className="flex items-center gap-1.5 mt-0.5 text-xs text-textSecondary font-medium">
               <Briefcase className="h-3.5 w-3.5 text-primary shrink-0" />
-              <span className="truncate max-w-44 text-xs">{currentUser.jobTitle}</span>
+              <span className="truncate max-w-44 text-xs">
+                {currentUser.jobTitle}
+              </span>
             </div>
           )}
 

@@ -113,6 +113,25 @@ const updateUser = asyncHandler(
       return;
     }
 
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "Request failed",
+        data: { message: "User not found" },
+      });
+      return;
+    }
+    
+    if (user.isSuperAdmin && req.user?.id !== user._id.toString()) {
+      res.status(403).json({
+        success: false,
+        message: "Request failed",
+        data: { message: "You cannot modify Owner's profile" },
+      });
+      return;
+    }
+
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
       req.body.password = await bcrypt.hash(req.body.password, salt);
@@ -129,7 +148,7 @@ const updateUser = asyncHandler(
       fs.unlinkSync(req.file.path);
     }
 
-    const user = await User.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
         $set: {
@@ -146,14 +165,11 @@ const updateUser = asyncHandler(
     )
       .select("-password")
       .select("+email");
-    if (!user) {
-      res.status(404).json({ success: false, message: "User not found" });
-      return;
-    }
+
     res.status(200).json({
       success: true,
       message: "Request processed successfully",
-      data: user,
+      data: updatedUser,
     });
     return;
   },
@@ -175,6 +191,7 @@ const deleteUser = asyncHandler(
     }
   },
 );
+
 const toggleAdminStatus = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const user = await User.findById(req.params.id);
@@ -192,7 +209,7 @@ const toggleAdminStatus = asyncHandler(
       success: true,
       message: "Request processed successfully",
       data: {
-        message: `User status changed to ${user.isAdmin ? "Admin" : "Not Admin"}`,
+        message: `User status changed to ${user.isAdmin ? "Admin" : "User"}`,
       },
     });
     return;

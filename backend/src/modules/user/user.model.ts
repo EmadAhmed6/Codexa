@@ -19,6 +19,7 @@ interface IUser extends Document, IUserSchema {
   generateToken: () => string;
   isVerified: boolean;
   postsCount: number;
+  isSuperAdmin: boolean;
 }
 
 const userSchema = new Schema<IUser>(
@@ -28,7 +29,7 @@ const userSchema = new Schema<IUser>(
       required: true,
       minLength: 3,
       maxLength: 100,
-  },
+    },
     username: {
       type: String,
       required: true,
@@ -65,10 +66,12 @@ const userSchema = new Schema<IUser>(
     otp: {
       type: String,
       default: null,
+      select: false,
     },
     otpExpired: {
       type: Date,
       default: null,
+      select: false,
     },
     profilePicture: {
       type: {
@@ -85,10 +88,16 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    isSuperAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
+    toJSON: {
+      virtuals: true,
+    },
     toObject: { virtuals: true },
   },
 );
@@ -100,7 +109,12 @@ userSchema.virtual("posts", {
 
 userSchema.methods.generateToken = function (this: IUser): string {
   return jwt.sign(
-    { id: this._id, isAdmin: this.isAdmin, username: this.username },
+    {
+      id: this._id,
+      isAdmin: this.isAdmin,
+      isSuperAdmin: this.isSuperAdmin,
+      username: this.username,
+    },
     process.env.JWT_SECRET_KEY as string,
   );
 };

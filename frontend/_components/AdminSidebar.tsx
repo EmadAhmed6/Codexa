@@ -38,13 +38,8 @@ export default function AdminSidebar({
   const adminUsers = allUsersList
     .filter((u) => u.isAdmin)
     .sort((a, b) => {
-      const uA = (a.username || "").toLowerCase();
-      const uB = (b.username || "").toLowerCase();
-      const isEmadA = uA === "emad_v8";
-      const isEmadB = uB === "emad_v8";
-
-      if (isEmadA && !isEmadB) return -1;
-      if (!isEmadA && isEmadB) return 1;
+      if (a.isSuperAdmin && !b.isSuperAdmin) return -1;
+      if (!a.isSuperAdmin && b.isSuperAdmin) return 1;
       return 0;
     });
 
@@ -176,7 +171,7 @@ export default function AdminSidebar({
 
           <div className="space-y-1">
             {displayAdmins.map((adminItem) => {
-              const isOwner = adminItem.username?.toLowerCase() === "emad_v8";
+              const isOwner = !!adminItem.isSuperAdmin;
               const isLoading = updatingId === adminItem._id;
 
               return (
@@ -228,8 +223,8 @@ export default function AdminSidebar({
                     </div>
                   </Link>
 
-                  {/* Right: Remove Admin button (hidden for owner) */}
-                  {!isOwner && adminItem._id && (
+                  {/* Right: Remove Admin button - only visible to superAdmin, hidden for owner */}
+                  {currentUser?.isSuperAdmin && !adminItem.isSuperAdmin && adminItem._id && (
                     <Tooltip
                       position="top"
                       content={t.admin.removeAdmin}

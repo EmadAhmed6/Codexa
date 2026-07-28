@@ -5,6 +5,7 @@ export interface UserProfile {
   jobTitle?: string;
   email?: string;
   isAdmin?: boolean;
+  isSuperAdmin?: boolean;
   isVerified?: boolean;
   postsCount?: number;
   profilePicture?: {

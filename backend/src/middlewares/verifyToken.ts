@@ -7,6 +7,7 @@ import { Types } from "mongoose";
 interface JWTUserPayload {
   id: string;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   username?: string;
 }
 
@@ -75,6 +76,28 @@ const verifyAdminToken = (req: Request, res: Response, next: NextFunction) => {
   });
 };
 
+const verifySuperAdminToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  verifyToken(req, res, () => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (req.user.isSuperAdmin) {
+      next();
+    } else {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+        data: { message: "Only super admin is allowed" },
+      });
+    }
+  });
+};
+
 const verifyPostOwner = (req: Request, res: Response, next: NextFunction) => {
   verifyToken(req, res, async () => {
     if (!req.user) {
@@ -139,6 +162,7 @@ export {
   verifyToken,
   verifyAuthorizedToken,
   verifyAdminToken,
+  verifySuperAdminToken,
   verifyPostOwner,
   verifyCommentOwner,
 };

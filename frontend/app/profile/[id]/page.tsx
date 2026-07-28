@@ -42,6 +42,7 @@ export default function UserProfilePage() {
   const { t, isArabic } = useLanguage();
 
   const { data: currentUser } = useGetAuthMeQuery();
+  console.log(currentUser);
 
   const targetUserId =
     routeUserId === "me" ? currentUser?._id || "" : routeUserId;
@@ -185,7 +186,9 @@ export default function UserProfilePage() {
                 </div>
 
                 {/* Edit Avatar Pen Button (Owner or Admin) */}
-                {(isOwnProfile || currentUser?.isAdmin) && (
+                {(isOwnProfile ||
+                  currentUser?.isAdmin ||
+                  currentUser?.isSuperAdmin) && (
                   <label
                     onClick={(e) => e.stopPropagation()}
                     className="absolute -bottom-1 ltr:-right-1 rtl:-left-1 p-2.5 rounded-2xl bg-primary hover:bg-primaryHover text-white shadow-lg border-2 border-bgSecondary transition-transform hover:scale-110 cursor-pointer z-20"
@@ -223,22 +226,17 @@ export default function UserProfilePage() {
                           userToDisplay?.username ||
                           "Developer"}
                       </Text>
-                      {userToDisplay?.username?.toLowerCase() === "emad_v8" ? (
+                      {userToDisplay?.isSuperAdmin ? (
                         <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full text-amber-400 border border-amber-400/40 flex items-center gap-1.5 w-fit">
                           <Crown className="h-3 w-3 text-amber-400" />
-                          OWNER
+                          {t.profile.owner}
                         </span>
                       ) : userToDisplay?.isAdmin ? (
                         <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1">
                           <ShieldCheck className="h-3.5 w-3.5" />
                           {t.admin.admin}
                         </span>
-                      ) : (
-                        <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30 flex items-center gap-1">
-                          <UserIcon className="h-3.5 w-3.5" />
-                          {t.admin.user}
-                        </span>
-                      )}
+                      ) : null}
                     </div>
 
                     {userToDisplay?.fullName && (

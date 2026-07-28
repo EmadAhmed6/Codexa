@@ -29,6 +29,7 @@ interface UserHoverCardProps {
     bio?: string;
     email?: string;
     isAdmin?: boolean;
+    isSuperAdmin?: boolean;
     profilePicture?: {
       url?: string;
     };
@@ -108,22 +109,22 @@ export default function UserHoverCard({
           >
             {displayName}
           </Text>
-          {user.username?.toLowerCase() === "emad_v8" ? (
+          {user.isSuperAdmin ? (
             <span className="text-[9px] font-extrabold uppercase tracking-wider  mt-0.5 text-amber-400 flex items-center gap-1">
               <Crown className="h-2.5 w-2.5 text-amber-400 inline" />
               {t.profile.owner}
             </span>
           ) : user.isAdmin ? (
             <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider block mt-0.5">
-              Administrator
+              {t.admin.admin}
             </span>
           ) : null}
         </div>
       </div>
 
-      {/* Admin Action: Set as Admin / Edit User */}
-      {currentUser?.isAdmin && (
-        <div className="pt-2 border-t border-borderPrimary/20 flex flex-col gap-1.5">
+      {/* Toggle Admin: visible only to superAdmin, not on superAdmin targets */}
+      {currentUser?.isSuperAdmin && !user.isSuperAdmin && (
+        <div className="pt-2 border-t border-borderPrimary/20">
           <button
             type="button"
             onClick={handleToggleAdmin}
@@ -144,7 +145,12 @@ export default function UserHoverCard({
               </>
             )}
           </button>
+        </div>
+      )}
 
+      {/* Edit User: visible to all admins, not on superAdmin targets */}
+      {currentUser?.isAdmin && !user.isSuperAdmin && (
+        <div className="pt-2 border-t border-borderPrimary/20">
           <button
             type="button"
             onClick={(e) => {
