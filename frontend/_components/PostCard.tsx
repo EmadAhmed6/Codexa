@@ -102,7 +102,11 @@ export default function PostCard({ post }: PostCardProps) {
   // Admin can act on posts UNLESS the post belongs to a SuperAdmin
   const canAdminDelete = Boolean(
     (currentUser?.isAdmin || currentUser?.isSuperAdmin) &&
-    !(currentUser?.isAdmin && !currentUser?.isSuperAdmin && postAuthorIsSuperAdmin),
+    !(
+      currentUser?.isAdmin &&
+      !currentUser?.isSuperAdmin &&
+      postAuthorIsSuperAdmin
+    ),
   );
 
   // Show action menu to owner or to admins (with superadmin restriction)
@@ -321,7 +325,7 @@ export default function PostCard({ post }: PostCardProps) {
               <Text
                 as="h2"
                 size="lg"
-                font="extraBold"
+                font="medium"
                 color="primary"
                 dir="auto"
                 className="group-hover:text-primary transition-colors mb-2 leading-snug md:text-xl bidi-text"

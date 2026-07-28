@@ -10,7 +10,7 @@ import CreatePostCard from "@/_components/CreatePostCard";
 import { useGetPosts } from "@/_features/posts/hooks";
 import { getAllPosts } from "@/_features/posts/api/getAllPosts";
 import { Post } from "@/_features/posts/types/Post";
-import { Zap, FileText, PlusCircle, RefreshCw, Sparkles } from "lucide-react";
+import { Zap, FileText, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Cookies from "js-cookie";
 import { Text } from "@/_components/Text";
@@ -151,8 +151,6 @@ function HomeContent() {
       <Navbar />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8">
-        
-
         {/* Search indicator message */}
         {search && (
           <div className="mb-6 flex items-center justify-between p-3.5 rounded-xl bg-bgSecondary/60 border border-borderPrimary/40">
@@ -255,7 +253,6 @@ function HomeContent() {
 
                   {!hasMore && (
                     <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-bgSecondary/40 border border-borderPrimary/30 text-xs text-textSecondary">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
                       <Text as="span" size="xs" color="secondary">
                         {t.home.reachedEnd}
                       </Text>
@@ -290,8 +287,6 @@ function HomeContent() {
           </div>
         </div>
       </main>
-
-
 
       {/* Footer */}
       <footer className="w-full max-w-7xl mx-auto px-6 py-8 border-t border-borderPrimary/20 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-textSecondary">
