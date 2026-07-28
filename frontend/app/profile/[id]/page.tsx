@@ -254,7 +254,7 @@ export default function UserProfilePage() {
                         </Text>
                       </div>
                     )}
-                    {userToDisplay?.email && (
+                    {(isOwnProfile || currentUser?.isAdmin) && userToDisplay?.email && (
                       <div className="flex items-center justify-center ltr:md:justify-start rtl:md:justify-end gap-1.5 mt-1">
                         <Mail className="h-3.5 w-3.5 text-textSecondary" />
                         <Text as="p" size="xs" color="secondary">
