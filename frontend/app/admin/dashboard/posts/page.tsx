@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/_components/Navbar";
 import AdminSidebar from "@/_components/AdminSidebar";
@@ -38,13 +38,18 @@ export default function AdminPostsPage() {
   const deletePostMutation = useDeletePost();
   const { t, isArabic } = useLanguage();
 
+  const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPostToDelete, setSelectedPostToDelete] = useState<{
     id: string;
     title: string;
   } | null>(null);
 
-  if (isAuthLoading) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || isAuthLoading) {
     return (
       <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col">
         <Navbar />

@@ -54,7 +54,7 @@ All post, comment, reply, and profile mutations trigger targeted invalidation ac
 ---
 
 ### 4. Interactive Hover Cards & Reaction Popovers
-- **`<UserHoverCard />`**: Hovering over author links (post author, comment author, reply author) opens an interactive popover showing avatar, username, and clickable profile link (`/profile/${userId}`).
+- **`<UserHoverCard />`**: Hovering over author links (post author, comment author, reply author, or table rows) opens an interactive popover showing avatar, username, role, clickable profile link (`/profile/${userId}`), and administrative actions (**Set as Admin / Remove Admin**, **Edit User**).
 - **`<UserListTooltip />`**: Hovering over like or share buttons displays a popover list of users who reacted (featuring avatars and usernames).
 - **`<AuthorProfileTooltip />`**: Displays comprehensive profile details in Admin Dashboard tables.
 
@@ -78,10 +78,11 @@ import { Text } from "@/_components/Text";
 
 ---
 
-### 6. Admin Dashboard Pages
+### 6. Admin Dashboard & Admin Privileges
 Dedicated administrative routes guarded for admin users:
-- **`/admin/dashboard/users`**: Manage registered user accounts, view credentials, search by username/email, and delete accounts.
+- **`/admin/dashboard/users`**: Manage registered user accounts, view credentials, filter by role (Admins/Users), search by username/email, edit profiles, toggle admin status, and delete accounts.
 - **`/admin/dashboard/posts`**: Manage published articles, inspect engagement counts, search articles, and delete posts.
+- **Admin Profile Editing**: Admins can edit any user's profile details and change their profile photo directly from their profile page or hover card.
 
 ---
 

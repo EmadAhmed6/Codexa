@@ -165,26 +165,23 @@ const register = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateRegisterUser(req.body);
     if (!success) {
-      res
-        .status(400)
-        .json({ message: error.issues[0]?.message || "Invalid Input" });
+      res.status(400).json({
+        data: { message: error.issues[0]?.message || "Invalid Input" },
+      });
       return;
     }
 
-    const existingUser = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: req.body.email });
 
-    if (existingUser) {
-      if (existingUser.isVerified) {
+    if (user) {
+      if (user.isVerified) {
         res.status(400).json({
           success: false,
-          message:
-            existingUser.email === req.body.email
-              ? "Account already exists with this email, please login"
-              : "Username is already taken",
+          data: { message: "Account already exists with this email" },
         });
         return;
       }
-      await User.deleteOne({ _id: existingUser._id });
+      await User.deleteOne({ _id: user._id });
     }
 
     const genSalt = await bcrypt.genSalt(10);
@@ -310,7 +307,9 @@ const resendOTP = asyncHandler(
 
     res.status(200).json({
       success: true,
-      message: "A new OTP verification code has been sent to your email",
+      data: {
+        message: "A new OTP verification code has been sent to your email",
+      },
     });
     return;
   },

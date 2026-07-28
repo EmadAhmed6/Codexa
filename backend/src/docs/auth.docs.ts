@@ -1,6 +1,7 @@
 // ├── POST /auth/register
 // ├── POST /auth/login
 // ├── POST /auth/verify-otp
+// ├── POST /auth/resend-otp
 // ├── POST /auth/forgot-password
 // ├── POST /auth/reset-password
 // └── GET /auth/me
@@ -81,7 +82,7 @@
  * /auth/login:
  *   post:
  *     summary: Login user (Rate Limited - 5 req/min)
- *     description: Authenticate a user and return a JWT token. Protected against brute-force (max 5 attempts per minute).
+ *     description: Authenticate a user and return a JWT token. Protected against brute-force (max 5 attempts per minute). Sends new OTP code if email is unverified.
  *     tags:
  *       - Auth
  *     requestBody:
@@ -133,8 +134,55 @@
  *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       400:
  *         description: Invalid email or password
+ *       403:
+ *         description: Account is unverified. A new OTP has been dispatched to email.
  *       429:
  *         description: Too many attempts, please try again after a minute
+ */
+
+// Resend OTP
+/**
+ * @swagger
+ * /auth/resend-otp:
+ *   post:
+ *     summary: Resend OTP verification code
+ *     description: Generate and send a new 6-digit OTP code to the specified unverified email address
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: ahmed@example.com
+ *     responses:
+ *       200:
+ *         description: OTP code sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: A new OTP verification code has been sent to your email
+ *       400:
+ *         description: Account is already verified or invalid input
+ *       404:
+ *         description: User was not found
  */
 
 // Forgot Password

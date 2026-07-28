@@ -183,8 +183,8 @@ export default function UserProfilePage() {
                   )}
                 </div>
 
-                {/* Edit Avatar Pen Button (Owner Only) */}
-                {isOwnProfile && (
+                {/* Edit Avatar Pen Button (Owner or Admin) */}
+                {(isOwnProfile || currentUser?.isAdmin) && (
                   <label
                     onClick={(e) => e.stopPropagation()}
                     className="absolute -bottom-1 ltr:-right-1 rtl:-left-1 p-2.5 rounded-2xl bg-primary hover:bg-primaryHover text-white shadow-lg border-2 border-bgSecondary transition-transform hover:scale-110 cursor-pointer z-20"
@@ -275,7 +275,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {isOwnProfile && (
+                    {(isOwnProfile || currentUser?.isAdmin) && (
                       <Button
                         onClick={handleOpenEditModal}
                         variant="outline"

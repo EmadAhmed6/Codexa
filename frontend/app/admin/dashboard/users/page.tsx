@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/_components/Navbar";
 import AdminSidebar from "@/_components/AdminSidebar";
 import { Text } from "@/_components/Text";
-import { useGetAllUsers, useDeleteUser } from "@/_features/user/hooks";
+import {
+  useGetAllUsers,
+  useDeleteUser,
+} from "@/_features/user/hooks";
 import { useGetPosts } from "@/_features/posts/hooks";
 import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import {
@@ -21,9 +24,11 @@ import {
   Search,
   ArrowLeft,
   ArrowRight,
+  Edit,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
+import EditProfileModal from "@/_components/EditProfileModal";
 import Tooltip from "@/_components/Tooltip";
 import UserHoverCard from "@/_components/UserHoverCard";
 import { useLanguage } from "@/context/LanguageContext";
@@ -35,13 +40,20 @@ export default function AdminUsersPage() {
   const deleteUserMutation = useDeleteUser();
   const { t, isArabic } = useLanguage();
 
+  const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "user">("all");
+  const [userToEdit, setUserToEdit] = useState<any | null>(null);
   const [selectedUserToDelete, setSelectedUserToDelete] = useState<{
     id: string;
     username: string;
   } | null>(null);
 
-  if (isAuthLoading) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || isAuthLoading) {
     return (
       <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col">
         <Navbar />
@@ -98,12 +110,16 @@ export default function AdminUsersPage() {
   const allPostsList = Array.isArray(posts) ? posts : [];
 
   const filteredUsers = allUsersList.filter((u) => {
+    if (roleFilter === "admin" && !u.isAdmin) return false;
+    if (roleFilter === "user" && u.isAdmin) return false;
+
     const q = searchQuery.toLowerCase().trim();
     if (!q) return true;
     return (
       u.username?.toLowerCase().includes(q) ||
       u.email?.toLowerCase().includes(q) ||
-      u.jobTitle?.toLowerCase().includes(q)
+      u.jobTitle?.toLowerCase().includes(q) ||
+      u.fullName?.toLowerCase().includes(q)
     );
   });
 
@@ -142,7 +158,9 @@ export default function AdminUsersPage() {
               {t.admin.dashboard}
             </Text>
             <Text as="p" size="xs" color="secondary">
-              {isArabic ? "إدارة اليوزرات والبوستات المنشورة وإحصائيات السيستم" : "Manage system users, published posts, and platform metrics"}
+              {isArabic
+                ? "إدارة اليوزرات والبوستات المنشورة وإحصائيات السيستم"
+                : "Manage system users, published posts, and platform metrics"}
             </Text>
           </div>
         </div>
@@ -179,9 +197,17 @@ export default function AdminUsersPage() {
               </div>
             </div>
 
-            {/* Stats Summary Cards */}
+            {/* Stats Summary Cards (Filterable) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-5 rounded-2xl bg-bgSecondary/70 border border-borderPrimary/50 shadow-xs flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setRoleFilter("all")}
+                className={`p-5 rounded-2xl bg-bgSecondary/70 border transition-all text-left rtl:text-right flex items-center gap-4 cursor-pointer hover:border-primary ${
+                  roleFilter === "all"
+                    ? "border-primary ring-2 ring-primary/20 shadow-md"
+                    : "border-borderPrimary/50"
+                }`}
+              >
                 <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                   <Users className="h-6 w-6" />
                 </div>
@@ -193,9 +219,17 @@ export default function AdminUsersPage() {
                     {totalUsers}
                   </Text>
                 </div>
-              </div>
+              </button>
 
-              <div className="p-5 rounded-2xl bg-bgSecondary/70 border border-borderPrimary/50 shadow-xs flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setRoleFilter("admin")}
+                className={`p-5 rounded-2xl bg-bgSecondary/70 border transition-all text-left rtl:text-right flex items-center gap-4 cursor-pointer hover:border-amber-500 ${
+                  roleFilter === "admin"
+                    ? "border-amber-500 ring-2 ring-amber-500/20 shadow-md"
+                    : "border-borderPrimary/50"
+                }`}
+              >
                 <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
                   <ShieldCheck className="h-6 w-6" />
                 </div>
@@ -207,9 +241,17 @@ export default function AdminUsersPage() {
                     {adminUsersCount}
                   </Text>
                 </div>
-              </div>
+              </button>
 
-              <div className="p-5 rounded-2xl bg-bgSecondary/70 border border-borderPrimary/50 shadow-xs flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setRoleFilter("user")}
+                className={`p-5 rounded-2xl bg-bgSecondary/70 border transition-all text-left rtl:text-right flex items-center gap-4 cursor-pointer hover:border-emerald-500 ${
+                  roleFilter === "user"
+                    ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-md"
+                    : "border-borderPrimary/50"
+                }`}
+              >
                 <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
                   <Users className="h-6 w-6" />
                 </div>
@@ -221,7 +263,7 @@ export default function AdminUsersPage() {
                     {regularUsersCount}
                   </Text>
                 </div>
-              </div>
+              </button>
             </div>
 
             {/* Users Table */}
@@ -233,7 +275,9 @@ export default function AdminUsersPage() {
               ) : filteredUsers.length === 0 ? (
                 <div className="py-16 text-center">
                   <Text as="p" size="xs" color="secondary">
-                    {isArabic ? "ملقيناش أي يوزر يطابق البحث بتاعك." : "No users found matching your search query."}
+                    {isArabic
+                      ? "ملقيناش أي يوزر يطابق البحث أو الفلتر."
+                      : "No users found matching your search query or filter."}
                   </Text>
                 </div>
               ) : (
@@ -265,10 +309,10 @@ export default function AdminUsersPage() {
                                   <img
                                     src={userItem.profilePicture.url}
                                     alt={userItem.username}
-                                    className="h-9 w-9 rounded-xl object-cover border border-borderPrimary"
+                                    className="h-9 w-9 rounded-xl object-cover border border-borderPrimary group-hover:border-primary transition-colors"
                                   />
                                 ) : (
-                                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                                     <UserIcon className="h-4 w-4" />
                                   </div>
                                 )}
@@ -278,18 +322,18 @@ export default function AdminUsersPage() {
                                     size="xs"
                                     font="bold"
                                     color="primary"
-                                    className="group-hover:text-primary transition-colors"
+                                    className="group-hover:text-primary transition-colors flex items-center gap-1.5"
                                   >
                                     {userItem.username}
                                   </Text>
-                                  {userItem.bio && (
+                                  {userItem.fullName && (
                                     <Text
                                       as="p"
                                       size="xs"
                                       color="secondary"
-                                      className="text-[10px] italic opacity-80 max-w-40 truncate"
+                                      className="text-[11px] opacity-75"
                                     >
-                                      "{userItem.bio}"
+                                      {userItem.fullName}
                                     </Text>
                                   )}
                                 </div>
@@ -383,6 +427,17 @@ export default function AdminUsersPage() {
 
                           <td className="px-6 py-4 whitespace-nowrap ltr:text-right rtl:text-left">
                             <div className="flex items-center justify-end gap-2">
+                              <Tooltip position="top" content={isArabic ? "تعديل بيانات اليوزر" : "Edit User Profile"}>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setUserToEdit(userItem)}
+                                  className="h-8 w-8 p-0 rounded-xl cursor-pointer hover:border-primary hover:text-primary transition-all hover:scale-105"
+                                >
+                                  <Edit className="h-3.5 w-3.5 text-textSecondary hover:text-primary" />
+                                </Button>
+                              </Tooltip>
+
                               {userItem._id && (
                                 <Tooltip position="top" content={t.profile.userProfile}>
                                   <Link href={`/profile/${userItem._id}`}>
@@ -396,6 +451,7 @@ export default function AdminUsersPage() {
                                   </Link>
                                 </Tooltip>
                               )}
+
                               <Tooltip position="top" content={t.admin.deleteUser}>
                                 <Button
                                   variant="destructive"
@@ -428,6 +484,17 @@ export default function AdminUsersPage() {
         </div>
       </main>
 
+      {/* Edit User Modal */}
+      {userToEdit && (
+        <EditProfileModal
+          isOpen={!!userToEdit}
+          onClose={() => setUserToEdit(null)}
+          user={userToEdit}
+          targetUserId={userToEdit._id}
+        />
+      )}
+
+      {/* Delete User Modal */}
       <DeleteConfirmModal
         isOpen={!!selectedUserToDelete}
         onClose={() => setSelectedUserToDelete(null)}

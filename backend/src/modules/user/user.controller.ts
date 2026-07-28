@@ -24,30 +24,66 @@ const getUserById = asyncHandler(
         populate: [
           {
             path: "user",
-            select: ["_id", "fullName", "username", "profilePicture", "jobTitle"],
+            select: [
+              "_id",
+              "fullName",
+              "username",
+              "profilePicture",
+              "jobTitle",
+            ],
           },
           {
             path: "likes",
-            select: ["_id", "fullName", "username", "profilePicture", "jobTitle"],
+            select: [
+              "_id",
+              "fullName",
+              "username",
+              "profilePicture",
+              "jobTitle",
+            ],
           },
           {
             path: "shares",
-            select: ["_id", "fullName", "username", "profilePicture", "jobTitle"],
+            select: [
+              "_id",
+              "fullName",
+              "username",
+              "profilePicture",
+              "jobTitle",
+            ],
           },
           {
             path: "sharedPost",
             populate: [
               {
                 path: "user",
-                select: ["_id", "fullName", "username", "profilePicture", "jobTitle"],
+                select: [
+                  "_id",
+                  "fullName",
+                  "username",
+                  "profilePicture",
+                  "jobTitle",
+                ],
               },
               {
                 path: "likes",
-                select: ["_id", "fullName", "username", "profilePicture", "jobTitle"],
+                select: [
+                  "_id",
+                  "fullName",
+                  "username",
+                  "profilePicture",
+                  "jobTitle",
+                ],
               },
               {
                 path: "shares",
-                select: ["_id", "fullName", "username", "profilePicture", "jobTitle"],
+                select: [
+                  "_id",
+                  "fullName",
+                  "username",
+                  "profilePicture",
+                  "jobTitle",
+                ],
               },
             ],
           },
@@ -136,5 +172,28 @@ const deleteUser = asyncHandler(
     }
   },
 );
+const toggleAdminStatus = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "Request failed",
+        data: { message: "User not found" },
+      });
+      return;
+    }
+    user.isAdmin = !user.isAdmin;
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Request processed successfully",
+      data: {
+        message: `User status changed to ${user.isAdmin ? "Admin" : "Not Admin"}`,
+      },
+    });
+    return;
+  },
+);
 
-export { getAllUsers, getUserById, updateUser, deleteUser };
+export { getAllUsers, getUserById, updateUser, deleteUser, toggleAdminStatus };

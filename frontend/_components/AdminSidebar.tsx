@@ -102,17 +102,20 @@ export default function AdminSidebar({
         </Link>
       </nav>
 
-      {/* Admin Profile Info */}
+      {/* Admin Profile Info Link */}
       {currentUser && (
-        <div className="mt-6 pt-4 border-t border-borderPrimary/40 px-3 flex items-center gap-3">
+        <Link
+          href={`/profile/${currentUser._id}`}
+          className="mt-6 pt-4 border-t border-borderPrimary/40 px-3 flex items-center gap-3 hover:opacity-80 transition-all group cursor-pointer"
+        >
           {currentUser.profilePicture?.url ? (
             <img
               src={currentUser.profilePicture.url}
               alt={currentUser.username}
-              className="h-8 w-8 rounded-xl object-cover border border-borderPrimary"
+              className="h-9 w-9 rounded-xl object-cover border border-borderPrimary group-hover:border-primary transition-colors"
             />
           ) : (
-            <div className="h-8 w-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold text-xs">
+            <div className="h-9 w-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold text-xs">
               {currentUser.username?.[0]?.toUpperCase()}
             </div>
           )}
@@ -122,7 +125,7 @@ export default function AdminSidebar({
               size="xs"
               font="bold"
               color="primary"
-              className="truncate"
+              className="truncate group-hover:text-primary transition-colors"
             >
               {currentUser.username}
             </Text>
@@ -130,12 +133,12 @@ export default function AdminSidebar({
               as="span"
               size="xs"
               font="semiBold"
-              className="text-[10px] text-amber-500 uppercase block"
+              className="text-[10px] text-amber-500 uppercase block tracking-wider"
             >
               {t.admin.adminBadge}
             </Text>
           </div>
-        </div>
+        </Link>
       )}
     </aside>
   );

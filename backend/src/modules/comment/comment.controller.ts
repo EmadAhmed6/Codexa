@@ -166,8 +166,8 @@ const updateComment = asyncHandler(
       }
     }
 
-    const existingComment = await Comment.findById(commentId);
-    if (!existingComment) {
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
       res.status(404).json({ success: false, message: "Comment not found" });
       return;
     }
@@ -176,9 +176,9 @@ const updateComment = asyncHandler(
       undefined;
 
     if (req.file) {
-      if (existingComment.commentImage?.publicId) {
+      if (comment.commentImage?.publicId) {
         await cloudinary.uploader.destroy(
-          existingComment.commentImage.publicId,
+          comment.commentImage.publicId,
         );
       }
       const result = await cloudinary.uploader.upload(req.file.path);

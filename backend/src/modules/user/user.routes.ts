@@ -4,6 +4,7 @@ import {
   getUserById,
   updateUser,
   deleteUser,
+  toggleAdminStatus,
 } from "./user.controller.js";
 import {
   verifyToken,
@@ -18,6 +19,7 @@ router
   .route("/:id")
   .get(verifyToken, getUserById)
   .put(verifyAuthorizedToken, upload.single("profilePicture"), updateUser)
-  .delete(verifyAuthorizedToken, deleteUser);
+  .delete(verifyAuthorizedToken, deleteUser)
+  .patch(verifyAdminToken, toggleAdminStatus);
 
 export default router;

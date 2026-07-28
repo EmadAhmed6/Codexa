@@ -51,8 +51,12 @@ export default function RegisterPage() {
         reset();
       },
       onError: (err: any) => {
+        const serverMessage =
+          err?.response?.data?.data?.message ||
+          err?.response?.data?.message;
+
         toast.error(
-          err?.response?.data?.message ||
+          serverMessage ||
             (isArabic
               ? "مش عارفين نعمل حساب. الإيميل أو اسم المستخدم مستخدم قبل كدا."
               : "Error registering account. Email or username might already exist."),

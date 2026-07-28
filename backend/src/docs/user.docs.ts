@@ -1,8 +1,8 @@
 // GET    /users
 // GET    /users/{id}
 // PUT    /users/{id}
+// PATCH  /users/{id}
 // DELETE /users/{id}
-// POST   /users/{id}/upload
 
 /**
  * @swagger
@@ -88,7 +88,7 @@
  * /users/{id}:
  *   put:
  *     summary: Update user profile
- *     description: Update username, job title, email, or password of a user account.
+ *     description: Update username, job title, bio, email, password, or isAdmin status of a user account.
  *     tags:
  *       - Users
  *     security:
@@ -116,6 +116,9 @@
  *               jobTitle:
  *                 type: string
  *                 example: Full Stack Engineer
+ *               bio:
+ *                 type: string
+ *                 example: Software Developer & Tech Enthusiast
  *               email:
  *                 type: string
  *                 format: email
@@ -124,6 +127,9 @@
  *                 type: string
  *                 format: password
  *                 example: NewPassword123!
+ *               isAdmin:
+ *                 type: boolean
+ *                 example: true
  *     responses:
  *       200:
  *         description: User updated successfully
@@ -145,6 +151,53 @@
  *         description: User not found
  */
 
+// PATCH  /users/{id}
+/**
+ * @swagger
+ * /users/{id}:
+ *   patch:
+ *     summary: Toggle user Admin status (Admin Only)
+ *     description: Toggle the isAdmin boolean role of a target user account. Restricted to Administrators.
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: User ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *     responses:
+ *       200:
+ *         description: Admin status toggled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Request processed successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: User status changed to Admin
+ *       401:
+ *         description: Not authorized
+ *       403:
+ *         description: Only admin allowed
+ *       404:
+ *         description: User not found
+ */
+
 // DELETE /users/{id}
 
 /**
@@ -152,7 +205,7 @@
  * /users/{id}:
  *   delete:
  *     summary: Delete user
- *     description: Delete a user account from database.
+ *     description: Delete a user account from database. Restricted to profile owner or Admins.
  *     tags:
  *       - Users
  *     security:
@@ -185,8 +238,6 @@
  *         description: User was not found
  */
 
-// DELETE /users/{id}
-
 /**
  * @swagger
  * components:
@@ -203,6 +254,9 @@
  *         jobTitle:
  *           type: string
  *           example: Full Stack Engineer
+ *         bio:
+ *           type: string
+ *           example: Software Developer & Tech Enthusiast
  *         email:
  *           type: string
  *           format: email

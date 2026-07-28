@@ -60,6 +60,7 @@ const UserSchema = z.object({
   otp: z.string().min(6).optional(),
   otpExpired: z.date().optional(),
   bio: z.string().max(250).optional().or(z.literal("")),
+  isAdmin: z.boolean().optional(),
 });
 
 const UpdateUserSchema = UserSchema.partial();

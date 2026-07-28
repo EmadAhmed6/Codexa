@@ -44,30 +44,32 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 | 1 | POST | `/auth/register` | Register a new user account with DB OTP | ❌ | — |
 | 2 | POST | `/auth/login` | Authenticate user and retrieve JWT token | ❌ | 🔒 5 req/min |
 | 3 | POST | `/auth/verify-otp` | Verify user email using 6-digit DB OTP code | ❌ | — |
-| 4 | POST | `/auth/forgot-password` | Send password reset link to user's email | ❌ | 🔒 5 req/min |
-| 5 | POST | `/auth/reset-password/:userId/:token` | Validate reset token and update password | ❌ | — |
-| 6 | GET | `/auth/me` | Retrieve currently authenticated user profile | 🔒 | — |
-| 7 | GET | `/users` | Retrieve list of all users | 🔒 | 🔒 100 req/15min |
-| 8 | GET | `/users/:id` | Retrieve detailed user profile | 🔒 | 🔒 100 req/15min |
-| 9 | PUT | `/users/:id` | Update profile details and profilePicture image | 🔒 | 🔒 100 req/15min |
-| 10 | DELETE | `/users/:id` | Delete user account from the database | 🔒 | 🔒 100 req/15min |
-| 11 | GET | `/posts` | Retrieve all blog posts with populated user, likes, and shares | 🔒 | 🔒 100 req/15min |
-| 12 | POST | `/posts` | Create a new blog post with postImage metadata | 🔒 | 🔒 100 req/15min |
-| 13 | POST | `/posts/:postId/share` | Share an existing post & update shares count | 🔒 | 🔒 100 req/15min |
-| 14 | GET | `/posts/:postId` | Retrieve detailed view of a single post by ID | 🔒 | 🔒 100 req/15min |
-| 15 | PUT | `/posts/:postId` | Update title, description, category, or postImage of a post | 🔒 | 🔒 100 req/15min |
-| 16 | DELETE | `/posts/:postId` | Delete a post and clear its associated media | 🔒 | 🔒 100 req/15min |
-| 17 | PUT | `/posts/:postId/like` | Toggle like/unlike status on a blog post | 🔒 | 🔒 100 req/15min |
-| 18 | GET | `/posts/:postId/comments` | Retrieve comments for a post | 🔒 | 🔒 100 req/15min |
-| 19 | POST | `/posts/:postId/comments` | Post a new comment (with optional commentImage) | 🔒 | 🔒 100 req/15min |
-| 20 | PUT | `/posts/:postId/comments/:commentId/like` | Toggle like/unlike on a comment | 🔒 | 🔒 100 req/15min |
-| 21 | PUT | `/posts/:postId/comments/:commentId` | Update text or commentImage of a comment | 🔒 | 🔒 100 req/15min |
-| 22 | DELETE | `/posts/:postId/comments/:commentId` | Remove comment & decrement commentsCount on post | 🔒 | 🔒 100 req/15min |
-| 23 | GET | `/posts/:postId/comments/:commentId/replies` | Get all replies for a parent comment | 🔒 | 🔒 100 req/15min |
-| 24 | POST | `/posts/:postId/comments/:commentId/replies` | Create a reply under a parent comment (with optional replyImage) | 🔒 | 🔒 100 req/15min |
-| 25 | PUT | `/posts/:postId/comments/:commentId/replies/:replyCommentId` | Update text content or replyImage of a reply comment | 🔒 | 🔒 100 req/15min |
-| 26 | DELETE | `/posts/:postId/comments/:commentId/replies/:replyCommentId` | Remove reply comment & decrement replyCommentsCount | 🔒 | 🔒 100 req/15min |
-| 27 | PUT | `/posts/:postId/comments/:commentId/replies/:replyCommentId/like` | Toggle like/unlike on a reply comment | 🔒 | 🔒 100 req/15min |
+| 4 | POST | `/auth/resend-otp` | Resend 6-digit OTP code to unverified email | ❌ | — |
+| 5 | POST | `/auth/forgot-password` | Send password reset link to user's email | ❌ | 🔒 5 req/min |
+| 6 | POST | `/auth/reset-password/:userId/:token` | Validate reset token and update password | ❌ | — |
+| 7 | GET | `/auth/me` | Retrieve currently authenticated user profile | 🔒 | — |
+| 8 | GET | `/users` | Retrieve list of all users | 🔒 | 🔒 100 req/15min |
+| 9 | GET | `/users/:id` | Retrieve detailed user profile | 🔒 | 🔒 100 req/15min |
+| 10 | PUT | `/users/:id` | Update profile details, bio, and isAdmin status | 🔒 | 🔒 100 req/15min |
+| 11 | PATCH | `/users/:id` | Toggle user Admin role status (Admin Only) | 🔒 | 🔒 100 req/15min |
+| 12 | DELETE | `/users/:id` | Delete user account from the database | 🔒 | 🔒 100 req/15min |
+| 13 | GET | `/posts` | Retrieve all blog posts with populated user, likes, and shares | 🔒 | 🔒 100 req/15min |
+| 14 | POST | `/posts` | Create a new blog post with postImage metadata | 🔒 | 🔒 100 req/15min |
+| 15 | POST | `/posts/:postId/share` | Share an existing post & update shares count | 🔒 | 🔒 100 req/15min |
+| 16 | GET | `/posts/:postId` | Retrieve detailed view of a single post by ID | 🔒 | 🔒 100 req/15min |
+| 17 | PUT | `/posts/:postId` | Update title, description, category, or postImage of a post | 🔒 | 🔒 100 req/15min |
+| 18 | DELETE | `/posts/:postId` | Delete a post and clear its associated media | 🔒 | 🔒 100 req/15min |
+| 19 | PUT | `/posts/:postId/like` | Toggle like/unlike status on a blog post | 🔒 | 🔒 100 req/15min |
+| 20 | GET | `/posts/:postId/comments` | Retrieve comments for a post | 🔒 | 🔒 100 req/15min |
+| 21 | POST | `/posts/:postId/comments` | Post a new comment (with optional commentImage) | 🔒 | 🔒 100 req/15min |
+| 22 | PUT | `/posts/:postId/comments/:commentId/like` | Toggle like/unlike on a comment | 🔒 | 🔒 100 req/15min |
+| 23 | PUT | `/posts/:postId/comments/:commentId` | Update text or commentImage of a comment | 🔒 | 🔒 100 req/15min |
+| 24 | DELETE | `/posts/:postId/comments/:commentId` | Remove comment & decrement commentsCount on post | 🔒 | 🔒 100 req/15min |
+| 25 | GET | `/posts/:postId/comments/:commentId/replies` | Get all replies for a parent comment | 🔒 | 🔒 100 req/15min |
+| 26 | POST | `/posts/:postId/comments/:commentId/replies` | Create a reply under a parent comment (with optional replyImage) | 🔒 | 🔒 100 req/15min |
+| 27 | PUT | `/posts/:postId/comments/:commentId/replies/:replyCommentId` | Update text content or replyImage of a reply comment | 🔒 | 🔒 100 req/15min |
+| 28 | DELETE | `/posts/:postId/comments/:commentId/replies/:replyCommentId` | Remove reply comment & decrement replyCommentsCount | 🔒 | 🔒 100 req/15min |
+| 29 | PUT | `/posts/:postId/comments/:commentId/replies/:replyCommentId/like` | Toggle like/unlike on a reply comment | 🔒 | 🔒 100 req/15min |
 
 ---
 
@@ -222,6 +224,45 @@ Email was not found.
 {
   "success": false,
   "message": "Email was not found"
+}
+```
+
+---
+
+### POST /auth/resend-otp
+Resend a 6-digit OTP verification code to an unverified email account.
+
+#### Request Body
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `email` | string | ✅ | The unverified email address. |
+
+#### Responses
+
+##### Response 200
+OTP code sent successfully.
+```json
+{
+  "success": true,
+  "data": {
+    "message": "A new OTP verification code has been sent to your email"
+  }
+}
+```
+
+##### Response 400
+Account is already verified or email format is invalid.
+```json
+{
+  "message": "This account is already verified"
+}
+```
+
+##### Response 404
+Email was not found.
+```json
+{
+  "message": "User was not found"
 }
 ```
 
@@ -465,7 +506,53 @@ The user target profile was not found.
 }
 ```
 
+---
 
+### PATCH /users/:id 🔒
+Toggle the `isAdmin` boolean role of a target user account. **Admin-only endpoint.**
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `id` | string | ✅ | The target user ID to update. |
+
+#### Responses
+
+##### Response 200
+Admin status toggled successfully.
+```json
+{
+  "success": true,
+  "message": "Request processed successfully",
+  "data": {
+    "message": "User status changed to Admin"
+  }
+}
+```
+
+##### Response 401
+Not authorized.
+```json
+{
+  "message": "No token provided"
+}
+```
+
+##### Response 403
+Forbidden. Requesting user is not an administrator.
+```json
+{
+  "message": "You are not allowed, only admin allowed"
+}
+```
+
+##### Response 404
+User target was not found.
+```json
+{
+  "message": "User not found"
+}
+```
 
 ---
 
