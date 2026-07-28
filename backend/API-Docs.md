@@ -1,4 +1,4 @@
-# Blog API Documentation
+# Fluxion API Documentation
 
 By Emad Ahmed
 
