@@ -174,42 +174,34 @@ export default function ResetPasswordPage({
         {/* Password field */}
         <div className="space-y-1.5">
           <Label htmlFor="password">Password</Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
-              <Lock className="h-4.5 w-4.5" />
-            </span>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              disabled={resetMutation.isPending}
-              className={`pl-11 ${errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
-              {...register("password", {
-                onChange: () => clearErrors("password"),
-              })}
-            />
-          </div>
+          <Input
+            id="password"
+            type="password"
+            icon="lock"
+            placeholder="••••••••"
+            disabled={resetMutation.isPending}
+            hasError={!!errors.password}
+            {...register("password", {
+              onChange: () => clearErrors("password"),
+            })}
+          />
           <Error error={errors.password?.message} />
         </div>
 
         {/* Confirm password field */}
         <div className="space-y-1.5">
           <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 z-10 flex items-center text-textSecondary/60 pointer-events-none">
-              <Lock className="h-4.5 w-4.5" />
-            </span>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              disabled={resetMutation.isPending}
-              className={`pl-11 ${errors.confirmPassword ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}`}
-              {...register("confirmPassword", {
-                onChange: () => clearErrors("confirmPassword"),
-              })}
-            />
-          </div>
+          <Input
+            id="confirmPassword"
+            type="password"
+            icon="lock"
+            placeholder="••••••••"
+            disabled={resetMutation.isPending}
+            hasError={!!errors.confirmPassword}
+            {...register("confirmPassword", {
+              onChange: () => clearErrors("confirmPassword"),
+            })}
+          />
           <Error error={errors.confirmPassword?.message} />
         </div>
 

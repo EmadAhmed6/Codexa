@@ -47,7 +47,14 @@ const ResetPasswordSchema = z
 
 const UserSchema = z.object({
   fullName: z.string().trim().min(3).max(250),
-  username: z.string().trim().min(3).max(50),
+  username: z
+    .string()
+    .min(3)
+    .max(50)
+    .regex(
+      /^[a-z0-9_]+$/,
+      "Username must contain only lowercase letters, numbers, and underscores",
+    ),
   email: z.string().email().trim().min(4),
   password: passwordSchema,
   profilePicture: z

@@ -15,11 +15,11 @@ import upload from "../../middlewares/multer.js";
 const router = express.Router();
 
 router.route("/").get(verifyToken, getAllUsers);
+router.patch("/:id/toggle-admin", verifyAdminToken, toggleAdminStatus);
 router
   .route("/:id")
   .get(verifyToken, getUserById)
   .put(verifyAuthorizedToken, upload.single("profilePicture"), updateUser)
-  .delete(verifyAuthorizedToken, deleteUser)
-  .patch(verifyAdminToken, toggleAdminStatus);
+  .delete(verifyAuthorizedToken, deleteUser);
 
 export default router;

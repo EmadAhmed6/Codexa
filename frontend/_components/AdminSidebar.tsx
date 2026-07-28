@@ -1,12 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, FileText } from "lucide-react";
+import { Users, FileText, Crown, ShieldAlert, Loader2 } from "lucide-react";
 import { Text } from "@/_components/Text";
 import { UserProfile } from "@/_features/posts/types/Post";
+import { useGetAllUsers } from "@/_features/user/hooks";
 import { useLanguage } from "@/context/LanguageContext";
+import { toggleAdminStatus } from "@/_features/user/api/toggleAdminStatus";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/lib/toast";
+import Tooltip from "@/_components/Tooltip";
 
 interface AdminSidebarProps {
   currentUser?: UserProfile | null;
@@ -20,11 +25,65 @@ export default function AdminSidebar({
   totalPosts = 0,
 }: AdminSidebarProps) {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { t, isArabic } = useLanguage();
+  const { data: users } = useGetAllUsers();
+  const queryClient = useQueryClient();
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const isUsersActive =
     pathname === "/admin/dashboard/users" || pathname === "/admin/dashboard";
   const isPostsActive = pathname === "/admin/dashboard/posts";
+
+  const allUsersList = Array.isArray(users) ? users : [];
+  const adminUsers = allUsersList
+    .filter((u) => u.isAdmin)
+    .sort((a, b) => {
+      const uA = (a.username || "").toLowerCase();
+      const uB = (b.username || "").toLowerCase();
+      const isEmadA = uA === "emad_v8";
+      const isEmadB = uB === "emad_v8";
+
+      if (isEmadA && !isEmadB) return -1;
+      if (!isEmadA && isEmadB) return 1;
+      return 0;
+    });
+
+  const displayAdmins =
+    adminUsers.length > 0
+      ? adminUsers
+      : currentUser && currentUser.isAdmin
+        ? [currentUser]
+        : [];
+
+  const handleRemoveAdmin = async (
+    e: React.MouseEvent,
+    userId: string,
+    username: string,
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setUpdatingId(userId);
+    try {
+      const res = await toggleAdminStatus(userId);
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
+      queryClient.invalidateQueries({ queryKey: ["authMe"] });
+      toast.success(
+        isArabic
+          ? `اترجع ${username} يوزر عادي`
+          : `${username} removed from admin.`,
+      );
+    } catch (err: any) {
+      toast.error(
+        isArabic
+          ? "حصل خطأ أثناء تعديل الصلاحية"
+          : "Failed to update user role.",
+      );
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   return (
     <aside className="bg-bgSecondary/60 border border-borderPrimary/50 rounded-2xl p-4 shadow-sm backdrop-blur-xs">
@@ -102,43 +161,103 @@ export default function AdminSidebar({
         </Link>
       </nav>
 
-      {/* Admin Profile Info Link */}
-      {currentUser && (
-        <Link
-          href={`/profile/${currentUser._id}`}
-          className="mt-6 pt-4 border-t border-borderPrimary/40 px-3 flex items-center gap-3 hover:opacity-80 transition-all group cursor-pointer"
-        >
-          {currentUser.profilePicture?.url ? (
-            <img
-              src={currentUser.profilePicture.url}
-              alt={currentUser.username}
-              className="h-9 w-9 rounded-xl object-cover border border-borderPrimary group-hover:border-primary transition-colors"
-            />
-          ) : (
-            <div className="h-9 w-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold text-xs">
-              {currentUser.username?.[0]?.toUpperCase()}
-            </div>
-          )}
-          <div className="overflow-hidden">
-            <Text
-              as="p"
-              size="xs"
-              font="bold"
-              color="primary"
-              className="truncate group-hover:text-primary transition-colors"
-            >
-              {currentUser.username}
-            </Text>
-            <Text
-              as="span"
-              size="xs"
-              font="semiBold"
-              className="text-[10px] text-amber-500 uppercase block tracking-wider"
-            >
-              {t.admin.adminBadge}
-            </Text>
+      {/* Administrators List Section */}
+      {displayAdmins.length > 0 && (
+        <div className="mt-6 pt-4 border-t border-borderPrimary/40 space-y-2">
+          <Text
+            as="p"
+            size="xs"
+            font="semiBold"
+            color="secondary"
+            className="uppercase tracking-wider px-3 text-[10px] opacity-70 mb-1"
+          >
+            {isArabic ? "الأدمنز المسجلين" : "Administrators"}
+          </Text>
+
+          <div className="space-y-1">
+            {displayAdmins.map((adminItem) => {
+              const isOwner = adminItem.username?.toLowerCase() === "emad_v8";
+              const isLoading = updatingId === adminItem._id;
+
+              return (
+                <div
+                  key={adminItem._id}
+                  className="px-3 py-2 flex items-center justify-between gap-2 hover:bg-bgSecondary/90 rounded-xl transition-all group"
+                >
+                  {/* Left: avatar + info */}
+                  <Link
+                    href={`/profile/${adminItem._id}`}
+                    className="flex items-center gap-2.5 min-w-0 cursor-pointer"
+                  >
+                    {adminItem.profilePicture?.url ? (
+                      <img
+                        src={adminItem.profilePicture.url}
+                        alt={adminItem.username}
+                        className="h-8 w-8 rounded-xl object-cover border border-borderPrimary group-hover:border-primary transition-colors shrink-0"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold text-xs shrink-0">
+                        {adminItem.username?.[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <div className="overflow-hidden">
+                      <Text
+                        as="p"
+                        size="xs"
+                        font="bold"
+                        color="primary"
+                        className="truncate group-hover:text-primary transition-colors leading-tight"
+                      >
+                        {adminItem.username}
+                      </Text>
+                      {isOwner ? (
+                        <span className="text-[9px] font-extrabold uppercase tracking-wider mt-0.5 flex items-center gap-1 text-amber-400">
+                          <Crown className="h-2.5 w-2.5 text-amber-400 shrink-0" />
+                          {t.profile.owner}
+                        </span>
+                      ) : (
+                        <Text
+                          as="span"
+                          size="xs"
+                          font="semiBold"
+                          className="text-[9px] text-amber-500 uppercase block tracking-wider mt-0.5"
+                        >
+                          {t.admin.adminBadge}
+                        </Text>
+                      )}
+                    </div>
+                  </Link>
+
+                  {/* Right: Remove Admin button (hidden for owner) */}
+                  {!isOwner && adminItem._id && (
+                    <Tooltip
+                      position="top"
+                      content={t.admin.removeAdmin}
+                    >
+                      <button
+                        onClick={(e) =>
+                          handleRemoveAdmin(
+                            e,
+                            adminItem._id!,
+                            adminItem.username || "",
+                          )
+                        }
+                        disabled={isLoading}
+                        className="shrink-0 p-1.5 rounded-lg text-rose-500 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/15 hover:border-rose-500/40 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isLoading ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <ShieldAlert className="h-3 w-3" />
+                        )}
+                      </button>
+                    </Tooltip>
+                  )}
+                </div>
+              );
+            })}
           </div>
-        </Link>
+        </div>
       )}
     </aside>
   );

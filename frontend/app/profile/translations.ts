@@ -13,6 +13,11 @@ export interface ProfileTranslations {
   jobTitle: string;
   bio: string;
   saveProfile: string;
+  owner: string;
+  editUser: string;
+  setAdmin: string;
+  removeAdmin: string;
+  viewProfile: string;
 }
 
 export const profileTranslations: Record<Language, ProfileTranslations> = {
@@ -29,6 +34,11 @@ export const profileTranslations: Record<Language, ProfileTranslations> = {
     jobTitle: "Job Title",
     bio: "Bio",
     saveProfile: "Save Profile",
+    owner: "Owner",
+    editUser: "Edit User",
+    setAdmin: "Set as Admin",
+    removeAdmin: "Remove Admin",
+    viewProfile: "View Profile",
   },
   ar: {
     userProfile: "الملف الشخصي",
@@ -43,5 +53,10 @@ export const profileTranslations: Record<Language, ProfileTranslations> = {
     jobTitle: "المسمى الوظيفي",
     bio: "نبذة عنه",
     saveProfile: "حفظ البروفايل",
+    owner: "صاحب الموقع",
+    editUser: "تعديل بيانات اليوزر",
+    setAdmin: "خليه أدمن",
+    removeAdmin: "شيل صلاحية الأدمن",
+    viewProfile: "شوف البروفايل",
   },
 };

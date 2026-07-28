@@ -26,6 +26,7 @@ import {
   Calendar,
   Briefcase,
   Eye,
+  Crown,
 } from "lucide-react";
 import ImageModal from "@/_components/ImageModal";
 import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
@@ -222,7 +223,12 @@ export default function UserProfilePage() {
                           userToDisplay?.username ||
                           "Developer"}
                       </Text>
-                      {userToDisplay?.isAdmin ? (
+                      {userToDisplay?.username?.toLowerCase() === "emad_v8" ? (
+                        <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full text-amber-400 border border-amber-400/40 flex items-center gap-1.5 w-fit">
+                          <Crown className="h-3 w-3 text-amber-400" />
+                          OWNER
+                        </span>
+                      ) : userToDisplay?.isAdmin ? (
                         <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1">
                           <ShieldCheck className="h-3.5 w-3.5" />
                           {t.admin.admin}
@@ -254,14 +260,15 @@ export default function UserProfilePage() {
                         </Text>
                       </div>
                     )}
-                    {(isOwnProfile || currentUser?.isAdmin) && userToDisplay?.email && (
-                      <div className="flex items-center justify-center ltr:md:justify-start rtl:md:justify-end gap-1.5 mt-1">
-                        <Mail className="h-3.5 w-3.5 text-textSecondary" />
-                        <Text as="p" size="xs" color="secondary">
-                          {userToDisplay.email}
-                        </Text>
-                      </div>
-                    )}
+                    {(isOwnProfile || currentUser?.isAdmin) &&
+                      userToDisplay?.email && (
+                        <div className="flex items-center justify-center ltr:md:justify-start rtl:md:justify-end gap-1.5 mt-1">
+                          <Mail className="h-3.5 w-3.5 text-textSecondary" />
+                          <Text as="p" size="xs" color="secondary">
+                            {userToDisplay.email}
+                          </Text>
+                        </div>
+                      )}
                     {(userToDisplay as any)?.bio && (
                       <Text
                         as="p"

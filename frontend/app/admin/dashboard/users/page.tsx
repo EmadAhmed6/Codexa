@@ -5,10 +5,7 @@ import Link from "next/link";
 import Navbar from "@/_components/Navbar";
 import AdminSidebar from "@/_components/AdminSidebar";
 import { Text } from "@/_components/Text";
-import {
-  useGetAllUsers,
-  useDeleteUser,
-} from "@/_features/user/hooks";
+import { useGetAllUsers, useDeleteUser } from "@/_features/user/hooks";
 import { useGetPosts } from "@/_features/posts/hooks";
 import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import {
@@ -25,6 +22,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Edit,
+  Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
@@ -109,19 +107,34 @@ export default function AdminUsersPage() {
   const allUsersList = Array.isArray(users) ? users : [];
   const allPostsList = Array.isArray(posts) ? posts : [];
 
-  const filteredUsers = allUsersList.filter((u) => {
-    if (roleFilter === "admin" && !u.isAdmin) return false;
-    if (roleFilter === "user" && u.isAdmin) return false;
+  const filteredUsers = allUsersList
+    .filter((u) => {
+      if (roleFilter === "admin" && !u.isAdmin) return false;
+      if (roleFilter === "user" && u.isAdmin) return false;
 
-    const q = searchQuery.toLowerCase().trim();
-    if (!q) return true;
-    return (
-      u.username?.toLowerCase().includes(q) ||
-      u.email?.toLowerCase().includes(q) ||
-      u.jobTitle?.toLowerCase().includes(q) ||
-      u.fullName?.toLowerCase().includes(q)
-    );
-  });
+      const q = searchQuery.toLowerCase().trim();
+      if (!q) return true;
+      return (
+        u.username?.toLowerCase().includes(q) ||
+        u.email?.toLowerCase().includes(q) ||
+        u.jobTitle?.toLowerCase().includes(q) ||
+        u.fullName?.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => {
+      const nameA = `${a.username || ""}`.toLowerCase();
+      const nameB = `${b.username || ""}`.toLowerCase();
+      const isEmadA = nameA === "emad_v8";
+      const isEmadB = nameB === "emad_v8";
+
+      if (isEmadA && !isEmadB) return -1;
+      if (!isEmadA && isEmadB) return 1;
+
+      if (a.isAdmin && !b.isAdmin) return -1;
+      if (!a.isAdmin && b.isAdmin) return 1;
+
+      return 0;
+    });
 
   const totalUsers = allUsersList.length;
   const adminUsersCount = allUsersList.filter((u) => u.isAdmin).length;
@@ -285,12 +298,16 @@ export default function AdminUsersPage() {
                   <table className="w-full ltr:text-left rtl:text-right text-xs">
                     <thead className="bg-bgSecondary/90 text-textSecondary font-semibold uppercase tracking-wider border-b border-borderPrimary/40">
                       <tr>
-                        <th className="px-6 py-4">{isArabic ? "اليوزر" : "User"}</th>
+                        <th className="px-6 py-4">
+                          {isArabic ? "اليوزر" : "User"}
+                        </th>
                         <th className="px-6 py-4">Email</th>
                         <th className="px-6 py-4">{t.profile.jobTitle}</th>
                         <th className="px-6 py-4">{t.admin.role}</th>
                         <th className="px-6 py-4">{t.profile.joined}</th>
-                        <th className="px-6 py-4 ltr:text-right rtl:text-left">{t.admin.actions}</th>
+                        <th className="px-6 py-4 ltr:text-right rtl:text-left">
+                          {t.admin.actions}
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-borderPrimary/30 text-textPrimary font-medium">
@@ -300,7 +317,10 @@ export default function AdminUsersPage() {
                           className="hover:bg-bgSecondary/80 transition-colors"
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <UserHoverCard user={userItem as any}>
+                            <UserHoverCard
+                              user={userItem as any}
+                              position={isArabic ? "left" : "right"}
+                            >
                               <Link
                                 href={`/profile/${userItem._id}`}
                                 className="flex items-center gap-3 group"
@@ -387,7 +407,12 @@ export default function AdminUsersPage() {
                           </td>
 
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {userItem.isAdmin ? (
+                            {userItem.username?.toLowerCase() === "emad_v8" ? (
+                              <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full text-amber-400 border border-amber-400/40 flex items-center gap-1.5 w-fit">
+                                <Crown className="h-3 w-3 text-amber-400" />
+                                OWNER
+                              </span>
+                            ) : userItem.isAdmin ? (
                               <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1 w-fit">
                                 <ShieldCheck className="h-3 w-3" />
                                 {t.admin.admin}
@@ -406,11 +431,14 @@ export default function AdminUsersPage() {
                                 <Text as="span" size="xs" color="secondary">
                                   {new Date(
                                     userItem.createdAt,
-                                  ).toLocaleDateString(isArabic ? "ar-EG" : "en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  })}
+                                  ).toLocaleDateString(
+                                    isArabic ? "ar-EG" : "en-US",
+                                    {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    },
+                                  )}
                                 </Text>
                               </div>
                             ) : (
@@ -427,7 +455,14 @@ export default function AdminUsersPage() {
 
                           <td className="px-6 py-4 whitespace-nowrap ltr:text-right rtl:text-left">
                             <div className="flex items-center justify-end gap-2">
-                              <Tooltip position="top" content={isArabic ? "تعديل بيانات اليوزر" : "Edit User Profile"}>
+                              <Tooltip
+                                position="top"
+                                content={
+                                  isArabic
+                                    ? "تعديل بيانات اليوزر"
+                                    : "Edit User Profile"
+                                }
+                              >
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -439,7 +474,10 @@ export default function AdminUsersPage() {
                               </Tooltip>
 
                               {userItem._id && (
-                                <Tooltip position="top" content={t.profile.userProfile}>
+                                <Tooltip
+                                  position="top"
+                                  content={t.profile.userProfile}
+                                >
                                   <Link href={`/profile/${userItem._id}`}>
                                     <Button
                                       variant="outline"
@@ -452,7 +490,10 @@ export default function AdminUsersPage() {
                                 </Tooltip>
                               )}
 
-                              <Tooltip position="top" content={t.admin.deleteUser}>
+                              <Tooltip
+                                position="top"
+                                content={t.admin.deleteUser}
+                              >
                                 <Button
                                   variant="destructive"
                                   size="sm"

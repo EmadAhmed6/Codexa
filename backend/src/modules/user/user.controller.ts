@@ -8,10 +8,11 @@ import bcrypt from "bcryptjs";
 // GET ALL USERS
 const getAllUsers = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const user = await User.find()
+    const users = await User.find()
       .sort({ isAdmin: -1, createdAt: -1 })
       .select("-password");
-    res.status(200).json({ success: true, data: user });
+
+    res.status(200).json({ success: true, data: users });
     return;
   },
 );

@@ -135,6 +135,7 @@ export default function EditProfileModal({
               type="text"
               icon="user"
               placeholder={isArabic ? "الاسم بالكامل" : "Full Name"}
+              hasError={!!errors.fullName}
               {...register("fullName", {
                 onChange: () => clearErrors("fullName"),
               })}
@@ -156,6 +157,7 @@ export default function EditProfileModal({
               type="text"
               icon="user"
               placeholder="Username"
+              hasError={!!errors.username}
               {...register("username", {
                 onChange: () => clearErrors("username"),
               })}
@@ -177,6 +179,7 @@ export default function EditProfileModal({
               type="text"
               icon="briefcase"
               placeholder="e.g. Frontend Developer"
+              hasError={!!(errors as any).jobTitle}
               {...register("jobTitle" as any, {
                 onChange: () => clearErrors("jobTitle" as any),
               })}
@@ -198,6 +201,7 @@ export default function EditProfileModal({
               type="text"
               icon="file"
               placeholder="Tell us about yourself..."
+              hasError={!!(errors as any).bio}
               {...register("bio" as any, {
                 onChange: () => clearErrors("bio" as any),
               })}
@@ -219,6 +223,7 @@ export default function EditProfileModal({
               type="email"
               icon="mail"
               placeholder="Email"
+              hasError={!!errors.email}
               {...register("email", {
                 onChange: () => clearErrors("email"),
               })}

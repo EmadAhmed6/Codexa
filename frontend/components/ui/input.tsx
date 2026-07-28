@@ -36,14 +36,17 @@ export type IconName = keyof typeof ICON_MAP;
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   icon?: IconName | React.ReactNode;
+  hasError?: boolean;
+  error?: boolean | string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, icon, ...props }, ref) => {
+  ({ className, type, icon, hasError, error, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
 
     const isPassword = type === "password";
     const actualType = isPassword ? (showPassword ? "text" : "password") : type;
+    const isInvalid = Boolean(hasError || error);
 
     const renderIcon = () => {
       if (!icon) return null;
@@ -72,6 +75,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "flex h-11 w-full rounded-lg border border-borderPrimary bg-bgPrimary/50 px-4 py-3 text-sm text-textPrimary placeholder:text-textSecondary/60 shadow-sm transition-all focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-ringPrimary/20 disabled:cursor-not-allowed disabled:opacity-50",
             hasIcon && "ltr:pl-11 rtl:pr-11",
             isPassword && "ltr:pr-11 rtl:pl-11",
+            isInvalid && "border-destructive/60 focus-visible:border-destructive/80 focus-visible:ring-destructive/10",
             className,
           )}
           ref={ref}

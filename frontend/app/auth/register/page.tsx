@@ -97,7 +97,7 @@ export default function RegisterPage() {
             icon="user"
             placeholder={isArabic ? "أدخل الاسم بالكامل" : "Enter your full name"}
             disabled={registerMutation.isPending}
-            className={errors.fullName ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            hasError={!!errors.fullName}
             {...register("fullName", {
               onChange: () => clearErrors("fullName"),
             })}
@@ -114,7 +114,7 @@ export default function RegisterPage() {
             icon="user"
             placeholder={t.auth.usernamePlaceholder}
             disabled={registerMutation.isPending}
-            className={errors.username ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            hasError={!!errors.username}
             {...register("username", {
               onChange: () => clearErrors("username"),
             })}
@@ -131,7 +131,7 @@ export default function RegisterPage() {
             icon="mail"
             placeholder={t.auth.emailPlaceholder}
             disabled={registerMutation.isPending}
-            className={errors.email ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            hasError={!!errors.email}
             {...register("email", { onChange: () => clearErrors("email") })}
           />
           <Error error={errors.email?.message} />
@@ -159,7 +159,7 @@ export default function RegisterPage() {
             icon="lock"
             placeholder={t.auth.passwordPlaceholder}
             disabled={registerMutation.isPending}
-            className={errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            hasError={!!errors.password}
             {...register("password", {
               onChange: () => clearErrors("password"),
             })}

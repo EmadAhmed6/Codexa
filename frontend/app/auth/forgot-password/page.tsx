@@ -191,11 +191,7 @@ export default function ForgotPasswordPage() {
             icon="mail"
             placeholder={t.auth.emailPlaceholder}
             disabled={forgotMutation.isPending}
-            className={
-              errors.email
-                ? "border-destructive/60 focus-visible:ring-destructive/10"
-                : ""
-            }
+            hasError={!!errors.email}
             {...register("email", { onChange: () => clearErrors("email") })}
           />
           <Error error={errors.email?.message} />

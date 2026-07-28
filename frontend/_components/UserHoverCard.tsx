@@ -2,7 +2,15 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { User as UserIcon, ExternalLink, ShieldCheck, ShieldAlert, Loader2, Edit } from "lucide-react";
+import {
+  User as UserIcon,
+  ExternalLink,
+  ShieldCheck,
+  ShieldAlert,
+  Loader2,
+  Edit,
+  Crown,
+} from "lucide-react";
 import Tooltip, { TooltipPosition } from "./Tooltip";
 import { Text } from "./Text";
 import { useGetAuthMeQuery } from "@/_features/auth/hooks";
@@ -10,6 +18,7 @@ import { toggleAdminStatus } from "@/_features/user/api/toggleAdminStatus";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
 import EditProfileModal from "./EditProfileModal";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface UserHoverCardProps {
   user?: {
@@ -34,6 +43,7 @@ export default function UserHoverCard({
   children,
 }: UserHoverCardProps) {
   const { data: currentUser } = useGetAuthMeQuery();
+  const { t, isArabic } = useLanguage();
   const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -53,13 +63,22 @@ export default function UserHoverCard({
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["userProfile", user._id] });
+      queryClient.invalidateQueries({ queryKey: ["authMe"] });
       toast.success(
-        res?.data?.message ||
-          res?.message ||
-          (newStatus ? "Promoted to Admin!" : "Removed from Admin!"),
+        isArabic
+          ? newStatus
+            ? `اتعمل ${displayName} أدمن`
+            : `اترجع ${displayName} يوزر عادي`
+          : newStatus
+            ? "Promoted to Admin!"
+            : "Removed from Admin!",
       );
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to update user role.");
+      toast.error(
+        isArabic
+          ? "حصل خطأ أثناء تعديل الصلاحية"
+          : "Failed to update user role.",
+      );
     } finally {
       setIsUpdating(false);
     }
@@ -89,11 +108,16 @@ export default function UserHoverCard({
           >
             {displayName}
           </Text>
-          {user.isAdmin && (
+          {user.username?.toLowerCase() === "emad_v8" ? (
+            <span className="text-[9px] font-extrabold uppercase tracking-wider  mt-0.5 text-amber-400 flex items-center gap-1">
+              <Crown className="h-2.5 w-2.5 text-amber-400 inline" />
+              {t.profile.owner}
+            </span>
+          ) : user.isAdmin ? (
             <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider block mt-0.5">
               Administrator
             </span>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -111,12 +135,12 @@ export default function UserHoverCard({
             ) : user.isAdmin ? (
               <>
                 <ShieldAlert className="h-3 w-3" />
-                <span>Remove Admin</span>
+                <span>{t.profile.removeAdmin}</span>
               </>
             ) : (
               <>
                 <ShieldCheck className="h-3 w-3" />
-                <span>Set as Admin</span>
+                <span>{t.profile.setAdmin}</span>
               </>
             )}
           </button>
@@ -131,7 +155,7 @@ export default function UserHoverCard({
             className="w-full text-[10px] font-bold py-1.5 px-2.5 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
             <Edit className="h-3 w-3" />
-            <span>Edit User</span>
+            <span>{t.profile.editUser}</span>
           </button>
         </div>
       )}
@@ -142,7 +166,7 @@ export default function UserHoverCard({
           onClick={(e) => e.stopPropagation()}
           className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
         >
-          <span>View Profile</span>
+          <span>{t.profile.viewProfile}</span>
           <ExternalLink className="h-3 w-3" />
         </Link>
       </div>

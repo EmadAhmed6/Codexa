@@ -110,7 +110,7 @@ export default function LoginPage() {
             icon="mail"
             placeholder={t.auth.emailPlaceholder}
             disabled={loginMutation.isPending}
-            className={errors.email ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            hasError={!!errors.email}
             {...register("email", { onChange: () => clearErrors("email") })}
           />
           <Error error={errors.email?.message} />
@@ -128,7 +128,7 @@ export default function LoginPage() {
             icon="lock"
             placeholder={t.auth.passwordPlaceholder}
             disabled={loginMutation.isPending}
-            className={errors.password ? "border-destructive/60 focus-visible:ring-destructive/10" : ""}
+            hasError={!!errors.password}
             {...register("password", {
               onChange: () => clearErrors("password"),
             })}
