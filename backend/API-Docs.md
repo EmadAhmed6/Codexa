@@ -733,8 +733,6 @@ List of posts returned successfully.
     {
       "_id": "65f1a2b3c4d5e6f789012345",
       "title": "My First Blog Post",
-      "description": "This is my first blog post description.",
-      "category": "Technology",
       "user": {
         "_id": "65f1a2b3c4d5e6f789012347",
         "username": "Ahmed"
@@ -795,8 +793,6 @@ Post created successfully. Returns the populated post resource.
   "data": {
     "_id": "65f1a2b3c4d5e6f789012345",
     "title": "My First Blog Post",
-    "description": "This is my first blog post description.",
-    "category": "Technology",
     "user": {
       "_id": "65f1a2b3c4d5e6f789012347",
       "username": "Ahmed"
@@ -930,8 +926,6 @@ Post updated successfully. Returns updated post document.
   "data": {
     "_id": "65f1a2b3c4d5e6f789012345",
     "title": "Updated Blog Post Title",
-    "description": "This is my updated blog post description content.",
-    "category": "Programming",
     "user": "65f1a2b3c4d5e6f789012347",
     "postImage": {
       "url": "https://example.com/image.jpg",
