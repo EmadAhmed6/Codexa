@@ -62,12 +62,26 @@ export default function LoginPage() {
         }
       },
       onError: (err: any) => {
-        toast.error(
+        const errorMsg =
           err?.response?.data?.message ||
-            (isArabic
-              ? "الإيميل أو الباسورد غلط. حاول تاني."
-              : "Invalid email or password. Please try again."),
-        );
+          (isArabic
+            ? "الإيميل أو الباسورد غلط. حاول تاني."
+            : "Invalid email or password. Please try again.");
+
+        toast.error(errorMsg);
+
+        if (
+          err?.response?.status === 403 ||
+          err?.response?.data?.isVerified === false ||
+          errorMsg.toLowerCase().includes("verify")
+        ) {
+          const userEmail = data.email.trim();
+          setTimeout(() => {
+            router.push(
+              `/auth/verify-otp?email=${encodeURIComponent(userEmail)}`,
+            );
+          }, 1200);
+        }
       },
     });
   };

@@ -198,9 +198,14 @@ export default function ReplySection({
             </div>
           ) : replies && replies.length > 0 ? (
             replies.map((reply: Reply) => {
-              const isReplyOwner =
+              const isReplyOwner = Boolean(
                 currentUser &&
-                (currentUser._id === reply.user?._id || currentUser.isAdmin);
+                  (currentUser._id === reply.user?._id ||
+                    (currentUser as any)?.id === reply.user?._id)
+              );
+              const isReplyOwnerOrAdmin = Boolean(
+                currentUser && (isReplyOwner || currentUser.isAdmin)
+              );
               const isEditingReply = editingReplyId === reply._id;
               const replyImageSrc =
                 reply.commentImage?.url || reply.image?.url;
@@ -284,14 +289,18 @@ export default function ReplySection({
                     </div>
 
                     {/* Owner / Admin Controls Menu */}
-                    {isReplyOwner && !isEditingReply && (
+                    {isReplyOwnerOrAdmin && !isEditingReply && (
                       <ActionMenu
-                        onEdit={() => {
-                          setEditingReplyId(reply._id);
-                          setEditReplyText(reply.text);
-                          setEditReplyImagePreview(replyImageSrc || null);
-                          setEditReplyImageFile(null);
-                        }}
+                        onEdit={
+                          isReplyOwner
+                            ? () => {
+                                setEditingReplyId(reply._id);
+                                setEditReplyText(reply.text);
+                                setEditReplyImagePreview(replyImageSrc || null);
+                                setEditReplyImageFile(null);
+                              }
+                            : undefined
+                        }
                         onDelete={() => deleteReplyMutation.mutate(reply._id)}
                         editLabel={t.post.editComment}
                         deleteLabel={t.post.deleteComment}

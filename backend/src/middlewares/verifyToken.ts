@@ -82,7 +82,11 @@ const verifyPostOwner = (req: Request, res: Response, next: NextFunction) => {
     }
 
     const postId = req.params.postId;
-    if (!postId || typeof postId !== "string" || !Types.ObjectId.isValid(postId)) {
+    if (
+      !postId ||
+      typeof postId !== "string" ||
+      !Types.ObjectId.isValid(postId)
+    ) {
       return res.status(400).json({ message: "Invalid post ID" });
     }
 
@@ -109,8 +113,12 @@ const verifyCommentOwner = (
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const commentId = req.params.commentId;
-    if (!commentId || typeof commentId !== "string" || !Types.ObjectId.isValid(commentId)) {
+    const commentId = req.params.replyCommentId || req.params.commentId;
+    if (
+      !commentId ||
+      typeof commentId !== "string" ||
+      !Types.ObjectId.isValid(commentId)
+    ) {
       return res.status(400).json({ message: "Invalid comment ID" });
     }
 

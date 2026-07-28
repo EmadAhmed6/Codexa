@@ -344,8 +344,14 @@ export default function CommentSection({
     ) : comments && comments.length > 0 ? (
       <div className="space-y-4">
         {comments.map((comment) => {
-          const isOwner =
-            currentUser && currentUser._id === comment.user?._id;
+          const isOwner = Boolean(
+            currentUser &&
+              (currentUser._id === comment.user?._id ||
+                (currentUser as any)?.id === comment.user?._id)
+          );
+          const isOwnerOrAdmin = Boolean(
+            currentUser && (isOwner || currentUser.isAdmin)
+          );
           const isEditing = editingCommentId === comment._id;
           const likesCount =
             comment.commentLikesCount !== undefined
@@ -438,14 +444,22 @@ export default function CommentSection({
                 </div>
 
                 {/* Edit & Delete Comment Action Menu */}
-                {isOwner && !isEditing && (
+                {isOwnerOrAdmin && !isEditing && (
                   <ActionMenu
-                    onEdit={() => {
-                      setEditingCommentId(comment._id);
-                      setEditText(comment.text);
-                      setEditImagePreview(comment.commentImage?.url || (comment as any).image?.url || null);
-                      setEditImageFile(null);
-                    }}
+                    onEdit={
+                      isOwner
+                        ? () => {
+                            setEditingCommentId(comment._id);
+                            setEditText(comment.text);
+                            setEditImagePreview(
+                              comment.commentImage?.url ||
+                                (comment as any).image?.url ||
+                                null,
+                            );
+                            setEditImageFile(null);
+                          }
+                        : undefined
+                    }
                     onDelete={() => deleteCommentMutation.mutate(comment._id)}
                     editLabel={t.post.editComment}
                     deleteLabel={t.post.deleteComment}

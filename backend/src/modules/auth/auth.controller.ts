@@ -21,7 +21,7 @@ const sendEmail = async (to: string, subject: string, html: string) => {
     },
   });
   await transporter.sendMail({
-    from: process.env.USER_EMAIL,
+    from: `"Fluxion App" <${process.env.USER_EMAIL}>`,
     to,
     subject,
     html,
@@ -170,13 +170,23 @@ const register = asyncHandler(
         .json({ message: error.issues[0]?.message || "Invalid Input" });
       return;
     }
-    const user = await User.findOne({ email: req.body.email });
-    if (user) {
-      res
-        .status(400)
-        .json({ success: false, message: "Email is already exist" });
-      return;
+
+    const existingUser = await User.findOne({ email: req.body.email });
+
+    if (existingUser) {
+      if (existingUser.isVerified) {
+        res.status(400).json({
+          success: false,
+          message:
+            existingUser.email === req.body.email
+              ? "Account already exists with this email, please login"
+              : "Username is already taken",
+        });
+        return;
+      }
+      await User.deleteOne({ _id: existingUser._id });
     }
+
     const genSalt = await bcrypt.genSalt(10);
     req.body.password = await bcrypt.hash(req.body.password, genSalt);
 
@@ -195,6 +205,7 @@ const register = asyncHandler(
     });
 
     const finalUser = await newUser.save();
+
     await sendEmail(
       finalUser.email,
       "Verify Your Email - Fluxion",
@@ -203,9 +214,9 @@ const register = asyncHandler(
 
     const token = finalUser.generateToken();
     const {
-      password,
-      otp: _,
-      otpExpired: __,
+      password: _,
+      otp: __,
+      otpExpired: ___,
       ...others
     } = finalUser.toObject();
 
@@ -242,7 +253,7 @@ const verifyEmailOTP = asyncHandler(
     if (user.otp !== otp || !user.otpExpired || user.otpExpired < new Date()) {
       res
         .status(400)
-        .json({ success: false, message: "Invalid or expired token" });
+        .json({ success: false, message: "Invalid or expired OTP code" });
       return;
     }
 
@@ -250,10 +261,56 @@ const verifyEmailOTP = asyncHandler(
     user.otp = undefined;
     user.otpExpired = undefined;
     await user.save();
-    const { password, otp: __, otpExpired: _, ...others } = user.toObject();
+    const {
+      password: _,
+      otp: __,
+      otpExpired: ___,
+      ...others
+    } = user.toObject();
     res.status(200).json({
       success: true,
       data: { message: "Account verified successfully", ...others },
+    });
+    return;
+  },
+);
+
+// RESEND OTP
+const resendOTP = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { email } = req.body;
+    if (!email || typeof email !== "string") {
+      res.status(400).json({ success: false, message: "Email is required" });
+      return;
+    }
+    const user = await User.findOne({ email: email.trim() });
+    if (!user) {
+      res.status(404).json({ success: false, message: "Email was not found" });
+      return;
+    }
+    if (user.isVerified) {
+      res
+        .status(400)
+        .json({ success: false, message: "Account is already verified" });
+      return;
+    }
+
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
+
+    user.otp = generatedOtp;
+    user.otpExpired = otpExpired;
+    await user.save();
+
+    await sendEmail(
+      user.email,
+      "Verify Your Email - Fluxion",
+      generateOtpEmailHtml(user.username, generatedOtp),
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "A new OTP verification code has been sent to your email",
     });
     return;
   },
@@ -276,6 +333,7 @@ const login = asyncHandler(
         .json({ success: false, message: "Invalid email or password" });
       return;
     }
+
     const isPasswordMatch = await bcrypt.compare(
       req.body.password,
       user.password,
@@ -286,8 +344,40 @@ const login = asyncHandler(
         .json({ success: false, message: "Invalid email or password" });
       return;
     }
+
+    if (!user.isVerified) {
+      const generatedOtp = Math.floor(
+        100000 + Math.random() * 900000,
+      ).toString();
+      const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
+
+      user.otp = generatedOtp;
+      user.otpExpired = otpExpired;
+      await user.save();
+
+      await sendEmail(
+        user.email,
+        "Verify Your Email - Fluxion",
+        generateOtpEmailHtml(user.username, generatedOtp),
+      );
+
+      res.status(403).json({
+        success: false,
+        isVerified: false,
+        email: user.email,
+        message:
+          "Please verify your email. A new OTP code has been sent to your inbox.",
+      });
+      return;
+    }
+
     const token = user.generateToken();
-    const { password, otp: _, otpExpired: __, ...others } = user.toObject();
+    const {
+      password: _,
+      otp: __,
+      otpExpired: ___,
+      ...others
+    } = user.toObject();
     res.status(200).json({
       success: true,
       message: "Logged in successfully",
@@ -472,5 +562,6 @@ export {
   sendForgotPasswodLink,
   resetPassword,
   verifyEmailOTP,
+  resendOTP,
   getMe,
 };

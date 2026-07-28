@@ -1,30 +1,27 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Navbar from "@/_components/Navbar";
 import PostCard from "@/_components/PostCard";
 import CreatePostCard from "@/_components/CreatePostCard";
+import EditProfileModal from "@/_components/EditProfileModal";
 import {
   useGetUserProfile,
   useUploadProfilePicture,
-  useUpdateUser,
   useDeleteUser,
 } from "@/_features/user/hooks";
 import { useGetPosts } from "@/_features/posts/hooks";
 import { useGetAuthMeQuery } from "@/_features/auth/hooks";
 import {
   User as UserIcon,
-  Camera,
   Mail,
   Loader2,
   FileText,
   Edit,
   Edit2,
   Trash2,
-  X,
   ShieldCheck,
   Calendar,
   Briefcase,
@@ -33,16 +30,8 @@ import {
 import ImageModal from "@/_components/ImageModal";
 import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
 import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  editProfileSchema,
-  type IEditProfile,
-} from "@/_features/posts/schemas/post";
-import Error from "@/_components/Error";
 import { Text } from "@/_components/Text";
 import { Post } from "@/_features/posts/types/Post";
-import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function UserProfilePage() {
@@ -67,7 +56,6 @@ export default function UserProfilePage() {
   });
 
   const uploadProfileMutation = useUploadProfilePicture(targetUserId);
-  const updateUserMutation = useUpdateUser(targetUserId);
   const deleteUserMutation = useDeleteUser();
 
   const [mounted, setMounted] = useState(false);
@@ -82,8 +70,6 @@ export default function UserProfilePage() {
 
   const userToDisplay =
     profileUser || (isOwnProfile ? currentUser : null) || currentUser;
-
-  const currentEmail = userToDisplay?.email || currentUser?.email || "";
 
   const handleDeleteAccount = async () => {
     const deleteId = targetUserId || currentUser?._id;
@@ -105,36 +91,6 @@ export default function UserProfilePage() {
     }
   };
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    clearErrors,
-    formState: { errors },
-  } = useForm<IEditProfile>({
-    resolver: zodResolver(editProfileSchema as any),
-    mode: "onBlur",
-    defaultValues: {
-      fullName: userToDisplay?.fullName || "",
-      username: userToDisplay?.username || "",
-      jobTitle: userToDisplay?.jobTitle || "",
-      bio: (userToDisplay as any)?.bio || "",
-      email: currentEmail,
-    },
-  });
-
-  useEffect(() => {
-    if (userToDisplay) {
-      reset({
-        fullName: userToDisplay.fullName || "",
-        username: userToDisplay.username || "",
-        jobTitle: userToDisplay.jobTitle || "",
-        bio: (userToDisplay as any)?.bio || "",
-        email: userToDisplay.email || currentUser?.email || "",
-      });
-    }
-  }, [userToDisplay, currentUser, reset]);
-
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -148,29 +104,7 @@ export default function UserProfilePage() {
   };
 
   const handleOpenEditModal = () => {
-    reset({
-      fullName: userToDisplay?.fullName || "",
-      username: userToDisplay?.username || "",
-      jobTitle: userToDisplay?.jobTitle || "",
-      bio: (userToDisplay as any)?.bio || "",
-      email: userToDisplay?.email || currentUser?.email || "",
-    });
     setIsEditModalOpen(true);
-  };
-
-  const handleUpdateProfile = async (data: IEditProfile) => {
-    try {
-      await updateUserMutation.mutateAsync({
-        fullName: data.fullName.trim(),
-        username: data.username.trim(),
-        jobTitle: data.jobTitle ? data.jobTitle.trim() : "",
-        bio: data.bio ? data.bio.trim() : "",
-        email: data.email.trim(),
-      });
-      setIsEditModalOpen(false);
-    } catch {
-      // error handled in mutation
-    }
   };
 
   const rawPosts: any[] =
@@ -456,168 +390,12 @@ export default function UserProfilePage() {
       </main>
 
       {/* Edit Profile Modal */}
-      {isEditModalOpen &&
-        mounted &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
-            onClick={() => setIsEditModalOpen(false)}
-          >
-            <div
-              className="relative w-full max-w-md bg-bgSecondary border border-borderPrimary rounded-2xl p-6 shadow-2xl space-y-4"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between border-b border-borderPrimary/40 pb-3">
-                <Text as="h3" size="lg" font="bold" color="primary">
-                  {t.profile.editProfile}
-                </Text>
-                <button
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="p-1.5 rounded-lg text-textSecondary hover:text-textPrimary cursor-pointer"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              <form
-                onSubmit={handleSubmit(handleUpdateProfile)}
-                className="space-y-4"
-              >
-                <div>
-                  <Text
-                    as="label"
-                    size="xs"
-                    font="semiBold"
-                    color="secondary"
-                    className="block mb-1"
-                  >
-                    {isArabic ? "الاسم بالكامل" : "Full Name"}
-                  </Text>
-                  <Input
-                    type="text"
-                    icon="user"
-                    placeholder={isArabic ? "الاسم بالكامل" : "Full Name"}
-                    {...register("fullName", {
-                      onChange: () => clearErrors("fullName"),
-                    })}
-                  />
-                  <Error error={errors.fullName?.message} />
-                </div>
-
-                <div>
-                  <Text
-                    as="label"
-                    size="xs"
-                    font="semiBold"
-                    color="secondary"
-                    className="block mb-1"
-                  >
-                    {t.auth.usernameLabel}
-                  </Text>
-                  <Input
-                    type="text"
-                    icon="user"
-                    placeholder="Username"
-                    {...register("username", {
-                      onChange: () => clearErrors("username"),
-                    })}
-                  />
-                  <Error error={errors.username?.message} />
-                </div>
-
-                <div>
-                  <Text
-                    as="label"
-                    size="xs"
-                    font="semiBold"
-                    color="secondary"
-                    className="block mb-1"
-                  >
-                    {t.profile.jobTitle}
-                  </Text>
-                  <Input
-                    type="text"
-                    icon="briefcase"
-                    placeholder="e.g. Frontend Developer"
-                    {...register("jobTitle" as any, {
-                      onChange: () => clearErrors("jobTitle" as any),
-                    })}
-                  />
-                  <Error error={(errors as any).jobTitle?.message} />
-                </div>
-
-                <div>
-                  <Text
-                    as="label"
-                    size="xs"
-                    font="semiBold"
-                    color="secondary"
-                    className="block mb-1"
-                  >
-                    {t.profile.bio}
-                  </Text>
-                  <Input
-                    type="text"
-                    icon="file"
-                    placeholder="Tell us about yourself..."
-                    {...register("bio" as any, {
-                      onChange: () => clearErrors("bio" as any),
-                    })}
-                  />
-                  <Error error={(errors as any).bio?.message} />
-                </div>
-
-                <div>
-                  <Text
-                    as="label"
-                    size="xs"
-                    font="semiBold"
-                    color="secondary"
-                    className="block mb-1"
-                  >
-                    Email Address
-                  </Text>
-                  <Input
-                    type="email"
-                    icon="mail"
-                    placeholder="Email"
-                    {...register("email", {
-                      onChange: () => clearErrors("email"),
-                    })}
-                  />
-                  <Error error={errors.email?.message} />
-                </div>
-
-                <div className="flex justify-end gap-2 pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEditModalOpen(false)}
-                    className="rounded-xl text-xs cursor-pointer"
-                  >
-                    <Text as="span" size="xs" color="secondary">
-                      {t.post.cancel}
-                    </Text>
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={updateUserMutation.isPending}
-                    className="rounded-xl bg-primary text-primary-foreground text-xs cursor-pointer"
-                  >
-                    <Text as="span" size="xs" font="semiBold" color="white">
-                      {updateUserMutation.isPending
-                        ? t.post.saving
-                        : t.profile.saveProfile}
-                    </Text>
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>,
-          document.body,
-        )}
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        user={userToDisplay}
+        targetUserId={targetUserId}
+      />
 
       {/* Delete User Modal */}
       <DeleteConfirmModal

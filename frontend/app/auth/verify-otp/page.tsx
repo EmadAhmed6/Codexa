@@ -18,7 +18,10 @@ import {
   verifyOtpSchema,
   type IVerifyOtp,
 } from "@/_features/auth/schemas/auth";
-import { useVerifyOtpMutation } from "@/_features/auth/hooks";
+import {
+  useVerifyOtpMutation,
+  useResendOtpMutation,
+} from "@/_features/auth/hooks";
 import { Text } from "@/_components/Text";
 import Error from "@/_components/Error";
 import Link from "next/link";
@@ -31,6 +34,7 @@ function VerifyOtpForm() {
   const { t, isArabic } = useLanguage();
 
   const verifyOtpMutation = useVerifyOtpMutation();
+  const resendOtpMutation = useResendOtpMutation();
 
   const {
     register,
@@ -180,6 +184,35 @@ function VerifyOtpForm() {
             </div>
           )}
         </Button>
+
+        {/* Resend Code Option */}
+        <div className="text-center pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              const email = getValues("email") || emailQuery;
+              if (!email) {
+                toast.error(
+                  isArabic
+                    ? "يرجى كتابة البريد الإلكتروني فوق أولاً"
+                    : "Please enter your email address above first",
+                );
+                return;
+              }
+              resendOtpMutation.mutate(email.trim());
+            }}
+            disabled={resendOtpMutation.isPending}
+            className="text-xs font-semibold text-primary hover:underline cursor-pointer disabled:opacity-50"
+          >
+            {resendOtpMutation.isPending
+              ? isArabic
+                ? "جاري إرسال كود جديد..."
+                : "Resending Code..."
+              : isArabic
+                ? "لم يصلك كود؟ إعادة إرسال OTP"
+                : "Didn't receive a code? Resend OTP"}
+          </button>
+        </div>
       </form>
 
       {/* Footer Link */}
