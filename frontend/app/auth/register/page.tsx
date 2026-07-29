@@ -35,7 +35,6 @@ export default function RegisterPage() {
       username: "",
       email: "",
       password: "",
-      jobTitle: "",
     },
   });
 
@@ -52,8 +51,7 @@ export default function RegisterPage() {
       },
       onError: (err: any) => {
         const serverMessage =
-          err?.response?.data?.data?.message ||
-          err?.response?.data?.message;
+          err?.response?.data?.data?.message || err?.response?.data?.message;
 
         toast.error(
           serverMessage ||
@@ -95,7 +93,9 @@ export default function RegisterPage() {
             id="fullName"
             type="text"
             icon="user"
-            placeholder={isArabic ? "أدخل الاسم بالكامل" : "Enter your full name"}
+            placeholder={
+              isArabic ? "أدخل الاسم بالكامل" : "Enter your full name"
+            }
             disabled={registerMutation.isPending}
             hasError={!!errors.fullName}
             {...register("fullName", {
@@ -135,19 +135,6 @@ export default function RegisterPage() {
             {...register("email", { onChange: () => clearErrors("email") })}
           />
           <Error error={errors.email?.message} />
-        </div>
-
-        {/* Job Title Field (Optional) */}
-        <div className="space-y-1.5">
-          <Label htmlFor="jobTitle">{t.auth.jobTitleLabel}</Label>
-          <Input
-            id="jobTitle"
-            type="text"
-            icon="briefcase"
-            placeholder={t.auth.jobTitlePlaceholder}
-            disabled={registerMutation.isPending}
-            {...register("jobTitle" as any)}
-          />
         </div>
 
         {/* Password Field */}
