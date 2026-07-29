@@ -4,8 +4,7 @@ export interface UserProfile {
   username: string;
   jobTitle?: string;
   email?: string;
-  isAdmin?: boolean;
-  isSuperAdmin?: boolean;
+  role?: "User" | "Admin" | "SuperAdmin";
   isVerified?: boolean;
   postsCount?: number;
   profilePicture?: {

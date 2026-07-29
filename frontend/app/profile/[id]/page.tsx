@@ -190,8 +190,8 @@ export default function UserProfilePage() {
 
                 {/* Edit Avatar Pen Button (Owner or Admin — but not admin on SuperAdmin profile) */}
                 {(isOwnProfile ||
-                  currentUser?.isSuperAdmin ||
-                  (currentUser?.isAdmin && !userToDisplay?.isSuperAdmin)) && (
+                  currentUser?.role === "SuperAdmin" ||
+                  (currentUser?.role === "Admin" && userToDisplay?.role !== "SuperAdmin")) && (
                   <label
                     onClick={(e) => e.stopPropagation()}
                     className="absolute -bottom-1 ltr:-right-1 rtl:-left-1 p-2.5 rounded-2xl bg-primary hover:bg-primaryHover text-white shadow-lg border-2 border-bgSecondary transition-transform hover:scale-110 cursor-pointer z-20"
@@ -229,12 +229,12 @@ export default function UserProfilePage() {
                           userToDisplay?.username ||
                           "Developer"}
                       </Text>
-                      {userToDisplay?.isSuperAdmin ? (
+                      {userToDisplay?.role === "SuperAdmin" ? (
                         <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full text-amber-400 border border-amber-400/40 flex items-center gap-1.5 w-fit">
                           <Crown className="h-3 w-3 text-amber-400" />
                           {t.profile.owner}
                         </span>
-                      ) : userToDisplay?.isAdmin ? (
+                      ) : userToDisplay?.role === "Admin" ? (
                         <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1">
                           <ShieldCheck className="h-3.5 w-3.5" />
                           {t.admin.admin}
@@ -262,8 +262,8 @@ export default function UserProfilePage() {
                       </div>
                     )}
                     {(isOwnProfile ||
-                      currentUser?.isAdmin ||
-                      currentUser?.isSuperAdmin) &&
+                      currentUser?.role === "Admin" ||
+                      currentUser?.role === "SuperAdmin") &&
                       userToDisplay?.email && (
                         <div className="flex items-center justify-center md:justify-start gap-1.5 mt-1 w-full">
                           <Mail className="h-3.5 w-3.5 text-textSecondary shrink-0" />
@@ -287,8 +287,8 @@ export default function UserProfilePage() {
                   <div className="flex items-center gap-2">
                     {/* Edit Profile — hidden from admins on SuperAdmin profiles */}
                     {(isOwnProfile ||
-                      currentUser?.isSuperAdmin ||
-                      (currentUser?.isAdmin && !userToDisplay?.isSuperAdmin)) && (
+                      currentUser?.role === "SuperAdmin" ||
+                      (currentUser?.role === "Admin" && userToDisplay?.role !== "SuperAdmin")) && (
                       <Button
                         onClick={handleOpenEditModal}
                         variant="outline"
@@ -310,8 +310,8 @@ export default function UserProfilePage() {
 
                     {/* Delete User — hidden from admins on SuperAdmin profiles */}
                     {(isOwnProfile ||
-                      currentUser?.isSuperAdmin ||
-                      (currentUser?.isAdmin && !userToDisplay?.isSuperAdmin)) && (
+                      currentUser?.role === "SuperAdmin" ||
+                      (currentUser?.role === "Admin" && userToDisplay?.role !== "SuperAdmin")) && (
                       <Button
                         onClick={() => setIsDeleteUserModalOpen(true)}
                         variant="destructive"

@@ -45,11 +45,11 @@ export default function AdminSidebar({
     return {
       ...u,
       isSuperAdmin: isCurrent
-        ? Boolean(currentUser?.isSuperAdmin || u.isSuperAdmin)
-        : Boolean(u.isSuperAdmin),
+        ? Boolean(currentUser?.role === "SuperAdmin" || u.role === "SuperAdmin")
+        : Boolean(u.role === "SuperAdmin"),
       isAdmin: isCurrent
-        ? Boolean(currentUser?.isAdmin || u.isAdmin || currentUser?.isSuperAdmin)
-        : Boolean(u.isAdmin),
+        ? Boolean(currentUser?.role === "Admin" || u.role === "Admin" || currentUser?.role === "SuperAdmin")
+        : Boolean(u.role === "Admin"),
     };
   });
 
@@ -64,7 +64,8 @@ export default function AdminSidebar({
   const displayAdmins =
     adminUsers.length > 0
       ? adminUsers
-      : currentUser && (currentUser.isAdmin || currentUser.isSuperAdmin)
+      : currentUser &&
+          (currentUser.role === "Admin" || currentUser.role === "SuperAdmin")
         ? [currentUser]
         : [];
 
@@ -190,9 +191,9 @@ export default function AdminSidebar({
           <div className="space-y-1">
             {displayAdmins.map((adminItem) => {
               const isOwner = Boolean(
-                adminItem.isSuperAdmin ||
+                adminItem.role === "SuperAdmin" ||
                   (currentUser &&
-                    currentUser.isSuperAdmin &&
+                    currentUser.role === "SuperAdmin" &&
                     (currentUser._id === adminItem._id ||
                       (currentUser as any).id === adminItem._id ||
                       (currentUser.username &&
@@ -250,7 +251,7 @@ export default function AdminSidebar({
                   </Link>
 
                   {/* Right: Remove Admin button - only visible to superAdmin, hidden for owner */}
-                  {currentUser?.isSuperAdmin && !isOwner && adminItem._id && (
+                  {currentUser?.role === "SuperAdmin" && !isOwner && adminItem._id && (
                     <Tooltip
                       position="top"
                       content={t.admin.removeAdmin}

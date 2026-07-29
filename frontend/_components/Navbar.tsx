@@ -127,7 +127,7 @@ const Navbar = () => {
           )}
 
           {/* Admin Dashboard Quick Button */}
-          {mounted && token && (user?.isAdmin || user?.isSuperAdmin) && (
+          {mounted && token && (user?.role === "Admin" || user?.role === "SuperAdmin") && (
             <Tooltip position="bottom" content={t.nav.adminDashboard}>
               <Link href="/admin/dashboard/users">
                 <button
@@ -217,7 +217,7 @@ const Navbar = () => {
                       </Text>
                     </Link>
 
-                    {user?.isAdmin && (
+                    {(user?.role === "Admin" || user?.role === "SuperAdmin") && (
                       <Link
                         href="/admin/dashboard/users"
                         onClick={() => setDropdownOpen(false)}
@@ -342,7 +342,7 @@ const Navbar = () => {
           </div>
 
           {/* Admin Dashboard button on Mobile */}
-          {token && user?.isAdmin && (
+          {token && (user?.role === "Admin" || user?.role === "SuperAdmin") && (
             <Link
               href="/admin/dashboard/users"
               onClick={() => setMobileMenuOpen(false)}

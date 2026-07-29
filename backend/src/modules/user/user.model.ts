@@ -15,11 +15,10 @@ import {
 } from "./user.schema.js";
 
 interface IUser extends Document, IUserSchema {
-  isAdmin: boolean;
   generateToken: () => string;
   isVerified: boolean;
   postsCount: number;
-  isSuperAdmin: boolean;
+  role: "User" | "Admin" | "SuperAdmin";
 }
 
 const userSchema = new Schema<IUser>(
@@ -84,13 +83,10 @@ const userSchema = new Schema<IUser>(
       },
     },
     isVerified: { type: Boolean, default: false },
-    isAdmin: {
-      type: Boolean,
-      default: false,
-    },
-    isSuperAdmin: {
-      type: Boolean,
-      default: false,
+    role: {
+      type: String,
+      enum: ["User", "Admin", "SuperAdmin"],
+      default: "User",
     },
   },
   {
@@ -111,8 +107,7 @@ userSchema.methods.generateToken = function (this: IUser): string {
   return jwt.sign(
     {
       id: this._id,
-      isAdmin: this.isAdmin,
-      isSuperAdmin: this.isSuperAdmin,
+      role: this.role,
       username: this.username,
     },
     process.env.JWT_SECRET_KEY as string,

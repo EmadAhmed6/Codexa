@@ -96,15 +96,14 @@ export default function PostCard({ post }: PostCardProps) {
 
   // Is the post's author a SuperAdmin? Admins cannot delete SuperAdmin posts.
   const postAuthorIsSuperAdmin = Boolean(
-    typeof post.user === "object" && (post.user as any)?.isSuperAdmin,
+    typeof post.user === "object" && (post.user as any)?.role === "SuperAdmin",
   );
 
   // Admin can act on posts UNLESS the post belongs to a SuperAdmin
   const canAdminDelete = Boolean(
-    (currentUser?.isAdmin || currentUser?.isSuperAdmin) &&
+    (currentUser?.role === "Admin" || currentUser?.role === "SuperAdmin") &&
     !(
-      currentUser?.isAdmin &&
-      !currentUser?.isSuperAdmin &&
+      currentUser?.role === "Admin" &&
       postAuthorIsSuperAdmin
     ),
   );

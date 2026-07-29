@@ -28,8 +28,7 @@ interface UserHoverCardProps {
     jobTitle?: string;
     bio?: string;
     email?: string;
-    isAdmin?: boolean;
-    isSuperAdmin?: boolean;
+    role?: "User" | "Admin" | "SuperAdmin";
     profilePicture?: {
       url?: string;
     };
@@ -58,7 +57,7 @@ export default function UserHoverCard({
     e.stopPropagation();
     if (!user?._id) return;
     setIsUpdating(true);
-    const newStatus = !user.isAdmin;
+    const newStatus = user.role !== "Admin";
     try {
       const res = await toggleAdminStatus(user._id);
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
@@ -109,12 +108,12 @@ export default function UserHoverCard({
           >
             {displayName}
           </Text>
-          {user.isSuperAdmin ? (
+          {user.role === "SuperAdmin" ? (
             <span className="text-[9px] font-extrabold uppercase tracking-wider  mt-0.5 text-amber-400 flex items-center gap-1">
               <Crown className="h-2.5 w-2.5 text-amber-400 inline" />
               {t.profile.owner}
             </span>
-          ) : user.isAdmin ? (
+          ) : user.role === "Admin" ? (
             <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider block mt-0.5">
               {t.admin.admin}
             </span>
@@ -123,7 +122,7 @@ export default function UserHoverCard({
       </div>
 
       {/* Toggle Admin: visible only to superAdmin, not on superAdmin targets */}
-      {currentUser?.isSuperAdmin && !user.isSuperAdmin && (
+      {currentUser?.role === "SuperAdmin" && user.role !== "SuperAdmin" && (
         <div className="pt-2 border-t border-borderPrimary/20">
           <button
             type="button"
@@ -133,7 +132,7 @@ export default function UserHoverCard({
           >
             {isUpdating ? (
               <Loader2 className="h-3 w-3 animate-spin" />
-            ) : user.isAdmin ? (
+            ) : user.role === "Admin" ? (
               <>
                 <ShieldAlert className="h-3 w-3" />
                 <span>{t.profile.removeAdmin}</span>
@@ -149,7 +148,7 @@ export default function UserHoverCard({
       )}
 
       {/* Edit User: visible to all admins, not on superAdmin targets */}
-      {currentUser?.isAdmin && !user.isSuperAdmin && (
+      {(currentUser?.role === "Admin" || currentUser?.role === "SuperAdmin") && user.role !== "SuperAdmin" && (
         <div className="pt-2 border-t border-borderPrimary/20">
           <button
             type="button"

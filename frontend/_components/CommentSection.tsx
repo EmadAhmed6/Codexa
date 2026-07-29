@@ -422,8 +422,8 @@ export default function CommentSection({
           const isOwnerOrAdmin = Boolean(
             currentUser &&
             (isOwner ||
-              currentUser.isSuperAdmin ||
-              (currentUser.isAdmin && !(comment.user as any)?.isSuperAdmin))
+              currentUser.role === "SuperAdmin" ||
+              (currentUser.role === "Admin" && (comment.user as any)?.role !== "SuperAdmin"))
           );
           const likesCount =
             comment.commentLikesCount !== undefined

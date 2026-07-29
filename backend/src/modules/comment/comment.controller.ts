@@ -174,7 +174,7 @@ const updateComment = asyncHandler(
     }
 
     const commentOwner = await User.findById(comment.user);
-    if (commentOwner?.isSuperAdmin && !req.user?.isSuperAdmin) {
+    if (commentOwner?.role === "SuperAdmin" && req.user?.role !== "SuperAdmin") {
       res.status(403).json({
         success: false,
         message: "You cannot edit a SuperAdmin's comment",
@@ -242,7 +242,7 @@ const deleteComment = asyncHandler(
     }
     const comment = await Comment.findById(new Types.ObjectId(commentId));
     const commentOwner = await User.findById(comment?.user);
-    if (commentOwner?.isSuperAdmin && !req.user?.isSuperAdmin) {
+    if (commentOwner?.role === "SuperAdmin" && req.user?.role !== "SuperAdmin") {
       res.status(403).json({
         success: false,
         message: "You cannot delete a SuperAdmin's comment",

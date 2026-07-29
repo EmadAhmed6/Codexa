@@ -66,7 +66,7 @@ export default function AdminUsersPage() {
 
   const BackIcon = isArabic ? ArrowRight : ArrowLeft;
 
-  if (!currentUser?.isAdmin && !currentUser?.isSuperAdmin) {
+  if (currentUser?.role !== "Admin" && currentUser?.role !== "SuperAdmin") {
     return (
       <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col justify-between">
         <Navbar />
@@ -111,8 +111,8 @@ export default function AdminUsersPage() {
 
   const filteredUsers = allUsersList
     .filter((u) => {
-      if (roleFilter === "admin" && !u.isAdmin) return false;
-      if (roleFilter === "user" && u.isAdmin) return false;
+      if (roleFilter === "admin" && u.role !== "Admin" && u.role !== "SuperAdmin") return false;
+      if (roleFilter === "user" && (u.role === "Admin" || u.role === "SuperAdmin")) return false;
 
       const q = searchQuery.toLowerCase().trim();
       if (!q) return true;
@@ -124,17 +124,17 @@ export default function AdminUsersPage() {
       );
     })
     .sort((a, b) => {
-      if (a.isSuperAdmin && !b.isSuperAdmin) return -1;
-      if (!a.isSuperAdmin && b.isSuperAdmin) return 1;
+      if (a.role === "SuperAdmin" && b.role !== "SuperAdmin") return -1;
+      if (a.role !== "SuperAdmin" && b.role === "SuperAdmin") return 1;
 
-      if (a.isAdmin && !b.isAdmin) return -1;
-      if (!a.isAdmin && b.isAdmin) return 1;
+      if ((a.role === "Admin" || a.role === "SuperAdmin") && b.role === "User") return -1;
+      if (a.role === "User" && (b.role === "Admin" || b.role === "SuperAdmin")) return 1;
 
       return 0;
     });
 
   const totalUsers = allUsersList.length;
-  const adminUsersCount = allUsersList.filter((u) => u.isAdmin).length;
+  const adminUsersCount = allUsersList.filter((u) => u.role === "Admin" || u.role === "SuperAdmin").length;
   const regularUsersCount = totalUsers - adminUsersCount;
 
   const handleConfirmDeleteUser = async () => {
@@ -404,12 +404,12 @@ export default function AdminUsersPage() {
                           </td>
 
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {userItem.isSuperAdmin ? (
+                            {userItem.role === "SuperAdmin" ? (
                               <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full text-amber-400 border border-amber-400/40 flex items-center gap-1.5 w-fit">
                                 <Crown className="h-3 w-3 text-amber-400" />
                                 OWNER
                               </span>
-                            ) : userItem.isAdmin ? (
+                            ) : userItem.role === "Admin" ? (
                               <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1 w-fit">
                                 <ShieldCheck className="h-3 w-3" />
                                 {t.admin.admin}
@@ -453,7 +453,7 @@ export default function AdminUsersPage() {
                           <td className="px-6 py-4 whitespace-nowrap ltr:text-right rtl:text-left">
                             <div className="flex items-center justify-end gap-2">
                               {/* Edit button: hidden for non-superAdmin users when viewing superAdmin rows */}
-                              {(!userItem.isSuperAdmin || currentUser?.isSuperAdmin) && (
+                              {(userItem.role !== "SuperAdmin" || currentUser?.role === "SuperAdmin") && (
                                 <Tooltip
                                   position="top"
                                   content={
@@ -491,9 +491,8 @@ export default function AdminUsersPage() {
                               )}
 
                               {/* Remove Admin button - visible only to superAdmin, only on admin users (not superAdmin themselves) */}
-                              {currentUser?.isSuperAdmin &&
-                                userItem.isAdmin &&
-                                !userItem.isSuperAdmin && (
+                              {currentUser?.role === "SuperAdmin" &&
+                                userItem.role === "Admin" && (
                                   <Tooltip
                                     position="top"
                                     content={

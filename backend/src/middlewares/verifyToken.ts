@@ -6,8 +6,7 @@ import { Types } from "mongoose";
 
 interface JWTUserPayload {
   id: string;
-  isAdmin: boolean;
-  isSuperAdmin: boolean;
+  role: "User" | "Admin" | "SuperAdmin";
   username?: string;
 }
 
@@ -52,7 +51,11 @@ const verifyAuthorizedToken = (
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
-    if (req.user.id === id || req.user.isAdmin || req.user.isSuperAdmin) {
+    if (
+      req.user.id === id ||
+      req.user.role === "Admin" ||
+      req.user.role === "SuperAdmin"
+    ) {
       next();
     } else {
       return res.status(403).json({ message: "You are not allowed" });
@@ -66,7 +69,7 @@ const verifyAdminToken = (req: Request, res: Response, next: NextFunction) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (req.user.isAdmin) {
+    if (req.user.role === "Admin") {
       next();
     } else {
       return res
@@ -86,7 +89,7 @@ const verifySuperAdminToken = (
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (req.user.isSuperAdmin) {
+    if (req.user.role === "SuperAdmin") {
       next();
     } else {
       return res.status(403).json({
@@ -118,7 +121,11 @@ const verifyPostOwner = (req: Request, res: Response, next: NextFunction) => {
       return res.status(404).json({ message: "Post was not found" });
     }
 
-    if (post.user?.toString() === req.user.id || req.user.isAdmin || req.user.isSuperAdmin) {
+    if (
+      post.user?.toString() === req.user.id ||
+      req.user.role === "Admin" ||
+      req.user.role === "SuperAdmin"
+    ) {
       next();
     } else {
       return res.status(403).json({ message: "You are not allowed" });
@@ -150,7 +157,11 @@ const verifyCommentOwner = (
       return res.status(404).json({ message: "Comment was not found" });
     }
 
-    if (comment.user.toString() === req.user.id || req.user.isAdmin || req.user.isSuperAdmin) {
+    if (
+      comment.user.toString() === req.user.id ||
+      req.user.role === "Admin" ||
+      req.user.role === "SuperAdmin"
+    ) {
       next();
     } else {
       return res.status(403).json({ message: "You are not allowed" });

@@ -19,7 +19,7 @@ export default function AuthorProfileTooltip({
   const avatarUrl = user?.profilePicture?.url;
   const jobTitle = user?.jobTitle;
   const email = (user as any)?.email;
-  const isAdmin = (user as any)?.isAdmin;
+  const isAdmin = (user as any)?.role === "Admin" || (user as any)?.role === "SuperAdmin";
 
   return (
     <div className="p-3 min-w-56 space-y-2.5">

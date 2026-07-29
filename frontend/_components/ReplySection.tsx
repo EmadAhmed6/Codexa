@@ -172,8 +172,8 @@ export default function ReplySection({
               const isReplyOwnerOrAdmin = Boolean(
                 currentUser &&
                 (isReplyOwner ||
-                  currentUser.isSuperAdmin ||
-                  (currentUser.isAdmin && !(reply.user as any)?.isSuperAdmin))
+                  currentUser.role === "SuperAdmin" ||
+                  (currentUser.role === "Admin" && (reply.user as any)?.role !== "SuperAdmin"))
               );
               const replyImageSrc =
                 reply.commentImage?.url || reply.image?.url;

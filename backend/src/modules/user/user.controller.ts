@@ -123,8 +123,7 @@ const updateUser = asyncHandler(
       return;
     }
 
-    // Block anyone who is not a SuperAdmin from modifying a SuperAdmin's profile
-    if (user.isSuperAdmin && !req.user?.isSuperAdmin) {
+    if (user.role === "SuperAdmin" && req.user?.role !== "SuperAdmin") {
       res.status(403).json({
         success: false,
         message: "Request failed",
@@ -180,7 +179,7 @@ const updateUser = asyncHandler(
 const deleteUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const user = await User.findById(req.params.id);
-    if (user?.isSuperAdmin && !req.user?.isSuperAdmin) {
+    if (user?.role === "SuperAdmin" && req.user?.role !== "SuperAdmin") {
       res.status(403).json({
         success: false,
         message: "Request failed",
@@ -212,13 +211,13 @@ const toggleAdminStatus = asyncHandler(
       });
       return;
     }
-    user.isAdmin = !user.isAdmin;
+    user.role = user.role === "Admin" ? "User" : "Admin";
     await user.save();
     res.status(200).json({
       success: true,
       message: "Request processed successfully",
       data: {
-        message: `User status changed to ${user.isAdmin ? "Admin" : "User"}`,
+        message: `User status changed to ${user.role}`,
       },
     });
     return;

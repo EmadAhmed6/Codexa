@@ -15,14 +15,13 @@ export interface AuthMe {
   username: string;
   jobTitle?: string;
   email: string;
-  isAdmin?: boolean;
-  isSuperAdmin?: boolean;
   isVerified?: boolean;
   postsCount: number;
   profilePicture: {
     url: string;
     publicId: string;
   };
+  role: "User" | "Admin" | "SuperAdmin";
   createdAt: string;
   updatedAt: string;
 }

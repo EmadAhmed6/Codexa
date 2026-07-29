@@ -75,13 +75,13 @@ export default function SinglePostPage() {
 
   // Is the post's author a SuperAdmin? Admins cannot delete SuperAdmin posts.
   const postAuthorIsSuperAdmin = Boolean(
-    post && typeof post.user === "object" && (post.user as any)?.isSuperAdmin,
+    post && typeof post.user === "object" && (post.user as any)?.role === "SuperAdmin",
   );
 
   // Admin can act on posts UNLESS the post belongs to a SuperAdmin
   const canAdminDelete = Boolean(
-    (currentUser?.isAdmin || currentUser?.isSuperAdmin) &&
-    !(currentUser?.isAdmin && !currentUser?.isSuperAdmin && postAuthorIsSuperAdmin),
+    (currentUser?.role === "Admin" || currentUser?.role === "SuperAdmin") &&
+    !(currentUser?.role === "Admin" && postAuthorIsSuperAdmin),
   );
 
   const isOwnerOrAdmin = Boolean(isPostOwner || canAdminDelete);

@@ -3,9 +3,8 @@ declare global {
     interface Request {
       user?: {
         id: string;
-        isAdmin: boolean;
         username?: string;
-        isSuperAdmin: boolean;
+        role: "User" | "Admin" | "SuperAdmin";
       };
     }
   }

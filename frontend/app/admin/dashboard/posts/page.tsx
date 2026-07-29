@@ -62,7 +62,7 @@ export default function AdminPostsPage() {
 
   const BackIcon = isArabic ? ArrowRight : ArrowLeft;
 
-  if (!currentUser?.isAdmin && !currentUser?.isSuperAdmin) {
+  if (currentUser?.role !== "Admin" && currentUser?.role !== "SuperAdmin") {
     return (
       <div className="min-h-screen bg-bgPrimary text-textPrimary flex flex-col justify-between">
         <Navbar />
