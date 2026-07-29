@@ -1,4 +1,4 @@
-# ⚙️ Fluxion API — Backend RESTful Service
+Fluxion API
 
 A robust, enterprise-grade RESTful API built for the **Fluxion** social media and engineering platform. Built with **Node.js**, **Express.js**, and **MongoDB (Mongoose)**, fully typed in **TypeScript**.
 
@@ -22,21 +22,25 @@ Includes JSON Web Token (JWT) authentication, role-based authorization, rate lim
 ## ✨ Core API Capabilities
 
 ### 🔐 1. Authentication & Security
+
 - **OTP Registration & Email Verification**: Users register and receive a 6-digit OTP via email (`/auth/register`), verified against DB expiration (`/auth/verify-otp`).
 - **Rate-Limited Endpoints**: Login (`authLimiter`: 5 req/min) and API endpoints (`apiLimiter`: 100 req/15min).
 - **Password Reset Pipeline**: Forgot password (`/auth/forgot-password`) sends signed reset links via Nodemailer.
 - **Middlewares**: `verifyToken`, `verifyAuthorizedToken`, `verifyAdminToken`.
 
 ### 📝 2. Posts & Atomic Image Management
+
 - **Single Atomic Multipart Requests**: Post creation (`POST /posts`) and updates (`PUT /posts/:postId`) handle text and `postImage` in a single `Multipart/FormData` request.
 - **Deep User Populates**: Populates `user`, `likes`, `shares` with selected fields (`_id`, `username`, `profilePicture`, `jobTitle`, `bio`).
 - **Social Features**: Like/unlike toggle, post sharing with `sharesCount` tracking.
 
 ### 💬 3. Comments & Nested Inline Replies
+
 - **Comments (`/posts/:postId/comments`)**: Create, update, delete, and like comments with optional `commentImage` attachments.
 - **Inline Replies (`/posts/:postId/comments/:commentId/replies`)**: Full CRUD and like pipeline for replies supporting `replyImage` attachments.
 
 ### 👤 4. User Profiles
+
 - **Profile Details**: Supports `username` (up to 50 chars), `jobTitle` (up to 50 chars), `bio` (up to 250 chars), and profile picture uploads.
 - **Cloudinary Cleanup**: Legacy Cloudinary images are automatically deleted when updated or removed.
 

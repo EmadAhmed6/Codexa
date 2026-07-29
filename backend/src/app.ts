@@ -10,8 +10,9 @@ import cors from "cors";
 import swaggerui from "swagger-ui-express";
 import spacs from "./config/swagger.js";
 import { apiLimiter } from "./middlewares/limiter.js";
+import type { Express } from "express";
 dotenv.config();
-const app = express();
+const app: Express = express();
 
 connectToDB();
 
@@ -32,6 +33,6 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, (): void => {
   console.log(`Server is running on port ${PORT}`);
 });
