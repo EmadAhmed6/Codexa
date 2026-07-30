@@ -76,7 +76,6 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 | 29  | DELETE | `/posts/:postId/comments/:commentId/replies/:replyCommentId`      | Remove reply comment & decrement replyCommentsCount              |  🔒  | 🔒 100 req/15min |
 | 30  | PUT    | `/posts/:postId/comments/:commentId/replies/:replyCommentId/like` | Toggle like/unlike on a reply comment                            |  🔒  | 🔒 100 req/15min |
 
-
 ---
 
 ## Table of Contents
@@ -413,8 +412,7 @@ Successfully retrieved users list.
       "_id": "65f1a2b3c4d5e6f789012345",
       "username": "Ahmed",
       "email": "ahmed@example.com",
-      "isAdmin": false,
-      "isSuperAdmin": false,
+      "role": "User",
       "isVerified": true,
       "postsCount": 0,
       "profilePicture": {
@@ -440,7 +438,7 @@ Missing or invalid JWT token.
 
 ---
 
-### GET /users/:id 🔒
+### GET /users/:userId 🔒
 
 Retrieve profile information of a single user by their database ID.
 
@@ -448,7 +446,7 @@ Retrieve profile information of a single user by their database ID.
 
 | Parameter | Type   | Required | Description         |
 | :-------- | :----- | :------: | :------------------ |
-| `id`      | string |    ✅    | The target user ID. |
+| `userId`      | string |    ✅    | The target user ID. |
 
 #### Responses
 
@@ -498,7 +496,7 @@ User with specified ID was not found.
 
 ---
 
-### PUT /users/:id 🔒
+### PUT /users/:userId 🔒
 
 Update user profile information (Username, Email, or Password). Access is restricted to the profile owner or users with Admin privileges.
 
@@ -506,7 +504,7 @@ Update user profile information (Username, Email, or Password). Access is restri
 
 | Parameter | Type   | Required | Description                   |
 | :-------- | :----- | :------: | :---------------------------- |
-| `id`      | string |    ✅    | The ID of the user to update. |
+| `userId`      | string |    ✅    | The ID of the user to update. |
 
 #### Request Body
 
@@ -584,7 +582,7 @@ The user target profile was not found.
 
 ---
 
-### PATCH /users/:id/toggle-admin 🔒
+### PATCH /users/:userId/toggle-admin 🔒
 
 Toggle the role of a target user account (`User` <-> `Admin`). **Super Admin-only endpoint.** Super Admin status cannot be self-toggled.
 
@@ -592,7 +590,7 @@ Toggle the role of a target user account (`User` <-> `Admin`). **Super Admin-onl
 
 | Parameter | Type   | Required | Description                   |
 | :-------- | :----- | :------: | :---------------------------- |
-| `id`      | string |    ✅    | The target user ID to update. |
+| `userId`      | string |    ✅    | The target user ID to update. |
 
 #### Responses
 
@@ -658,9 +656,9 @@ Change the account password for an authenticated user. **Restricted strictly to 
 
 #### Request Body
 
-| Field             | Type   | Required | Description                                                                                                   |
-| :---------------- | :----- | :------: | :------------------------------------------------------------------------------------------------------------ |
-| `currentPassword` | string |    ✅    | The user's current password.                                                                                  |
+| Field             | Type   | Required | Description                                                                                                  |
+| :---------------- | :----- | :------: | :----------------------------------------------------------------------------------------------------------- |
+| `currentPassword` | string |    ✅    | The user's current password.                                                                                 |
 | `newPassword`     | string |    ✅    | The new password (Min length: 6, Max length: 72, must contain uppercase, lowercase, and numeric characters). |
 
 #### Responses
@@ -734,8 +732,7 @@ Target user account was not found.
 
 ---
 
-### DELETE /users/:id 🔒
-
+### DELETE /users/:userId 🔒
 
 Delete a user from the database. Restricted to profile owner or Admins. **Owner / Super Admin profiles cannot be deleted by regular Admins.**
 
@@ -743,7 +740,7 @@ Delete a user from the database. Restricted to profile owner or Admins. **Owner 
 
 | Parameter | Type   | Required | Description                   |
 | :-------- | :----- | :------: | :---------------------------- |
-| `id`      | string |    ✅    | The target user ID to delete. |
+| `userId`      | string |    ✅    | The target user ID to delete. |
 
 #### Responses
 
