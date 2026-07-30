@@ -69,9 +69,10 @@
  *                     email:
  *                       type: string
  *                       example: ahmed@example.com
- *                     isAdmin:
- *                       type: boolean
- *                       example: false
+ *                     role:
+ *                       type: string
+ *                       enum: [User, Admin, SuperAdmin]
+ *                       example: User
  *       400:
  *         description: Invalid input or email already exists
  */
@@ -126,9 +127,10 @@
  *                     email:
  *                       type: string
  *                       example: ahmed@example.com
- *                     isAdmin:
- *                       type: boolean
- *                       example: false
+ *                     role:
+ *                       type: string
+ *                       enum: [User, Admin, SuperAdmin]
+ *                       example: User
  *                     token:
  *                       type: string
  *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -344,9 +346,10 @@
  *                     email:
  *                       type: string
  *                       example: ahmed@example.com
- *                     isAdmin:
- *                       type: boolean
- *                       example: false
+ *                     role:
+ *                       type: string
+ *                       enum: [User, Admin, SuperAdmin]
+ *                       example: User
  *       400:
  *         description: Invalid or expired token
  *       404:
@@ -390,9 +393,10 @@
  *                     jobTitle:
  *                       type: string
  *                       example: Full Stack Developer
- *                     isAdmin:
- *                       type: boolean
- *                       example: false
+ *                     role:
+ *                       type: string
+ *                       enum: [User, Admin, SuperAdmin]
+ *                       example: User
  *                     isVerified:
  *                       type: boolean
  *                       example: true

@@ -173,7 +173,7 @@ export default function ResetPasswordPage({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Password field */}
         <div className="space-y-1.5">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">New Password</Label>
           <Input
             id="password"
             type="password"

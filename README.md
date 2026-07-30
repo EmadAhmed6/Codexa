@@ -24,16 +24,18 @@
 - **🗂️ React Query Cache Strategy**: Instant UI updates across Feed, Single Post Pages, Profile Pages, and Admin Dashboard via global cache invalidation (`["posts"]`, `["post", postId]`, `["userProfile"]`, `["users"]`, `["authMe"]`).
 - **🎴 Interactive Hover Cards**: Hover over any username or avatar (in posts, comments, replies, or admin dashboard) to reveal user profile details (`<UserHoverCard />`) or reaction lists (`<UserListTooltip />`).
 - **👤 Profile & Bio Management**: Editable profile fields (`username` up to 50 chars, `jobTitle` up to 50 chars, `bio` up to 250 chars) and profile avatar uploads.
+- **🔑 Account Password Change Modal**: Interactive Change Password modal (`ChangePasswordModal.tsx`) with real-time Zod schema requirement indicators, password visibility toggles, and strict owner-only access (`isOwnProfile === true`).
 - **🛡️ Admin Dashboard**: Dedicated administrative panels (`/admin/dashboard/users` & `/admin/dashboard/posts`) with real-time search, role-based filter cards, top-sorted Super Admin listing, and role management buttons.
 
 ### ⚙️ Server Side (Backend)
 - **🚀 Node.js & Express.js REST API**: Modular controller architecture written in TypeScript.
-- **🔐 Role-Based Access Control (RBAC)**: Fine-grained token verification middlewares (`verifyToken`, `verifyAdminToken`, `verifySuperAdminToken`).
-- **🛡️ Super Admin Protection**: Strict server-side safeguards preventing regular admins from editing or deleting Super Admin (Owner) profiles, and restricting `PATCH /users/:id/toggle-admin` to Super Admins.
-- **🔐 Bulletproof Authentication**: JWT authorization, bcrypt password hashing, rate-limiting (`express-rate-limit`), and email verification (OTP via Nodemailer with hidden schema selection).
+- **🔐 Role-Based Access Control (RBAC)**: Fine-grained token verification middlewares (`verifyToken`, `verifyAdminToken`, `verifySuperAdminToken`, `verifyAuthorizedToken`).
+- **🛡️ Super Admin Protection**: Strict server-side safeguards preventing regular admins from editing or deleting Super Admin (Owner) profiles, restricting `PATCH /users/:id/toggle-admin` to Super Admins, and enforcing profile owner isolation on `POST /users/:userId/change-password`.
+- **🔐 Bulletproof Authentication & Security**: JWT authorization, bcrypt password hashing, rate-limiting (`express-rate-limit` with 10 req/min on sensitive password/auth endpoints), and email verification (OTP via Nodemailer with hidden schema selection).
 - **🗄️ MongoDB & Mongoose ORM**: Schema definitions with deep populates (`user`, `likes`, `shares`, `comments`, `replies`).
 - **☁️ Cloudinary Integration**: Automated image uploading and legacy Cloudinary asset cleanup on file replacements or deletions.
-- **🛡️ Validation & Sanitation**: Strict Zod schemas validating user inputs across register, login, profile updates, posts, comments, and replies.
+- **🛡️ Validation & Sanitation**: Strict Zod schemas validating user inputs across register, login, change password (`currentPassword` & `newPassword`), profile updates, posts, comments, and replies.
+
 
 ---
 
@@ -60,8 +62,9 @@ Codexa/
 │   ├── _features/              # Domain-driven features (auth, posts, user)
 │   │   ├── auth/               # Auth API, hooks, Zod schemas, types
 │   │   ├── posts/              # Post, comment, reply API, hooks, schemas
-│   │   └── user/               # Profile API & hooks
+│   │   └── user/               # Profile API, hooks, Zod schemas, types
 │   ├── app/                    # Next.js App Router Pages (Feed, Auth, Profile, Admin)
+
 │   └── components/ui/          # Base Primitives (Button, Input, etc.)
 │
 ├── backend/                    # Express.js REST API

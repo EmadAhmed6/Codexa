@@ -261,7 +261,7 @@ const changePassword = asyncHandler(
 
 const toggleAdminStatus = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.userId);
     if (!user) {
       res.status(404).json({
         success: false,

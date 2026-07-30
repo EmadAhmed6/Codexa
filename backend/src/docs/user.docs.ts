@@ -2,6 +2,7 @@
 // GET    /users/{id}
 // PUT    /users/{id}
 // PATCH  /users/{id}
+// POST   /users/{id}/change-password
 // DELETE /users/{id}
 
 /**
@@ -10,6 +11,7 @@
  *   name: Users
  *   description: User management APIs
  */
+
 
 // GET    /users
 /**
@@ -127,9 +129,10 @@
  *                 type: string
  *                 format: password
  *                 example: NewPassword123!
- *               isAdmin:
- *                 type: boolean
- *                 example: true
+ *               role:
+ *                 type: string
+ *                 enum: [User, Admin, SuperAdmin]
+ *                 example: User
  *     responses:
  *       200:
  *         description: User updated successfully
@@ -159,7 +162,8 @@
  * /users/{id}/toggle-admin:
  *   patch:
  *     summary: Toggle user Admin status (Super Admin Only)
- *     description: Toggle the isAdmin boolean role of a target user account. Restricted strictly to Super Administrators. Super Admin status cannot be self-toggled.
+ *     description: Toggle the role of a target user account between User and Admin. Restricted strictly to Super Administrators. Super Admin status cannot be self-toggled.
+
  *     tags:
  *       - Users
  *     security:
@@ -200,7 +204,77 @@
  *         description: User not found
  */
 
+// POST   /users/{id}/change-password
+/**
+ * @swagger
+ * /users/{id}/change-password:
+ *   post:
+ *     summary: Change user password (Owner Only, Rate Limited - 10 req/min)
+ *     description: Change account password for authenticated user. Restricted strictly to profile owner (req.user.id === params.id).
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: User ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 format: password
+ *                 example: OldSecret123!
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 minLength: 6
+ *                 maxLength: 72
+ *                 example: NewSecret123!
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Request processed successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: Password changed successfully
+ *       400:
+ *         description: Invalid input / Zod schema validation error
+ *       401:
+ *         description: Incorrect current password
+ *       403:
+ *         description: Cannot change other user's password
+ *       404:
+ *         description: User not found
+ */
+
 // DELETE /users/{id}
+
 
 /**
  * @swagger
@@ -265,12 +339,10 @@
  *           type: string
  *           format: email
  *           example: ahmed@example.com
- *         isAdmin:
- *           type: boolean
- *           example: false
- *         isSuperAdmin:
- *           type: boolean
- *           example: false
+ *         role:
+ *           type: string
+ *           enum: [User, Admin, SuperAdmin]
+ *           example: User
  *         isVerified:
  *           type: boolean
  *           example: true

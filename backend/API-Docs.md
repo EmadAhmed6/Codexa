@@ -56,24 +56,26 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 | 9   | GET    | `/users/:userId`                                                  | Retrieve detailed user profile                                   |  🔒  | 🔒 100 req/15min |
 | 10  | PUT    | `/users/:userId`                                                  | Update profile details, jobTitle, bio, avatar, and credentials   |  🔒  | 🔒 100 req/15min |
 | 11  | PATCH  | `/users/:userId/toggle-admin`                                     | Toggle user Admin role status (Super Admin Only)                 |  🔒  | 🔒 100 req/15min |
-| 12  | DELETE | `/users/:userId`                                                  | Delete user account from the database                            |  🔒  | 🔒 100 req/15min |
-| 13  | GET    | `/posts`                                                          | Retrieve all blog posts with populated user, likes, and shares   |  🔒  | 🔒 100 req/15min |
-| 14  | POST   | `/posts`                                                          | Create a new blog post with postImage metadata                   |  🔒  | 🔒 100 req/15min |
-| 15  | POST   | `/posts/:postId/share`                                            | Share an existing post & update shares count                     |  🔒  | 🔒 100 req/15min |
-| 16  | GET    | `/posts/:postId`                                                  | Retrieve detailed view of a single post by ID                    |  🔒  | 🔒 100 req/15min |
-| 17  | PUT    | `/posts/:postId`                                                  | Update title, description, category, or postImage of a post      |  🔒  | 🔒 100 req/15min |
-| 18  | DELETE | `/posts/:postId`                                                  | Delete a post and clear its associated media                     |  🔒  | 🔒 100 req/15min |
-| 19  | PUT    | `/posts/:postId/like`                                             | Toggle like/unlike status on a blog post                         |  🔒  | 🔒 100 req/15min |
-| 20  | GET    | `/posts/:postId/comments`                                         | Retrieve comments for a post                                     |  🔒  | 🔒 100 req/15min |
-| 21  | POST   | `/posts/:postId/comments`                                         | Post a new comment (with optional commentImage)                  |  🔒  | 🔒 100 req/15min |
-| 22  | PUT    | `/posts/:postId/comments/:commentId/like`                         | Toggle like/unlike on a comment                                  |  🔒  | 🔒 100 req/15min |
-| 23  | PUT    | `/posts/:postId/comments/:commentId`                              | Update text or commentImage of a comment                         |  🔒  | 🔒 100 req/15min |
-| 24  | DELETE | `/posts/:postId/comments/:commentId`                              | Remove comment & decrement commentsCount on post                 |  🔒  | 🔒 100 req/15min |
-| 25  | GET    | `/posts/:postId/comments/:commentId/replies`                      | Get all replies for a parent comment                             |  🔒  | 🔒 100 req/15min |
-| 26  | POST   | `/posts/:postId/comments/:commentId/replies`                      | Create a reply under a parent comment (with optional replyImage) |  🔒  | 🔒 100 req/15min |
-| 27  | PUT    | `/posts/:postId/comments/:commentId/replies/:replyCommentId`      | Update text content or replyImage of a reply comment             |  🔒  | 🔒 100 req/15min |
-| 28  | DELETE | `/posts/:postId/comments/:commentId/replies/:replyCommentId`      | Remove reply comment & decrement replyCommentsCount              |  🔒  | 🔒 100 req/15min |
-| 29  | PUT    | `/posts/:postId/comments/:commentId/replies/:replyCommentId/like` | Toggle like/unlike on a reply comment                            |  🔒  | 🔒 100 req/15min |
+| 12  | POST   | `/users/:userId/change-password`                                  | Change account password (Profile Owner Only)                     |  🔒  |  🔒 10 req/min   |
+| 13  | DELETE | `/users/:userId`                                                  | Delete user account from the database                            |  🔒  | 🔒 100 req/15min |
+| 14  | GET    | `/posts`                                                          | Retrieve all blog posts with populated user, likes, and shares   |  🔒  | 🔒 100 req/15min |
+| 15  | POST   | `/posts`                                                          | Create a new blog post with postImage metadata                   |  🔒  | 🔒 100 req/15min |
+| 16  | POST   | `/posts/:postId/share`                                            | Share an existing post & update shares count                     |  🔒  | 🔒 100 req/15min |
+| 17  | GET    | `/posts/:postId`                                                  | Retrieve detailed view of a single post by ID                    |  🔒  | 🔒 100 req/15min |
+| 18  | PUT    | `/posts/:postId`                                                  | Update title, description, category, or postImage of a post      |  🔒  | 🔒 100 req/15min |
+| 19  | DELETE | `/posts/:postId`                                                  | Delete a post and clear its associated media                     |  🔒  | 🔒 100 req/15min |
+| 20  | PUT    | `/posts/:postId/like`                                             | Toggle like/unlike status on a blog post                         |  🔒  | 🔒 100 req/15min |
+| 21  | GET    | `/posts/:postId/comments`                                         | Retrieve comments for a post                                     |  🔒  | 🔒 100 req/15min |
+| 22  | POST   | `/posts/:postId/comments`                                         | Post a new comment (with optional commentImage)                  |  🔒  | 🔒 100 req/15min |
+| 23  | PUT    | `/posts/:postId/comments/:commentId/like`                         | Toggle like/unlike on a comment                                  |  🔒  | 🔒 100 req/15min |
+| 24  | PUT    | `/posts/:postId/comments/:commentId`                              | Update text or commentImage of a comment                         |  🔒  | 🔒 100 req/15min |
+| 25  | DELETE | `/posts/:postId/comments/:commentId`                              | Remove comment & decrement commentsCount on post                 |  🔒  | 🔒 100 req/15min |
+| 26  | GET    | `/posts/:postId/comments/:commentId/replies`                      | Get all replies for a parent comment                             |  🔒  | 🔒 100 req/15min |
+| 27  | POST   | `/posts/:postId/comments/:commentId/replies`                      | Create a reply under a parent comment (with optional replyImage) |  🔒  | 🔒 100 req/15min |
+| 28  | PUT    | `/posts/:postId/comments/:commentId/replies/:replyCommentId`      | Update text content or replyImage of a reply comment             |  🔒  | 🔒 100 req/15min |
+| 29  | DELETE | `/posts/:postId/comments/:commentId/replies/:replyCommentId`      | Remove reply comment & decrement replyCommentsCount              |  🔒  | 🔒 100 req/15min |
+| 30  | PUT    | `/posts/:postId/comments/:commentId/replies/:replyCommentId/like` | Toggle like/unlike on a reply comment                            |  🔒  | 🔒 100 req/15min |
+
 
 ---
 
@@ -116,8 +118,7 @@ User registered successfully. Returns user details along with an auto-generated 
     "_id": "65f1a2b3c4d5e6f789012345",
     "username": "ahmed",
     "email": "ahmed@example.com",
-    "isAdmin": false,
-    "isSuperAdmin": false,
+    "role": "User",
     "isVerified": false,
     "postsCount": 0,
     "profilePicture": {
@@ -166,8 +167,7 @@ Login successful. Returns user account details and the authorization token.
     "_id": "65f1a2b3c4d5e6f789012345",
     "username": "ahmed",
     "email": "ahmed@example.com",
-    "isAdmin": false,
-    "isSuperAdmin": false,
+    "role": "User",
     "isVerified": true,
     "postsCount": 0,
     "profilePicture": {
@@ -218,8 +218,7 @@ Account verified successfully. Returns user account details.
     "_id": "65f1a2b3c4d5e6f789012345",
     "username": "ahmed",
     "email": "ahmed@example.com",
-    "isAdmin": false,
-    "isSuperAdmin": false,
+    "role": "User",
     "isVerified": true,
     "postsCount": 0,
     "profilePicture": {
@@ -464,8 +463,7 @@ Successfully retrieved user details.
     "_id": "65f1a2b3c4d5e6f789012345",
     "username": "Ahmed",
     "email": "ahmed@example.com",
-    "isAdmin": false,
-    "isSuperAdmin": false,
+    "role": "User",
     "isVerified": true,
     "postsCount": 0,
     "profilePicture": {
@@ -531,8 +529,7 @@ Profile updated successfully. Returns updated user document.
     "_id": "65f1a2b3c4d5e6f789012345",
     "username": "AhmedUpdated",
     "email": "ahmed.new@example.com",
-    "isAdmin": false,
-    "isSuperAdmin": false,
+    "role": "User",
     "isVerified": true,
     "postsCount": 0,
     "profilePicture": {
@@ -589,7 +586,7 @@ The user target profile was not found.
 
 ### PATCH /users/:id/toggle-admin 🔒
 
-Toggle the `isAdmin` boolean role of a target user account. **Super Admin-only endpoint.** Super Admin status cannot be self-toggled.
+Toggle the role of a target user account (`User` <-> `Admin`). **Super Admin-only endpoint.** Super Admin status cannot be self-toggled.
 
 #### Path Parameters
 
@@ -649,7 +646,96 @@ User target was not found.
 
 ---
 
+### POST /users/:userId/change-password 🔒
+
+Change the account password for an authenticated user. **Restricted strictly to profile owner (`req.user.id === params.userId`).** Protected by rate limiting (10 req/min).
+
+#### Path Parameters
+
+| Parameter | Type   | Required | Description                        |
+| :-------- | :----- | :------: | :--------------------------------- |
+| `userId`  | string |    ✅    | The ID of the target user account. |
+
+#### Request Body
+
+| Field             | Type   | Required | Description                                                                                                   |
+| :---------------- | :----- | :------: | :------------------------------------------------------------------------------------------------------------ |
+| `currentPassword` | string |    ✅    | The user's current password.                                                                                  |
+| `newPassword`     | string |    ✅    | The new password (Min length: 6, Max length: 72, must contain uppercase, lowercase, and numeric characters). |
+
+#### Responses
+
+##### Response 200
+
+Password changed successfully.
+
+```json
+{
+  "success": true,
+  "message": "Request processed successfully",
+  "data": {
+    "message": "Password changed successfully"
+  }
+}
+```
+
+##### Response 400
+
+Zod schema input validation failure or missing required fields.
+
+```json
+{
+  "success": false,
+  "message": "Password must be at least 6 characters"
+}
+```
+
+##### Response 401
+
+Current password provided is incorrect.
+
+```json
+{
+  "success": false,
+  "message": "Request failed",
+  "data": {
+    "message": "Current Password is incorrect"
+  }
+}
+```
+
+##### Response 403
+
+Forbidden. The requesting user is attempting to change another user's password.
+
+```json
+{
+  "success": false,
+  "message": "Request failed",
+  "data": {
+    "message": "You cannot change other user's password"
+  }
+}
+```
+
+##### Response 404
+
+Target user account was not found.
+
+```json
+{
+  "success": false,
+  "message": "Request failed",
+  "data": {
+    "message": "User not found"
+  }
+}
+```
+
+---
+
 ### DELETE /users/:id 🔒
+
 
 Delete a user from the database. Restricted to profile owner or Admins. **Owner / Super Admin profiles cannot be deleted by regular Admins.**
 

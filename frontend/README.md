@@ -29,8 +29,9 @@ frontend/
     │   ├── schemas/      # Post, comment, & edit profile Zod schemas
     │   └── types/        # Post, Comment, & Reply interfaces
     └── user/
-        ├── api/          # User profile API requests (getUserProfile, updateUser, uploadAvatar)
-        ├── hooks/        # User profile hooks (useGetUserProfile, useUpdateUser)
+        ├── api/          # User profile API requests (getUserProfile, updateUser, changePassword, uploadAvatar)
+        ├── hooks/        # User profile hooks (useGetUserProfile, useUpdateUser, useChangePassword)
+        ├── schema/       # User feature Zod schemas (changePasswordSchema)
         └── types/        # UserProfile interfaces
 ```
 
@@ -84,6 +85,14 @@ Dedicated administrative routes guarded for `isAdmin` and `isSuperAdmin` users:
 - **`/admin/dashboard/users`**: Manage registered user accounts, filter by role (All/Admins/Users), search by username/email/jobTitle, edit user profiles, toggle admin status (Super Admin only), and delete accounts. Super Admins are sorted at the top of the table automatically. Regular admins cannot edit or delete Super Admin profiles or toggle admin statuses.
 - **`/admin/dashboard/posts`**: Manage published articles, inspect engagement counts, search articles, and delete posts.
 - **Admin Profile Editing**: Admins can edit user profile details and change profile photos directly from profile pages or hover cards, with protection for Super Admin (Owner) profiles.
+
+---
+
+### 7. Account Security & Change Password Modal
+- **Strict Owner-Only Access (`isOwnProfile`)**: The "Change Password" action button and modal are strictly restricted to the logged-in user viewing their own profile (`isOwnProfile === true`). Neither Admins nor Super Admins can view or trigger password changes for other users.
+- **Client-Side Zod Validation (`changePasswordSchema`)**: Form validated with real-time requirements checking: minimum 6 characters, maximum 72 characters, at least one uppercase letter (`A-Z`), one lowercase letter (`a-z`), one digit (`0-9`), and matching confirmation password field.
+- **Interactive UI**: Modal built with React Hook Form + Zod resolver (`ChangePasswordModal.tsx`), live requirement checkmarks, and custom toast notifications.
+
 
 ---
 
