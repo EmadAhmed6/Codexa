@@ -4,7 +4,7 @@
 // PUT    /posts/{postId}
 // DELETE /posts/{postId}
 // PUT    /posts/{postId}/like
-// POST   /posts/{postId}/upload
+// POST   /posts/{postId}/share
 
 /**
  * @swagger
@@ -25,7 +25,7 @@
  *     parameters:
  *       - in: query
  *         name: pageNumber
- *         required: true
+ *         required: false
  *         description: Page number
  *         schema:
  *           type: integer
@@ -62,38 +62,32 @@
  *     requestBody:
  *       required: true
  *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 250
+ *                 example: My First Blog Post
+ *               postImage:
+ *                 type: string
+ *                 format: binary
+ *                 description: Image file to upload
  *         application/json:
  *           schema:
  *             type: object
  *             required:
  *               - title
- *               - description
- *               - category
  *             properties:
  *               title:
  *                 type: string
- *                 minLength: 2
- *                 maxLength: 32
- *                 example: My First Blog Post
- *               description:
- *                 type: string
- *                 minLength: 10
+ *                 minLength: 1
  *                 maxLength: 250
- *                 example: This is my first blog post description.
- *               category:
- *                 type: string
- *                 example: Technology
- *               image:
- *                 type: object
- *                 properties:
- *                   url:
- *                     type: string
- *                     format: uri
- *                     example: https://example.com/image.jpg
- *                   publicId:
- *                     type: string
- *                     nullable: true
- *                     example: blog_image_123
+ *                 example: My First Blog Post
  *     responses:
  *       201:
  *         description: Post created successfully
@@ -105,6 +99,9 @@
  *                 success:
  *                   type: boolean
  *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Post created successfully
  *                 data:
  *                   $ref: '#/components/schemas/Post'
  *       400:
@@ -167,34 +164,29 @@
  *           type: string
  *           example: 65f1a2b3c4d5e6f789012345
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 250
+ *                 example: Updated Blog Post
+ *               postImage:
+ *                 type: string
+ *                 format: binary
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
  *               title:
  *                 type: string
- *                 minLength: 2
- *                 maxLength: 32
- *                 example: Updated Blog Post
- *               description:
- *                 type: string
- *                 minLength: 10
+ *                 minLength: 1
  *                 maxLength: 250
- *                 example: Updated description for the blog post.
- *               category:
- *                 type: string
- *                 example: Programming
- *               image:
- *                 type: object
- *                 properties:
- *                   url:
- *                     type: string
- *                     format: uri
- *                   publicId:
- *                     type: string
- *                     nullable: true
+ *                 example: Updated Blog Post
  *     responses:
  *       200:
  *         description: Post updated successfully
@@ -246,7 +238,7 @@
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Post has been deleted successfully
+ *                   example: Post deleted successfully
  *       401:
  *         description: Not authorized
  *       404:
@@ -308,16 +300,6 @@
  *         schema:
  *           type: string
  *           example: 65f1a2b3c4d5e6f789012345
- *     requestBody:
- *       required: false
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               description:
- *                 type: string
- *                 example: Check out this post!
  *     responses:
  *       201:
  *         description: Post shared successfully
@@ -343,8 +325,6 @@
  *         description: Post was not found
  */
 
-
-
 /**
  * @swagger
  * components:
@@ -358,20 +338,31 @@
  *         title:
  *           type: string
  *           example: My First Blog Post
- *         description:
- *           type: string
- *           example: This is my first blog post description.
- *         category:
- *           type: string
- *           example: Technology
  *         user:
  *           type: object
  *           properties:
  *             _id:
  *               type: string
+ *               example: 65f1a2b3c4d5e6f789012345
+ *             fullName:
+ *               type: string
+ *               example: Ahmed Mohamed
  *             username:
  *               type: string
- *               example: Ahmed
+ *               example: ahmed
+ *             jobTitle:
+ *               type: string
+ *               example: Full Stack Engineer
+ *             bio:
+ *               type: string
+ *               example: Software Developer
+ *             profilePicture:
+ *               type: object
+ *               properties:
+ *                 url:
+ *                   type: string
+ *                 publicId:
+ *                   type: string
  *         postImage:
  *           type: object
  *           properties:
@@ -388,8 +379,18 @@
  *             properties:
  *               _id:
  *                 type: string
+ *               fullName:
+ *                 type: string
+ *                 example: Ahmed Mohamed
  *               username:
  *                 type: string
+ *                 example: ahmed
+ *               jobTitle:
+ *                 type: string
+ *               bio:
+ *                 type: string
+ *               profilePicture:
+ *                 type: object
  *         sharedPost:
  *           type: string
  *           nullable: true

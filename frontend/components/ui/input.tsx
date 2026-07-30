@@ -75,7 +75,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "flex h-11 w-full rounded-lg border border-borderPrimary bg-bgPrimary/50 px-4 py-3 text-sm text-textPrimary placeholder:text-textSecondary/60 shadow-sm transition-all focus-visible:outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-ringPrimary/20 disabled:cursor-not-allowed disabled:opacity-50",
             hasIcon && "ltr:pl-11 rtl:pr-11",
             isPassword && "ltr:pr-11 rtl:pl-11",
-            isInvalid && "border-destructive/60 focus-visible:border-destructive/80 focus-visible:ring-destructive/10",
+            isInvalid &&
+              "border-destructive focus-visible:border-destructive focus-visible:ring-1 focus-visible:ring-destructive/30",
+
             className,
           )}
           ref={ref}

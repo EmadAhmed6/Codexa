@@ -154,11 +154,11 @@ export default function CreatePostCard() {
 
         {/* Image Preview Thumbnail if attached */}
         {imagePreview && (
-          <div className="relative rounded-xl overflow-hidden border border-borderPrimary/40 max-h-48 group">
+          <div className="relative rounded-xl overflow-hidden border border-borderPrimary/40 max-h-56 group bg-black/5 dark:bg-white/5 flex items-center justify-center">
             <img
               src={imagePreview}
               alt="Attached preview"
-              className="w-full h-44 object-cover"
+              className="w-full h-auto max-h-52 object-contain rounded-xl"
             />
             <button
               type="button"

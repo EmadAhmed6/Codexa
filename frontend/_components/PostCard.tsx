@@ -102,10 +102,7 @@ export default function PostCard({ post }: PostCardProps) {
   // Admin can act on posts UNLESS the post belongs to a SuperAdmin
   const canAdminDelete = Boolean(
     (currentUser?.role === "Admin" || currentUser?.role === "SuperAdmin") &&
-    !(
-      currentUser?.role === "Admin" &&
-      postAuthorIsSuperAdmin
-    ),
+    !(currentUser?.role === "Admin" && postAuthorIsSuperAdmin),
   );
 
   // Show action menu to owner or to admins (with superadmin restriction)
@@ -337,11 +334,11 @@ export default function PostCard({ post }: PostCardProps) {
 
         {/* 3. FEATURED COVER IMAGE */}
         {(post.postImage?.url || post.image?.url) && (
-          <div className="block mb-4 overflow-hidden rounded-xl border border-borderPrimary/30 aspect-video relative z-10 pointer-events-none">
+          <div className=" mb-4 overflow-hidden rounded-xl border border-borderPrimary/30 relative z-10 pointer-events-none max-h-137.5 bg-black/5 dark:bg-white/5 flex items-center justify-center">
             <img
               src={post.postImage?.url || post.image?.url}
               alt={post.title || "Cover Image"}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-auto max-h-137.5 object-contain rounded-xl group-hover:scale-[1.01] transition-transform duration-300"
             />
           </div>
         )}

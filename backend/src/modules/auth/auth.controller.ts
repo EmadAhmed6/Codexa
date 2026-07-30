@@ -46,7 +46,7 @@ const generateOtpEmailHtml = (username: string, otp: string) => {
             <tr>
               <td align="center" style="padding: 32px 32px 24px 32px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15)); border-bottom: 1px solid #334155;">
                 <div style="display: inline-block; padding: 10px 18px; background: #6366f1; border-radius: 12px; font-weight: 800; font-size: 20px; color: #ffffff; letter-spacing: 1px;">
-                  FLUXION 🚀
+                  FLUXION 
                 </div>
                 <h1 style="margin: 16px 0 0 0; font-size: 22px; font-weight: 700; color: #ffffff;">Email Verification Code</h1>
               </td>

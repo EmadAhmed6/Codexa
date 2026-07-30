@@ -3,12 +3,11 @@
 // ├── PUT    /posts/{postId}/comments/{commentId}
 // ├── DELETE /posts/{postId}/comments/{commentId}
 // ├── PUT    /posts/{postId}/comments/{commentId}/like
-// ├── POST   /posts/{postId}/comments/{commentId}/upload
-// ├── POST   /posts/{postId}/comments/{commentId}/reply
-// ├── PUT    /posts/{postId}/comments/{commentId}/reply/{replyCommentId}
-// ├── DELETE /posts/{postId}/comments/{commentId}/reply/{replyCommentId}
-// ├── POST   /posts/{postId}/comments/{commentId}/reply/{replyCommentId} (upload image)
-// └── PUT    /posts/{postId}/comments/{commentId}/reply/{replyCommentId}/like
+// ├── GET    /posts/{postId}/comments/{commentId}/replies
+// ├── POST   /posts/{postId}/comments/{commentId}/replies
+// ├── PUT    /posts/{postId}/comments/{commentId}/replies/{replyCommentId}
+// ├── DELETE /posts/{postId}/comments/{commentId}/replies/{replyCommentId}
+// └── PUT    /posts/{postId}/comments/{commentId}/replies/{replyCommentId}/like
 
 /**
  * @swagger
@@ -44,7 +43,7 @@
  *           default: 1
  *           example: 1
  *       - in: query
- *         name: commentsPerPage
+ *         name: commentsPerPost
  *         required: false
  *         description: Number of comments per page
  *         schema:
@@ -70,7 +69,7 @@
  *                   items:
  *                     $ref: '#/components/schemas/Comment'
  *       400:
- *         description: Post ID is required
+ *         description: Valid Post ID is required
  *       401:
  *         description: Not authorized
  */
@@ -95,6 +94,18 @@
  *     requestBody:
  *       required: true
  *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - text
+ *             properties:
+ *               text:
+ *                 type: string
+ *                 example: This is a great post!
+ *               commentImage:
+ *                 type: string
+ *                 format: binary
  *         application/json:
  *           schema:
  *             type: object
@@ -151,8 +162,18 @@
  *           type: string
  *           example: 65f1a2b3c4d5e6f789012346
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               text:
+ *                 type: string
+ *                 example: Updated comment text
+ *               commentImage:
+ *                 type: string
+ *                 format: binary
  *         application/json:
  *           schema:
  *             type: object
@@ -279,7 +300,52 @@
 
 /**
  * @swagger
- * /posts/{postId}/comments/{commentId}/reply:
+ * /posts/{postId}/comments/{commentId}/replies:
+ *   get:
+ *     summary: Get all replies for a comment
+ *     tags:
+ *       - Comments
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         description: Post ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         description: Parent Comment ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012346
+ *     responses:
+ *       200:
+ *         description: Replies retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Request processed successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Comment'
+ *       400:
+ *         description: Valid Parent Comment ID is required
+ *       401:
+ *         description: Not authorized
+ *       404:
+ *         description: Parent comment was not found
  *   post:
  *     summary: Create a reply to a comment
  *     tags:
@@ -304,6 +370,18 @@
  *     requestBody:
  *       required: true
  *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - text
+ *             properties:
+ *               text:
+ *                 type: string
+ *                 example: This is a reply comment
+ *               replyImage:
+ *                 type: string
+ *                 format: binary
  *         application/json:
  *           schema:
  *             type: object
@@ -336,7 +414,7 @@
 
 /**
  * @swagger
- * /posts/{postId}/comments/{commentId}/reply/{replyCommentId}:
+ * /posts/{postId}/comments/{commentId}/replies/{replyCommentId}:
  *   put:
  *     summary: Update a reply comment
  *     tags:
@@ -366,8 +444,18 @@
  *           type: string
  *           example: 65f1a2b3c4d5e6f789012348
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               text:
+ *                 type: string
+ *                 example: Updated reply comment text
+ *               replyImage:
+ *                 type: string
+ *                 format: binary
  *         application/json:
  *           schema:
  *             type: object
@@ -447,13 +535,13 @@
  *         description: Not authorized
  *       403:
  *         description: You are not allowed
- *    404:
+ *       404:
  *         description: Reply comment was not found
  */
 
 /**
  * @swagger
- * /posts/{postId}/comments/{commentId}/reply/{replyCommentId}/like:
+ * /posts/{postId}/comments/{commentId}/replies/{replyCommentId}/like:
  *   put:
  *     summary: Like or unlike a reply comment
  *     tags:
@@ -528,9 +616,18 @@
  *             _id:
  *               type: string
  *               example: 65f1a2b3c4d5e6f789012347
+ *             fullName:
+ *               type: string
+ *               example: Ahmed Mohamed
  *             username:
  *               type: string
- *               example: Ahmed
+ *               example: ahmed
+ *             jobTitle:
+ *               type: string
+ *               example: Full Stack Engineer
+ *             bio:
+ *               type: string
+ *               example: Software Developer
  *             profilePicture:
  *               type: object
  *               properties:
@@ -538,8 +635,6 @@
  *                   type: string
  *                 publicId:
  *                   type: string
- *             jobTitle:
- *               type: string
  *         commentImage:
  *           type: object
  *           properties:
@@ -558,12 +653,18 @@
  *             properties:
  *               _id:
  *                 type: string
+ *               fullName:
+ *                 type: string
+ *                 example: Ahmed Mohamed
  *               username:
+ *                 type: string
+ *                 example: ahmed
+ *               jobTitle:
+ *                 type: string
+ *               bio:
  *                 type: string
  *               profilePicture:
  *                 type: object
- *               jobTitle:
- *                 type: string
  *         commentLikesCount:
  *           type: number
  *           example: 3

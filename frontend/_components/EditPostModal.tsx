@@ -208,11 +208,11 @@ export default function EditPostModal({
               {t.createEditPost.imageLabel}
             </Text>
             {imagePreview && (
-              <div className="relative rounded-xl overflow-hidden border border-borderPrimary/50 max-h-48 mb-2 group">
+              <div className="relative rounded-xl overflow-hidden border border-borderPrimary/50 max-h-56 mb-2 group bg-black/5 dark:bg-white/5 flex items-center justify-center">
                 <img
                   src={imagePreview}
                   alt="Post preview"
-                  className="w-full h-40 object-cover"
+                  className="w-full h-auto max-h-52 object-contain rounded-xl"
                 />
                 <button
                   type="button"

@@ -22,10 +22,14 @@
  *           schema:
  *             type: object
  *             required:
+ *               - fullName
  *               - username
  *               - email
  *               - password
  *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: Ahmed Mohamed
  *               username:
  *                 type: string
  *                 example: ahmed
@@ -63,6 +67,9 @@
  *                     _id:
  *                       type: string
  *                       example: 65f1a2b3c4d5e6f789012345
+ *                     fullName:
+ *                       type: string
+ *                       example: Ahmed Mohamed
  *                     username:
  *                       type: string
  *                       example: ahmed
@@ -340,6 +347,9 @@
  *                     _id:
  *                       type: string
  *                       example: 65f1a2b3c4d5e6f789012345
+ *                     fullName:
+ *                       type: string
+ *                       example: Ahmed Mohamed
  *                     username:
  *                       type: string
  *                       example: ahmed
@@ -384,6 +394,9 @@
  *                     _id:
  *                       type: string
  *                       example: 65f1a2b3c4d5e6f789012345
+ *                     fullName:
+ *                       type: string
+ *                       example: Ahmed Mohamed
  *                     username:
  *                       type: string
  *                       example: ahmed

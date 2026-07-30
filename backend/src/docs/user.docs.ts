@@ -1,9 +1,9 @@
 // GET    /users
-// GET    /users/{id}
-// PUT    /users/{id}
-// PATCH  /users/{id}
-// POST   /users/{id}/change-password
-// DELETE /users/{id}
+// GET    /users/{userId}
+// PUT    /users/{userId}
+// PATCH  /users/{userId}/toggle-admin
+// POST   /users/{userId}/change-password
+// DELETE /users/{userId}
 
 /**
  * @swagger
@@ -45,10 +45,10 @@
  *         description: Too many requests, please try again later
  */
 
-// GET    /users/{id}
+// GET    /users/{userId}
 /**
  * @swagger
- * /users/{id}:
+ * /users/{userId}:
  *   get:
  *     summary: Get user profile by ID (with populated posts, likes, and shares)
  *     description: Retrieve user profile by MongoDB ObjectId with deep populated posts, likes, and shares.
@@ -58,7 +58,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         description: User ID
  *         schema:
@@ -83,21 +83,21 @@
  *         description: User not found
  */
 
-// PUT    /users/{id}
+// PUT    /users/{userId}
 
 /**
  * @swagger
- * /users/{id}:
+ * /users/{userId}:
  *   put:
  *     summary: Update user profile
- *     description: Update username, job title, bio, email, password, or profile picture. Access is allowed for account owner or Admins. Super Admin (Owner) profile cannot be updated by regular Admins.
+ *     description: Update full name, username, job title, bio, email, password, or profile picture. Access is allowed for account owner or Admins. Super Admin (Owner) profile cannot be updated by regular Admins.
  *     tags:
  *       - Users
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         description: User ID
  *         schema:
@@ -110,11 +110,16 @@
  *           schema:
  *             type: object
  *             properties:
+ *               fullName:
+ *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 250
+ *                 example: Ahmed Mohamed
  *               username:
  *                 type: string
  *                 minLength: 3
- *                 maxLength: 20
- *                 example: Ahmed
+ *                 maxLength: 50
+ *                 example: ahmed
  *               jobTitle:
  *                 type: string
  *                 example: Full Stack Engineer
@@ -156,21 +161,20 @@
  *         description: User not found
  */
 
-// PATCH  /users/{id}/toggle-admin
+// PATCH  /users/{userId}/toggle-admin
 /**
  * @swagger
- * /users/{id}/toggle-admin:
+ * /users/{userId}/toggle-admin:
  *   patch:
  *     summary: Toggle user Admin status (Super Admin Only)
  *     description: Toggle the role of a target user account between User and Admin. Restricted strictly to Super Administrators. Super Admin status cannot be self-toggled.
-
  *     tags:
  *       - Users
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         description: User ID
  *         schema:
@@ -204,20 +208,20 @@
  *         description: User not found
  */
 
-// POST   /users/{id}/change-password
+// POST   /users/{userId}/change-password
 /**
  * @swagger
- * /users/{id}/change-password:
+ * /users/{userId}/change-password:
  *   post:
  *     summary: Change user password (Owner Only, Rate Limited - 10 req/min)
- *     description: Change account password for authenticated user. Restricted strictly to profile owner (req.user.id === params.id).
+ *     description: Change account password for authenticated user. Restricted strictly to profile owner (req.user.id === params.userId).
  *     tags:
  *       - Users
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         description: User ID
  *         schema:
@@ -273,12 +277,12 @@
  *         description: User not found
  */
 
-// DELETE /users/{id}
+// DELETE /users/{userId}
 
 
 /**
  * @swagger
- * /users/{id}:
+ * /users/{userId}:
  *   delete:
  *     summary: Delete user
  *     description: Delete a user account from database. Restricted to profile owner or Admins. Super Admin (Owner) profile cannot be deleted by regular Admins.
@@ -288,7 +292,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         description: User ID
  *         schema:
@@ -326,9 +330,12 @@
  *         _id:
  *           type: string
  *           example: 65f1a2b3c4d5e6f789012345
+ *         fullName:
+ *           type: string
+ *           example: Ahmed Mohamed
  *         username:
  *           type: string
- *           example: Ahmed
+ *           example: ahmed
  *         jobTitle:
  *           type: string
  *           example: Full Stack Engineer

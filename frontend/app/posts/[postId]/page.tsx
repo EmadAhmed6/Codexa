@@ -253,11 +253,11 @@ export default function SinglePostPage() {
 
         {/* Cloudinary Header Cover Image */}
         {(post.postImage?.url || post.image?.url) && (
-          <div className="w-full mb-10 overflow-hidden rounded-2xl border border-borderPrimary/50 shadow-lg">
+          <div className="w-full mb-10 overflow-hidden rounded-2xl border border-borderPrimary/50 shadow-lg max-h-[650px] flex items-center justify-center bg-black/5 dark:bg-white/5">
             <img
               src={post.postImage?.url || post.image?.url}
               alt={post.title}
-              className="w-full h-auto object-cover rounded-2xl"
+              className="w-full h-auto max-h-[650px] object-contain rounded-2xl"
             />
           </div>
         )}
