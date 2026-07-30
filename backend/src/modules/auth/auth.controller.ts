@@ -280,7 +280,9 @@ const resendOTP = asyncHandler(
       res.status(400).json({ success: false, message: "Email is required" });
       return;
     }
-    const user = await User.findOne({ email: email.trim() }).select("+otp +otpExpired");
+    const user = await User.findOne({ email: email.trim() }).select(
+      "+otp +otpExpired",
+    );
     if (!user) {
       res.status(404).json({ success: false, message: "Email was not found" });
       return;
@@ -325,7 +327,9 @@ const login = asyncHandler(
         .json({ message: error.issues[0]?.message || "Invalid Input" });
       return;
     }
-    const user = await User.findOne({ email: req.body.email }).select("+otp +otpExpired");
+    const user = await User.findOne({ email: req.body.email }).select(
+      "+otp +otpExpired",
+    );
     if (!user) {
       res
         .status(400)
@@ -563,4 +567,6 @@ export {
   verifyEmailOTP,
   resendOTP,
   getMe,
+  sendEmail,
+  generateOtpEmailHtml,
 };

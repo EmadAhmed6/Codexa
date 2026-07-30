@@ -45,6 +45,11 @@ const ResetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
+const ChangePasswordSchema = z.object({
+  currentPassword: passwordSchema,
+  newPassword: passwordSchema,
+});
+
 const UserSchema = z.object({
   fullName: z.string().trim().min(3).max(250),
   username: z
@@ -80,6 +85,7 @@ export {
   OtpSchema,
   UserSchema,
   UpdateUserSchema,
+  ChangePasswordSchema,
 };
 
 export type IRegisterUser = z.infer<typeof RegisterSchema>;
@@ -87,5 +93,6 @@ export type ILoginUser = z.infer<typeof LoginSchema>;
 export type IOtp = z.infer<typeof OtpSchema>;
 export type IForgotPassword = z.infer<typeof ForgotPasswordSchema>;
 export type IResetPassword = z.infer<typeof ResetPasswordSchema>;
+export type IChangePassword = z.infer<typeof ChangePasswordSchema>;
 export type IUserSchema = z.infer<typeof UserSchema>;
 export type IUpdateUser = z.infer<typeof UpdateUserSchema>;

@@ -41,7 +41,11 @@ const toastTranslationsAr: Record<string, string> = {
   "Failed to upload profile picture.": "فشل رفع صورة البروفايل.",
   "Profile updated successfully!": "تم تحديث البروفايل بنجاح!",
   "Failed to update profile.": "فشل تحديث البروفايل.",
+  "Password changed successfully!": "تم تغيير كلمة المرور بنجاح!",
+  "Failed to change password.": "فشل تغيير كلمة المرور.",
+  "You cannot change other user's password": "مش مسموح لك تغير باسورد مستخدم تاني.",
   "User deleted successfully!": "تم مسح اليوزر بنجاح!",
+
   "Failed to delete user.": "فشل مسح اليوزر.",
   "Signed out successfully!": "تم تسجيل الخروج بنجاح!",
   "Logged out successfully!": "تم تسجيل الخروج بنجاح!",

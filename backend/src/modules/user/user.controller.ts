@@ -1,9 +1,14 @@
 import express, { type Request, type Response } from "express";
 import asyncHandler from "express-async-handler";
 import { v2 as cloudinary } from "cloudinary";
-import { User, validateUpdateUser } from "./user.model.js";
+import {
+  User,
+  validateChangePassword,
+  validateUpdateUser,
+} from "./user.model.js";
 import fs from "fs";
 import bcrypt from "bcryptjs";
+import { verifyEmailOTP } from "../auth/auth.controller.js";
 
 // GET ALL USERS
 const getAllUsers = asyncHandler(
@@ -20,7 +25,7 @@ const getAllUsers = asyncHandler(
 // GET USER BY ID
 const getUserById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const user = await User.findById(req.params.id)
+    const user = await User.findById(req.params.userId)
       .select("-password")
       .populate({
         path: "posts",
@@ -113,7 +118,7 @@ const updateUser = asyncHandler(
       return;
     }
 
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.userId);
     if (!user) {
       res.status(404).json({
         success: false,
@@ -149,7 +154,7 @@ const updateUser = asyncHandler(
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
+      req.params.userId,
       {
         $set: {
           fullName: req.body.fullName,
@@ -178,7 +183,7 @@ const updateUser = asyncHandler(
 // DELETE USER
 const deleteUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.userId);
     if (user?.role === "SuperAdmin" && req.user?.role !== "SuperAdmin") {
       res.status(403).json({
         success: false,
@@ -188,7 +193,7 @@ const deleteUser = asyncHandler(
       return;
     }
     if (user) {
-      await User.findByIdAndDelete(req.params.id);
+      await User.findByIdAndDelete(req.params.userId);
       res
         .status(200)
         .json({ success: true, message: "User deleted successfully" });
@@ -197,6 +202,60 @@ const deleteUser = asyncHandler(
       res.status(404).json({ success: false, message: "User was not found" });
       return;
     }
+  },
+);
+
+const changePassword = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const user = await User.findById(req.params.userId as string);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "Request failed",
+        data: { message: "User not found" },
+      });
+      return;
+    }
+
+    if (req.user?.id !== req.params.userId) {
+      res.status(403).json({
+        success: false,
+        message: "Request failed",
+        data: { message: "You cannot change other user's password" },
+      });
+      return;
+    }
+
+    const { success, error } = validateChangePassword(req.body);
+    if (!success) {
+      res.status(400).json({
+        success: false,
+        message: error.issues[0]?.message || "Invalid Input",
+      });
+      return;
+    }
+    const isPasswordMatch = await bcrypt.compare(
+      req.body.currentPassword,
+      user.password,
+    );
+
+    if (!isPasswordMatch) {
+      res.status(401).json({
+        success: false,
+        message: "Request failed",
+        data: { message: "Current Password is incorrect" },
+      });
+      return;
+    }
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(req.body.newPassword, salt);
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Request processed successfully",
+      data: { message: "Password changed successfully" },
+    });
+    return;
   },
 );
 
@@ -224,4 +283,11 @@ const toggleAdminStatus = asyncHandler(
   },
 );
 
-export { getAllUsers, getUserById, updateUser, deleteUser, toggleAdminStatus };
+export {
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
+  toggleAdminStatus,
+  changePassword,
+};

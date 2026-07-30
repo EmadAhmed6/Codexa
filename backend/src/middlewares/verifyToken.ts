@@ -46,13 +46,16 @@ const verifyAuthorizedToken = (
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const id = req.params.id;
-    if (id && (typeof id !== "string" || !Types.ObjectId.isValid(id))) {
+    const userId = req.params.userId;
+    if (
+      userId &&
+      (typeof userId !== "string" || !Types.ObjectId.isValid(userId))
+    ) {
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
     if (
-      req.user.id === id ||
+      req.user.id === userId ||
       req.user.role === "Admin" ||
       req.user.role === "SuperAdmin"
     ) {

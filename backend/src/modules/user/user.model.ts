@@ -1,12 +1,14 @@
 import jwt from "jsonwebtoken";
 import { Document, Schema, model } from "mongoose";
 import {
+  ChangePasswordSchema,
   ForgotPasswordSchema,
   LoginSchema,
   OtpSchema,
   RegisterSchema,
   ResetPasswordSchema,
   UpdateUserSchema,
+  type IChangePassword,
   type ILoginUser,
   type IOtp,
   type IRegisterUser,
@@ -127,6 +129,9 @@ const validateResetPassword = (password: IResetPassword) => {
   return ResetPasswordSchema.safeParse(password);
 };
 
+const validateChangePassword = (password: IChangePassword) => {
+  return ChangePasswordSchema.safeParse(password);
+};
 const validateVerifyOtp = (data: IOtp) => {
   return OtpSchema.safeParse(data);
 };
@@ -146,6 +151,7 @@ export {
   validateLoginUser,
   validateResetPassword,
   validateForgotPassword,
+  validateChangePassword,
   validateVerifyOtp,
   validateUpdateUser,
 };

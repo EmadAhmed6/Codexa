@@ -27,9 +27,11 @@ import {
   Briefcase,
   Eye,
   Crown,
+  KeyRound,
 } from "lucide-react";
 import ImageModal from "@/_components/ImageModal";
 import DeleteConfirmModal from "@/_components/DeleteConfirmModal";
+import ChangePasswordModal from "@/_components/ChangePasswordModal";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/_components/Text";
 import { Post } from "@/_features/posts/types/Post";
@@ -63,6 +65,7 @@ export default function UserProfilePage() {
   const [mounted, setMounted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [isDeleteUserModalOpen, setIsDeleteUserModalOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
@@ -308,6 +311,27 @@ export default function UserProfilePage() {
                       </Button>
                     )}
 
+                    {/* Change Password — strictly visible ONLY to account owner */}
+                    {isOwnProfile && (
+                      <Button
+                        onClick={() => setIsChangePasswordModalOpen(true)}
+                        variant="outline"
+                        size="sm"
+                        className="group/pwdBtn rounded-xl border border-borderPrimary hover:border-primary/50 hover:bg-primary/10 transition-all duration-200 text-xs flex items-center gap-1.5 cursor-pointer hover:shadow-md hover:scale-105 active:scale-95"
+                      >
+                        <KeyRound className="h-3.5 w-3.5 text-textPrimary group-hover/pwdBtn:text-primary transition-colors" />
+                        <Text
+                          as="span"
+                          size="xs"
+                          font="semiBold"
+                          color="primary"
+                          className="group-hover/pwdBtn:text-primary transition-colors"
+                        >
+                          {t.profile.changePassword}
+                        </Text>
+                      </Button>
+                    )}
+
                     {/* Delete User — hidden from admins on SuperAdmin profiles */}
                     {(isOwnProfile ||
                       currentUser?.role === "SuperAdmin" ||
@@ -412,6 +436,15 @@ export default function UserProfilePage() {
         user={userToDisplay}
         targetUserId={targetUserId}
       />
+
+      {/* Change Password Modal (Owner Only) */}
+      {isOwnProfile && (
+        <ChangePasswordModal
+          isOpen={isChangePasswordModalOpen}
+          onClose={() => setIsChangePasswordModalOpen(false)}
+          targetUserId={targetUserId}
+        />
+      )}
 
       {/* Delete User Modal */}
       <DeleteConfirmModal

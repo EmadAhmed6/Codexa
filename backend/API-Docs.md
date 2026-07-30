@@ -53,10 +53,10 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 | 6   | POST   | `/auth/reset-password/:userId/:token`                             | Validate reset token and update password                         |  ❌  |        —         |
 | 7   | GET    | `/auth/me`                                                        | Retrieve currently authenticated user profile                    |  🔒  |        —         |
 | 8   | GET    | `/users`                                                          | Retrieve list of all users                                       |  🔒  | 🔒 100 req/15min |
-| 9   | GET    | `/users/:id`                                                      | Retrieve detailed user profile                                   |  🔒  | 🔒 100 req/15min |
-| 10  | PUT    | `/users/:id`                                                      | Update profile details, jobTitle, bio, avatar, and credentials   |  🔒  | 🔒 100 req/15min |
-| 11  | PATCH  | `/users/:id/toggle-admin`                                         | Toggle user Admin role status (Super Admin Only)                 |  🔒  | 🔒 100 req/15min |
-| 12  | DELETE | `/users/:id`                                                      | Delete user account from the database                            |  🔒  | 🔒 100 req/15min |
+| 9   | GET    | `/users/:userId`                                                  | Retrieve detailed user profile                                   |  🔒  | 🔒 100 req/15min |
+| 10  | PUT    | `/users/:userId`                                                  | Update profile details, jobTitle, bio, avatar, and credentials   |  🔒  | 🔒 100 req/15min |
+| 11  | PATCH  | `/users/:userId/toggle-admin`                                     | Toggle user Admin role status (Super Admin Only)                 |  🔒  | 🔒 100 req/15min |
+| 12  | DELETE | `/users/:userId`                                                  | Delete user account from the database                            |  🔒  | 🔒 100 req/15min |
 | 13  | GET    | `/posts`                                                          | Retrieve all blog posts with populated user, likes, and shares   |  🔒  | 🔒 100 req/15min |
 | 14  | POST   | `/posts`                                                          | Create a new blog post with postImage metadata                   |  🔒  | 🔒 100 req/15min |
 | 15  | POST   | `/posts/:postId/share`                                            | Share an existing post & update shares count                     |  🔒  | 🔒 100 req/15min |

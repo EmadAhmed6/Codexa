@@ -19,6 +19,11 @@ export interface ProfileTranslations {
   setAdmin: string;
   removeAdmin: string;
   viewProfile: string;
+  changePassword: string;
+  oldPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+  savePassword: string;
 }
 
 export const profileTranslations: Record<Language, ProfileTranslations> = {
@@ -41,6 +46,11 @@ export const profileTranslations: Record<Language, ProfileTranslations> = {
     setAdmin: "Set as Admin",
     removeAdmin: "Remove Admin",
     viewProfile: "View Profile",
+    changePassword: "Change Password",
+    oldPassword: "Current Password",
+    newPassword: "New Password",
+    confirmNewPassword: "Confirm New Password",
+    savePassword: "Update Password",
   },
   ar: {
     userProfile: "الملف الشخصي",
@@ -61,5 +71,11 @@ export const profileTranslations: Record<Language, ProfileTranslations> = {
     setAdmin: "خليه أدمن",
     removeAdmin: "شيل صلاحية الأدمن",
     viewProfile: "شوف البروفايل",
+    changePassword: "تغيير كلمة المرور",
+    oldPassword: "كلمة المرور الحالية",
+    newPassword: "كلمة المرور الجديدة",
+    confirmNewPassword: "تأكيد كلمة المرور الجديدة",
+    savePassword: "حفظ كلمة المرور",
   },
 };
+
