@@ -159,7 +159,7 @@ const Navbar = () => {
       setSelectedIndex((prev) =>
         prev > 0 ? prev - 1 : filteredUsers.length - 1,
       );
-    } else if (e.key === "Escape") {
+    } else if (e.key === "Escape" || e.key === "Tab") {
       setShowSuggestions(false);
       setSelectedIndex(-1);
     } else if (e.key === "Enter") {
@@ -229,6 +229,7 @@ const Navbar = () => {
                   id={`user-suggestion-${idx}`}
                   role="option"
                   aria-selected={isSelected}
+                  tabIndex={-1}
                   type="button"
                   onClick={() => onSelect(u._id)}
                   onMouseEnter={() => setSelectedIndex(idx)}
