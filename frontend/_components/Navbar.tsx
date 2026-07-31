@@ -35,6 +35,7 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDesktopSuggestions, setShowDesktopSuggestions] = useState(false);
   const [showMobileSuggestions, setShowMobileSuggestions] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 
   const desktopSearchRef = React.useRef<HTMLFormElement | null>(null);
   const mobileSearchRef = React.useRef<HTMLFormElement | null>(null);
@@ -52,14 +53,47 @@ const Navbar = () => {
   const filteredUsers = React.useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q || !allUsers || !Array.isArray(allUsers)) return [];
+
+    const cleanQuery = q.replace(/^@/, "");
+
+    const getRelevance = (u: any) => {
+      const cleanUsername = (u.username || "").toLowerCase().replace(/^@/, "");
+      const fullName = (u.fullName || "").toLowerCase();
+      const words: string[] = fullName.split(/\s+/).filter(Boolean);
+
+      // Rank 1: First name or Username starts with cleanQuery
+      if (cleanUsername.startsWith(cleanQuery)) return 1;
+      if (words.length > 0 && words[0].startsWith(cleanQuery)) return 1;
+
+      // Rank 2: Any subsequent word in fullName starts with cleanQuery (e.g. "Mohsen" in "Sayed Mohsen")
+      if (words.slice(1).some((w: string) => w.startsWith(cleanQuery)))
+        return 2;
+
+      // Rank 3: Full name or username contains cleanQuery
+      if (cleanUsername.includes(cleanQuery) || fullName.includes(cleanQuery))
+        return 3;
+
+      // No match
+      return 0;
+    };
+
     return allUsers
-      .filter((u) => {
-        const nameMatch = u.fullName?.toLowerCase().includes(q);
-        const usernameMatch = u.username?.toLowerCase().includes(q);
-        return nameMatch || usernameMatch;
+      .map((u) => ({ user: u, rank: getRelevance(u) }))
+      .filter((item) => item.rank > 0)
+      .sort((a, b) => {
+        if (a.rank !== b.rank) return a.rank - b.rank; // Rank 1 comes before Rank 2
+        const nameA = a.user.fullName || a.user.username || "";
+        const nameB = b.user.fullName || b.user.username || "";
+        return nameA.localeCompare(nameB);
       })
+      .map((item) => item.user)
       .slice(0, 6);
   }, [searchQuery, allUsers]);
+
+  // Reset keyboard selection whenever search query changes
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [searchQuery]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -80,19 +114,73 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setSelectedIndex(-1);
+    setShowDesktopSuggestions(false);
+    setShowMobileSuggestions(false);
+  };
+
   const handleSelectUser = (userId: string) => {
     setShowDesktopSuggestions(false);
     setShowMobileSuggestions(false);
+    setSelectedIndex(-1);
     setSearchQuery("");
     setMobileMenuOpen(false);
     router.push(`/profile/${userId}`);
+  };
+
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    isMobile: boolean = false,
+  ) => {
+    if (!filteredUsers || filteredUsers.length === 0) return;
+
+    const showSuggestions = isMobile
+      ? showMobileSuggestions
+      : showDesktopSuggestions;
+    const setShowSuggestions = isMobile
+      ? setShowMobileSuggestions
+      : setShowDesktopSuggestions;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (!showSuggestions) {
+        setShowSuggestions(true);
+      }
+      setSelectedIndex((prev) =>
+        prev < filteredUsers.length - 1 ? prev + 1 : 0,
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!showSuggestions) {
+        setShowSuggestions(true);
+      }
+      setSelectedIndex((prev) =>
+        prev > 0 ? prev - 1 : filteredUsers.length - 1,
+      );
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setSelectedIndex(-1);
+    } else if (e.key === "Enter") {
+      if (
+        showSuggestions &&
+        selectedIndex >= 0 &&
+        filteredUsers[selectedIndex]
+      ) {
+        e.preventDefault();
+        handleSelectUser(filteredUsers[selectedIndex]._id);
+      }
+    }
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowDesktopSuggestions(false);
     setShowMobileSuggestions(false);
-    if (filteredUsers.length > 0) {
+    if (selectedIndex >= 0 && filteredUsers[selectedIndex]) {
+      handleSelectUser(filteredUsers[selectedIndex]._id);
+    } else if (filteredUsers.length > 0) {
       handleSelectUser(filteredUsers[0]._id);
     } else if (searchQuery.trim()) {
       router.push(`/?search=${encodeURIComponent(searchQuery.trim())}`);
@@ -100,6 +188,7 @@ const Navbar = () => {
     } else {
       router.push("/");
     }
+    setSelectedIndex(-1);
   };
 
   const renderUserSuggestions = (
@@ -119,19 +208,35 @@ const Navbar = () => {
         </div>
 
         {filteredUsers.length > 0 ? (
-          <div className="space-y-0.5 max-h-64 overflow-y-auto">
-            {filteredUsers.map((u) => {
+          <div
+            id="user-suggestions-list"
+            role="listbox"
+            aria-label={
+              isArabic ? "قائمة اقتراحات المستخدمين" : "User Suggestions List"
+            }
+            className="space-y-0.5 max-h-64 overflow-y-auto"
+          >
+            {filteredUsers.map((u, idx) => {
               const displayName = u.fullName || u.username;
               const formattedUsername = u.username.startsWith("@")
                 ? u.username
                 : `@${u.username}`;
+              const isSelected = idx === selectedIndex;
 
               return (
                 <button
                   key={u._id}
+                  id={`user-suggestion-${idx}`}
+                  role="option"
+                  aria-selected={isSelected}
                   type="button"
                   onClick={() => onSelect(u._id)}
-                  className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-primary/10 transition-colors text-left rtl:text-right cursor-pointer group"
+                  onMouseEnter={() => setSelectedIndex(idx)}
+                  className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all text-left rtl:text-right cursor-pointer group ${
+                    isSelected
+                      ? "bg-primary/20 text-primary border border-primary/30 shadow-xs"
+                      : "hover:bg-primary/10"
+                  }`}
                 >
                   {u.profilePicture?.url ? (
                     <img
@@ -213,6 +318,15 @@ const Navbar = () => {
           <Search className="absolute ltr:left-3.5 rtl:right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-textSecondary" />
           <input
             type="text"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={showDesktopSuggestions && filteredUsers.length > 0}
+            aria-controls="user-suggestions-list"
+            aria-activedescendant={
+              selectedIndex >= 0
+                ? `user-suggestion-${selectedIndex}`
+                : undefined
+            }
             placeholder={t.nav.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => {
@@ -220,9 +334,20 @@ const Navbar = () => {
               setShowDesktopSuggestions(true);
             }}
             onFocus={() => setShowDesktopSuggestions(true)}
-            className="w-full ltr:pl-10 ltr:pr-4 rtl:pr-10 rtl:pl-4 py-2 text-xs sm:text-sm rounded-xl bg-bgSecondary/80 border border-borderPrimary/60 text-textPrimary placeholder:text-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+            onKeyDown={(e) => handleKeyDown(e, false)}
+            className="w-full ltr:pl-10 ltr:pr-9 rtl:pr-10 rtl:pl-9 py-2 text-xs sm:text-sm rounded-xl bg-bgSecondary/80 border border-borderPrimary/60 text-textPrimary placeholder:text-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             suppressHydrationWarning
           />
+          {searchQuery.length > 0 && (
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              aria-label={isArabic ? "مسح البحث" : "Clear search"}
+              className="absolute ltr:right-3 rtl:left-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-textSecondary hover:text-textPrimary hover:bg-primary/10 transition-colors cursor-pointer"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
           {renderUserSuggestions(showDesktopSuggestions, handleSelectUser)}
         </form>
 
@@ -268,26 +393,28 @@ const Navbar = () => {
           )}
 
           {/* Admin Dashboard Quick Button */}
-          {mounted && token && (user?.role === "Admin" || user?.role === "SuperAdmin") && (
-            <Tooltip position="bottom" content={t.nav.adminDashboard}>
-              <Link href="/admin/dashboard/users">
-                <button
-                  className="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 hover:text-amber-400 text-xs flex items-center gap-1.5 cursor-pointer font-bold transition-all"
-                  aria-label="Admin Dashboard"
-                >
-                  <LayoutDashboard className="h-4 w-4 shrink-0 text-amber-500" />
-                  <Text
-                    as="span"
-                    size="xs"
-                    font="bold"
-                    className="hidden md:inline-block text-amber-500 group-hover:text-amber-400 transition-colors"
+          {mounted &&
+            token &&
+            (user?.role === "Admin" || user?.role === "SuperAdmin") && (
+              <Tooltip position="bottom" content={t.nav.adminDashboard}>
+                <Link href="/admin/dashboard/users">
+                  <button
+                    className="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 hover:text-amber-400 text-xs flex items-center gap-1.5 cursor-pointer font-bold transition-all"
+                    aria-label="Admin Dashboard"
                   >
-                    {t.nav.dashboard}
-                  </Text>
-                </button>
-              </Link>
-            </Tooltip>
-          )}
+                    <LayoutDashboard className="h-4 w-4 shrink-0 text-amber-500" />
+                    <Text
+                      as="span"
+                      size="xs"
+                      font="bold"
+                      className="hidden md:inline-block text-amber-500 group-hover:text-amber-400 transition-colors"
+                    >
+                      {t.nav.dashboard}
+                    </Text>
+                  </button>
+                </Link>
+              </Tooltip>
+            )}
 
           {/* User Dropdown / Auth Links */}
           {mounted &&
@@ -358,7 +485,8 @@ const Navbar = () => {
                       </Text>
                     </Link>
 
-                    {(user?.role === "Admin" || user?.role === "SuperAdmin") && (
+                    {(user?.role === "Admin" ||
+                      user?.role === "SuperAdmin") && (
                       <Link
                         href="/admin/dashboard/users"
                         onClick={() => setDropdownOpen(false)}
@@ -451,6 +579,15 @@ const Navbar = () => {
             <Search className="absolute ltr:left-3.5 rtl:right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-textSecondary" />
             <input
               type="text"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={showMobileSuggestions && filteredUsers.length > 0}
+              aria-controls="user-suggestions-list"
+              aria-activedescendant={
+                selectedIndex >= 0
+                  ? `user-suggestion-${selectedIndex}`
+                  : undefined
+              }
               placeholder={t.nav.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => {
@@ -458,8 +595,19 @@ const Navbar = () => {
                 setShowMobileSuggestions(true);
               }}
               onFocus={() => setShowMobileSuggestions(true)}
-              className="w-full ltr:pl-10 ltr:pr-4 rtl:pr-10 rtl:pl-4 py-2 text-xs rounded-xl bg-bgSecondary border border-borderPrimary/60 text-textPrimary placeholder:text-textSecondary/60 outline-none"
+              onKeyDown={(e) => handleKeyDown(e, true)}
+              className="w-full ltr:pl-10 ltr:pr-9 rtl:pr-10 rtl:pl-9 py-2 text-xs rounded-xl bg-bgSecondary border border-borderPrimary/60 text-textPrimary placeholder:text-textSecondary/60 outline-none"
             />
+            {searchQuery.length > 0 && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                aria-label={isArabic ? "مسح البحث" : "Clear search"}
+                className="absolute ltr:right-3 rtl:left-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-textSecondary hover:text-textPrimary hover:bg-primary/10 transition-colors cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
             {renderUserSuggestions(showMobileSuggestions, handleSelectUser)}
           </form>
 
