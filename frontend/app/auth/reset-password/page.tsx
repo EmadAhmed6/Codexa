@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Lock, ArrowRight, ShieldCheck } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -155,7 +156,16 @@ export default function ResetPasswordPage({
   return (
     <div className="w-full max-w-md glass-card p-8 md:p-10 transition-all duration-300">
       {/* Title */}
-      <div className="mb-8 text-center">
+      <div className="mb-8 text-center flex flex-col items-center">
+        <Link href="/" className="mb-4 inline-block group">
+          <Image
+            src="/logo.png"
+            alt="Fluxion Logo"
+            width={48}
+            height={48}
+            className="mx-auto group-hover:scale-105 transition-transform"
+          />
+        </Link>
         <Text
           as="h1"
           size="3xl"

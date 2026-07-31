@@ -29,6 +29,7 @@ import { formatRelativeTime } from "@/lib/utils";
 import { Text } from "@/_components/Text";
 import Tooltip from "@/_components/Tooltip";
 import UserListTooltip from "@/_components/UserListTooltip";
+import UserHoverCard from "@/_components/UserHoverCard";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface PostCardProps {
@@ -234,58 +235,62 @@ export default function PostCard({ post }: PostCardProps) {
         {/* 1. TOP HEADER: Author Info & Controls */}
         <div className="flex items-center justify-between gap-2 mb-4 relative z-30">
           {/* Author Details */}
-          <Link
-            href={`/profile/${displayAuthor?._id || "me"}`}
-            className="flex items-center gap-2.5 group/author cursor-pointer pointer-events-auto relative z-10"
-            onClick={(e) => e.stopPropagation()}
+          <UserHoverCard
+            user={typeof displayAuthor === "object" ? displayAuthor : undefined}
           >
-            {displayAuthor?.profilePicture?.url ? (
-              <img
-                src={displayAuthor.profilePicture.url}
-                alt={authorDisplayName}
-                className="h-9 w-9 rounded-full object-cover border border-borderPrimary"
-              />
-            ) : (
-              <div className="h-9 w-9 rounded-full bg-primary/15 flex items-center justify-center text-primary">
-                <UserIcon className="h-4 w-4" />
-              </div>
-            )}
-            <div>
-              <Text
-                as="span"
-                size="xs"
-                font="bold"
-                color="primary"
-                className="group-hover/author:text-primary transition-colors block truncate max-w-40"
-              >
-                {authorDisplayName}
-              </Text>
-              <div className="flex items-center gap-2">
-                {displayAuthor?.jobTitle && (
-                  <Text
-                    as="span"
-                    size="xs"
-                    color="secondary"
-                    className="text-[10px] block truncate max-w-32"
-                  >
-                    {displayAuthor.jobTitle}
-                  </Text>
-                )}
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3 text-textSecondary" />
-                  <Text
-                    as="span"
-                    size="xs"
-                    font="medium"
-                    color="secondary"
-                    className="text-[10px]"
-                  >
-                    {formattedDate}
-                  </Text>
+            <Link
+              href={`/profile/${displayAuthor?._id || "me"}`}
+              className="flex items-center gap-2.5 group/author cursor-pointer pointer-events-auto relative z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {displayAuthor?.profilePicture?.url ? (
+                <img
+                  src={displayAuthor.profilePicture.url}
+                  alt={authorDisplayName}
+                  className="h-9 w-9 rounded-full object-cover border border-borderPrimary"
+                />
+              ) : (
+                <div className="h-9 w-9 rounded-full bg-primary/15 flex items-center justify-center text-primary">
+                  <UserIcon className="h-4 w-4" />
+                </div>
+              )}
+              <div>
+                <Text
+                  as="span"
+                  size="xs"
+                  font="bold"
+                  color="primary"
+                  className="group-hover/author:text-primary transition-colors block truncate max-w-40"
+                >
+                  {authorDisplayName}
+                </Text>
+                <div className="flex items-center gap-2">
+                  {displayAuthor?.jobTitle && (
+                    <Text
+                      as="span"
+                      size="xs"
+                      color="secondary"
+                      className="text-[10px] block truncate max-w-32"
+                    >
+                      {displayAuthor.jobTitle}
+                    </Text>
+                  )}
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3 text-textSecondary" />
+                    <Text
+                      as="span"
+                      size="xs"
+                      font="medium"
+                      color="secondary"
+                      className="text-[10px]"
+                    >
+                      {formattedDate}
+                    </Text>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </UserHoverCard>
 
           {/* Shared Post Badge & Owner/Admin Controls */}
           <div className="flex items-center gap-2 pointer-events-auto relative z-30">

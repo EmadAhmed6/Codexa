@@ -2,6 +2,7 @@ import { Language } from "@/lib/translations";
 
 export interface NavTranslations {
   searchPlaceholder: string;
+  noUsersFound: string;
   signIn: string;
   signUp: string;
   myProfile: string;
@@ -19,7 +20,8 @@ export interface NavTranslations {
 
 export const navTranslations: Record<Language, NavTranslations> = {
   en: {
-    searchPlaceholder: "Search posts, topics, or keywords...",
+    searchPlaceholder: "Search user by name or username...",
+    noUsersFound: "No users found",
     signIn: "Sign In",
     signUp: "Sign Up",
     myProfile: "My Profile",
@@ -35,7 +37,8 @@ export const navTranslations: Record<Language, NavTranslations> = {
     arabic: "عربي (مصري)",
   },
   ar: {
-    searchPlaceholder: "دور على بوستات، مواضيع، أو كلمات...",
+    searchPlaceholder: "ابحث عن مستخدم بالاسم أو اليوزر نيم...",
+    noUsersFound: "مفيش مستخدم بالاسم ده",
     signIn: "سجل دخول",
     signUp: "اعمل حساب",
     myProfile: "بروفايلي",

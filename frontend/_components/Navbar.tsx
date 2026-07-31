@@ -15,9 +15,11 @@ import {
   Globe,
   Menu,
   X,
+  Crown,
 } from "lucide-react";
 import Cookies from "js-cookie";
 import { useGetAuthMeQuery, useLogout } from "@/_features/auth/hooks";
+import { useGetAllUsers } from "@/_features/user/hooks";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/_components/Text";
 import Tooltip from "@/_components/Tooltip";
@@ -31,9 +33,15 @@ const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showDesktopSuggestions, setShowDesktopSuggestions] = useState(false);
+  const [showMobileSuggestions, setShowMobileSuggestions] = useState(false);
+
+  const desktopSearchRef = React.useRef<HTMLFormElement | null>(null);
+  const mobileSearchRef = React.useRef<HTMLFormElement | null>(null);
 
   const token = Cookies.get("token");
   const { data: user } = useGetAuthMeQuery();
+  const { data: allUsers } = useGetAllUsers();
   const logout = useLogout();
   const router = useRouter();
 
@@ -41,14 +49,141 @@ const Navbar = () => {
     setMounted(true);
   }, []);
 
+  const filteredUsers = React.useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q || !allUsers || !Array.isArray(allUsers)) return [];
+    return allUsers
+      .filter((u) => {
+        const nameMatch = u.fullName?.toLowerCase().includes(q);
+        const usernameMatch = u.username?.toLowerCase().includes(q);
+        return nameMatch || usernameMatch;
+      })
+      .slice(0, 6);
+  }, [searchQuery, allUsers]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        desktopSearchRef.current &&
+        !desktopSearchRef.current.contains(e.target as Node)
+      ) {
+        setShowDesktopSuggestions(false);
+      }
+      if (
+        mobileSearchRef.current &&
+        !mobileSearchRef.current.contains(e.target as Node)
+      ) {
+        setShowMobileSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectUser = (userId: string) => {
+    setShowDesktopSuggestions(false);
+    setShowMobileSuggestions(false);
+    setSearchQuery("");
+    setMobileMenuOpen(false);
+    router.push(`/profile/${userId}`);
+  };
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
+    setShowDesktopSuggestions(false);
+    setShowMobileSuggestions(false);
+    if (filteredUsers.length > 0) {
+      handleSelectUser(filteredUsers[0]._id);
+    } else if (searchQuery.trim()) {
       router.push(`/?search=${encodeURIComponent(searchQuery.trim())}`);
       setMobileMenuOpen(false);
     } else {
       router.push("/");
     }
+  };
+
+  const renderUserSuggestions = (
+    show: boolean,
+    onSelect: (id: string) => void,
+  ) => {
+    const q = searchQuery.trim();
+    if (!show || !q) return null;
+
+    return (
+      <div className="absolute top-full left-0 right-0 mt-2 bg-bgSecondary/95 backdrop-blur-xl border border-borderPrimary/60 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150 p-2 space-y-1">
+        <div className="px-2.5 py-1.5 border-b border-borderPrimary/30 flex items-center justify-between text-[11px] font-bold text-textSecondary">
+          <span>{isArabic ? "نتائج البحث عن مستخدم" : "User Suggestions"}</span>
+          <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-bold">
+            {filteredUsers.length}
+          </span>
+        </div>
+
+        {filteredUsers.length > 0 ? (
+          <div className="space-y-0.5 max-h-64 overflow-y-auto">
+            {filteredUsers.map((u) => {
+              const displayName = u.fullName || u.username;
+              const formattedUsername = u.username.startsWith("@")
+                ? u.username
+                : `@${u.username}`;
+
+              return (
+                <button
+                  key={u._id}
+                  type="button"
+                  onClick={() => onSelect(u._id)}
+                  className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-primary/10 transition-colors text-left rtl:text-right cursor-pointer group"
+                >
+                  {u.profilePicture?.url ? (
+                    <img
+                      src={u.profilePicture.url}
+                      alt={displayName}
+                      className="h-8 w-8 rounded-full object-cover border border-borderPrimary shrink-0 group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0 font-bold text-xs group-hover:scale-105 transition-transform">
+                      <UserIcon className="h-4 w-4" />
+                    </div>
+                  )}
+
+                  <div className="overflow-hidden min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <Text
+                        as="span"
+                        size="xs"
+                        font="bold"
+                        color="primary"
+                        className="truncate group-hover:text-primary leading-tight"
+                      >
+                        {displayName}
+                      </Text>
+                      {u.role === "SuperAdmin" ? (
+                        <Crown className="h-3 w-3 text-amber-400 shrink-0 inline" />
+                      ) : u.role === "Admin" ? (
+                        <span className="text-[9px] font-extrabold text-amber-500 bg-amber-500/10 px-1 rounded border border-amber-500/20 shrink-0">
+                          {t.admin.admin}
+                        </span>
+                      ) : null}
+                    </div>
+                    <Text
+                      as="span"
+                      size="xs"
+                      color="secondary"
+                      className="block truncate text-[10px] text-textSecondary leading-tight"
+                    >
+                      {formattedUsername}
+                    </Text>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-3 text-center text-xs text-textSecondary font-medium">
+            {t.nav.noUsersFound}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -70,6 +205,7 @@ const Navbar = () => {
 
         {/* Global Search Bar (Desktop View) */}
         <form
+          ref={desktopSearchRef}
           onSubmit={handleSearchSubmit}
           className="hidden md:flex flex-1 max-w-md relative"
           suppressHydrationWarning
@@ -79,10 +215,15 @@ const Navbar = () => {
             type="text"
             placeholder={t.nav.searchPlaceholder}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowDesktopSuggestions(true);
+            }}
+            onFocus={() => setShowDesktopSuggestions(true)}
             className="w-full ltr:pl-10 ltr:pr-4 rtl:pr-10 rtl:pl-4 py-2 text-xs sm:text-sm rounded-xl bg-bgSecondary/80 border border-borderPrimary/60 text-textPrimary placeholder:text-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             suppressHydrationWarning
           />
+          {renderUserSuggestions(showDesktopSuggestions, handleSelectUser)}
         </form>
 
         {/* Right Action Items & Mobile Menu Toggle */}
@@ -302,15 +443,24 @@ const Navbar = () => {
       {mounted && mobileMenuOpen && (
         <div className="md:hidden border-t border-borderPrimary/40 bg-bgPrimary/95 backdrop-blur-xl px-4 py-4 space-y-4 animate-in slide-in-from-top duration-200">
           {/* Mobile Search Input */}
-          <form onSubmit={handleSearchSubmit} className="relative w-full">
+          <form
+            ref={mobileSearchRef}
+            onSubmit={handleSearchSubmit}
+            className="relative w-full"
+          >
             <Search className="absolute ltr:left-3.5 rtl:right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-textSecondary" />
             <input
               type="text"
               placeholder={t.nav.searchPlaceholder}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowMobileSuggestions(true);
+              }}
+              onFocus={() => setShowMobileSuggestions(true)}
               className="w-full ltr:pl-10 ltr:pr-4 rtl:pr-10 rtl:pl-4 py-2 text-xs rounded-xl bg-bgSecondary border border-borderPrimary/60 text-textPrimary placeholder:text-textSecondary/60 outline-none"
             />
+            {renderUserSuggestions(showMobileSuggestions, handleSelectUser)}
           </form>
 
           {/* Quick Actions Row: Language & Theme */}

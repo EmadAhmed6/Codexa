@@ -175,12 +175,12 @@ export default function EditPostModal({
                 color="secondary"
                 className="text-[11px]"
               >
-                {watchTitle.length}/32
+                {watchTitle.length}/250
               </Text>
             </div>
             <textarea
               rows={3}
-              maxLength={32}
+              maxLength={250}
               placeholder={isArabic ? "اكتب محتوى البوست هنا..." : "Write post content here..."}
               {...register("title", {
                 onChange: () => clearErrors("title"),

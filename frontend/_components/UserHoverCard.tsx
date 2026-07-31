@@ -50,7 +50,12 @@ export default function UserHoverCard({
 
   if (!user || !user._id) return <>{children}</>;
 
-  const displayName = user.username || user.fullName || "User";
+  const displayName = user.fullName || user.username || "User";
+  const formattedUsername = user.username
+    ? user.username.startsWith("@")
+      ? user.username
+      : `@${user.username}`
+    : null;
 
   const handleToggleAdmin = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -86,28 +91,42 @@ export default function UserHoverCard({
 
   const content = (
     <div className="p-3 max-w-xs space-y-2.5 min-w-44 text-left">
-      <div className="flex items-center gap-2.5">
+      <Link
+        href={`/profile/${user._id}`}
+        onClick={(e) => e.stopPropagation()}
+        className="flex items-center gap-2.5 group/cardhead cursor-pointer hover:opacity-90 transition-opacity"
+      >
         {user.profilePicture?.url ? (
           <img
             src={user.profilePicture.url}
             alt={displayName}
-            className="h-8 w-8 rounded-full object-cover border border-borderPrimary shrink-0"
+            className="h-8 w-8 rounded-full object-cover border border-borderPrimary shrink-0 group-hover/cardhead:scale-105 transition-transform"
           />
         ) : (
-          <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0 font-bold text-xs">
+          <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0 font-bold text-xs group-hover/cardhead:scale-105 transition-transform">
             <UserIcon className="h-4 w-4" />
           </div>
         )}
-        <div className="overflow-hidden">
+        <div className="overflow-hidden min-w-0 flex-1">
           <Text
             as="h4"
             size="xs"
             font="bold"
             color="primary"
-            className="truncate leading-tight"
+            className="truncate leading-tight group-hover/cardhead:underline"
           >
             {displayName}
           </Text>
+          {formattedUsername && (
+            <Text
+              as="p"
+              size="xs"
+              color="secondary"
+              className="truncate leading-tight text-[10px] text-textSecondary mt-0.5 font-medium"
+            >
+              {formattedUsername}
+            </Text>
+          )}
           {user.role === "SuperAdmin" ? (
             <span className="text-[9px] font-extrabold uppercase tracking-wider  mt-0.5 text-amber-400 flex items-center gap-1">
               <Crown className="h-2.5 w-2.5 text-amber-400 inline" />
@@ -119,7 +138,7 @@ export default function UserHoverCard({
             </span>
           ) : null}
         </div>
-      </div>
+      </Link>
 
       {/* Toggle Admin: visible only to superAdmin, not on superAdmin targets */}
       {currentUser?.role === "SuperAdmin" && user.role !== "SuperAdmin" && (

@@ -2,6 +2,7 @@
 
 import React, { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { KeyRound, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +33,17 @@ function VerifyOtpForm() {
   const searchParams = useSearchParams();
   const emailQuery = searchParams.get("email") || "";
   const { t, isArabic } = useLanguage();
+
+  React.useEffect(() => {
+    if (!emailQuery || !emailQuery.trim()) {
+      toast.error(
+        isArabic
+          ? "يجب إنشاء حساب أولاً لتأكيد الكود."
+          : "Please register first to verify your account.",
+      );
+      router.replace("/auth/register");
+    }
+  }, [emailQuery, router, isArabic]);
 
   const verifyOtpMutation = useVerifyOtpMutation();
   const resendOtpMutation = useResendOtpMutation();
@@ -83,13 +95,24 @@ function VerifyOtpForm() {
 
   const SubmitIcon = isArabic ? ArrowLeft : ArrowRight;
 
+  if (!emailQuery || !emailQuery.trim()) {
+    return null;
+  }
+
   return (
     <div className="w-full max-w-md glass-card p-8 md:p-10 transition-all duration-300">
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto mb-4">
-          <KeyRound className="h-7 w-7" />
-        </div>
+      <div className="text-center mb-8 flex flex-col items-center">
+        <Link href="/" className="mb-4 inline-block group">
+          <Image
+            src="/logo.png"
+            alt="Fluxion Logo"
+            width={48}
+            height={48}
+            className="mx-auto group-hover:scale-105 transition-transform"
+          />
+        </Link>
+        
         <Text
           as="h1"
           size="3xl"

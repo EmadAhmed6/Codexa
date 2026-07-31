@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -166,7 +167,16 @@ export default function ForgotPasswordPage() {
       </Link>
 
       {/* Title */}
-      <div className="mb-8">
+      <div className="mb-8 flex flex-col items-center text-center">
+        <Link href="/" className="mb-4 inline-block group">
+          <Image
+            src="/logo.png"
+            alt="Fluxion Logo"
+            width={48}
+            height={48}
+            className="mx-auto group-hover:scale-105 transition-transform"
+          />
+        </Link>
         <Text
           as="h1"
           size="3xl"

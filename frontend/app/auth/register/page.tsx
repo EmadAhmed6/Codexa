@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -68,7 +69,16 @@ export default function RegisterPage() {
   return (
     <div className="w-full max-w-md glass-card p-8 md:p-10 transition-all duration-300">
       {/* Header */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 flex flex-col items-center">
+        <Link href="/" className="mb-4 inline-block group">
+          <Image
+            src="/logo.png"
+            alt="Fluxion Logo"
+            width={48}
+            height={48}
+            className="mx-auto group-hover:scale-105 transition-transform"
+          />
+        </Link>
         <Text
           as="h1"
           size="3xl"

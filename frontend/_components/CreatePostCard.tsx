@@ -130,6 +130,7 @@ export default function CreatePostCard() {
               return (
                 <textarea
                   rows={2}
+                  maxLength={250}
                   placeholder={
                     isArabic
                       ? `بماذا تفكر يا ${firstName}؟`
@@ -201,7 +202,7 @@ export default function CreatePostCard() {
               color="secondary"
               className="text-[11px] ltr:ml-2 rtl:mr-2"
             >
-              {watchTitle.length}/32
+              {watchTitle.length}/250
             </Text>
           </div>
 
