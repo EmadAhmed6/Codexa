@@ -61,15 +61,12 @@ const Navbar = () => {
       const fullName = (u.fullName || "").toLowerCase();
       const words: string[] = fullName.split(/\s+/).filter(Boolean);
 
-      // Rank 1: First name or Username starts with cleanQuery
       if (cleanUsername.startsWith(cleanQuery)) return 1;
       if (words.length > 0 && words[0].startsWith(cleanQuery)) return 1;
 
-      // Rank 2: Any subsequent word in fullName starts with cleanQuery (e.g. "Mohsen" in "Sayed Mohsen")
       if (words.slice(1).some((w: string) => w.startsWith(cleanQuery)))
         return 2;
 
-      // Rank 3: Full name or username contains cleanQuery
       if (cleanUsername.includes(cleanQuery) || fullName.includes(cleanQuery))
         return 3;
 
