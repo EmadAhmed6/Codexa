@@ -82,8 +82,10 @@ export default function EditProfileModal({
   if (!isOpen || !mounted) return null;
 
   const handleUpdateProfile = async (data: IEditProfile) => {
+    const effectiveUserId = targetUserId || user?._id || user?.id;
     try {
       await updateUserMutation.mutateAsync({
+        userId: effectiveUserId,
         fullName: data.fullName.trim(),
         username: data.username.trim(),
         jobTitle: data.jobTitle ? data.jobTitle.trim() : "",

@@ -9,16 +9,9 @@ export const axiosClient = axios.create({
   },
 });
 
-// Request interceptor: inject authorization token if stored locally or in cookies
 axiosClient.interceptors.request.use(
   (config) => {
-    let token: string | undefined = undefined;
-    if (typeof window !== "undefined") {
-      token = localStorage.getItem("token") || Cookies.get("token");
-    } else {
-      token = Cookies.get("token");
-    }
-
+    const token = Cookies.get("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

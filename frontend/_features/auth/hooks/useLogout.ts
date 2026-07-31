@@ -9,11 +9,10 @@ export const useLogout = () => {
 
   const logout = () => {
     Cookies.remove("token", { path: "/" });
-    if (typeof window !== "undefined") {
-      Cookies.remove("token");
-    }
+    Cookies.remove("token");
     queryClient.removeQueries({ queryKey: ["authMe"] });
     toast.success("Signed out successfully!");
+    router.refresh();
     router.push("/auth/login");
   };
 

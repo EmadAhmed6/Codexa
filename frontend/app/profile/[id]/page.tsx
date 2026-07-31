@@ -84,9 +84,7 @@ export default function UserProfilePage() {
       setIsDeleteUserModalOpen(false);
       if (isOwnProfile) {
         Cookies.remove("token", { path: "/" });
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("token");
-        }
+        Cookies.remove("token");
         router.push("/auth/login");
       } else {
         router.push("/");

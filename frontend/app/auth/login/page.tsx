@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginSchema, type ILogin } from "@/_features/auth/schemas/auth";
 import { useLoginMutation } from "@/_features/auth/hooks";
+import { useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { toast } from "@/lib/toast";
 import { Text } from "@/_components/Text";
@@ -21,6 +22,7 @@ import { useLanguage } from "@/context/LanguageContext";
 export default function LoginPage() {
   const loginMutation = useLoginMutation();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { t, isArabic } = useLanguage();
 
   const {
@@ -44,14 +46,13 @@ export default function LoginPage() {
         const token = res.data?.token || res.token;
         if (token) {
           Cookies.set("token", token, { expires: 7, path: "/" });
-          if (typeof window !== "undefined") {
-            localStorage.setItem("token", token);
-          }
+          queryClient.invalidateQueries({ queryKey: ["authMe"] });
           toast.success(
             isArabic
               ? "تم تسجيل الدخول بنجاح! مرحب بيك."
               : "Signed in successfully! Welcome back.",
           );
+          router.refresh();
           router.push("/");
           reset();
         } else {

@@ -166,8 +166,8 @@ export default function UserHoverCard({
         </div>
       )}
 
-      {/* Edit User: visible to all admins, not on superAdmin targets */}
-      {(currentUser?.role === "Admin" || currentUser?.role === "SuperAdmin") && user.role !== "SuperAdmin" && (
+      {/* Edit User: visible to admins (with restriction on superAdmin targets unless currentUser is superAdmin) */}
+      {(currentUser?.role === "SuperAdmin" || (currentUser?.role === "Admin" && user.role !== "SuperAdmin")) && (
         <div className="pt-2 border-t border-borderPrimary/20">
           <button
             type="button"
