@@ -174,7 +174,10 @@ const updateComment = asyncHandler(
     }
 
     const commentOwner = await User.findById(comment.user);
-    if (commentOwner?.role === "SuperAdmin" && req.user?.role !== "SuperAdmin") {
+    if (
+      commentOwner?.role === "SuperAdmin" &&
+      req.user?.role !== "SuperAdmin"
+    ) {
       res.status(403).json({
         success: false,
         message: "You cannot edit a SuperAdmin's comment",
@@ -207,7 +210,7 @@ const updateComment = asyncHandler(
           commentImage: req.file ? commentImage : undefined,
         },
       },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     ).populate("user", [
       "_id",
       "username",
@@ -242,7 +245,10 @@ const deleteComment = asyncHandler(
     }
     const comment = await Comment.findById(new Types.ObjectId(commentId));
     const commentOwner = await User.findById(comment?.user);
-    if (commentOwner?.role === "SuperAdmin" && req.user?.role !== "SuperAdmin") {
+    if (
+      commentOwner?.role === "SuperAdmin" &&
+      req.user?.role !== "SuperAdmin"
+    ) {
       res.status(403).json({
         success: false,
         message: "You cannot delete a SuperAdmin's comment",

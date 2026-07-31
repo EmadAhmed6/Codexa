@@ -224,7 +224,7 @@ const updateReplyComment = asyncHandler(
           commentImage: req.file ? replyImage : undefined,
         },
       },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     ).populate("user", [
       "_id",
       "username",

@@ -166,7 +166,7 @@ const updateUser = asyncHandler(
           bio: req.body.bio,
         },
       },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     )
       .select("-password")
       .select("+email");

@@ -184,7 +184,7 @@ const updatePost = asyncHandler(
           postImage: req.file ? postImage : undefined,
         },
       },
-      { new: true },
+      { returnDocument: "after" },
     ).populate("user", [
       "_id",
       "username",
