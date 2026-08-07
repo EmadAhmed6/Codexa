@@ -236,8 +236,6 @@ Login successful. Redirects to frontend callback page with signed JWT token.
 Redirect URL: ${FRONTEND_URL}/auth/callback?token=<JWT_TOKEN>
 ```
 
-> **Note**: Frontend should extract `token` query param from `/auth/callback?token=...`, store it in cookies (`token`), invalidate `authMe` query key, and navigate to `/`.
-
 ##### Response 400
 
 Social login conflict or missing account details.
