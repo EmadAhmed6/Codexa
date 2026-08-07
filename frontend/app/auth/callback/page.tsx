@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, Suspense } from "react";
+import React, { useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
@@ -13,12 +13,16 @@ function AuthCallbackContent() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { isArabic } = useLanguage();
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
+    if (hasProcessed.current) return;
+
     const token = searchParams.get("token");
     const error = searchParams.get("error");
 
     if (token) {
+      hasProcessed.current = true;
       Cookies.set("token", token, { expires: 7, path: "/" });
       queryClient.invalidateQueries({ queryKey: ["authMe"] });
       toast.success(
@@ -29,13 +33,12 @@ function AuthCallbackContent() {
       router.refresh();
       router.push("/");
     } else if (error) {
+      hasProcessed.current = true;
       toast.error(
         isArabic
           ? "فشل تسجيل الدخول بواسطة GitHub. حاول مرة أخرى."
           : "GitHub authentication failed. Please try again.",
       );
-      router.push("/auth/login");
-    } else {
       router.push("/auth/login");
     }
   }, [searchParams, router, queryClient, isArabic]);

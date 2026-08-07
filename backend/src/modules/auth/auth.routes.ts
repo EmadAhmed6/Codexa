@@ -21,6 +21,7 @@ router.post("/verify-otp", verifyEmailOTP);
 router.post("/resend-otp", authLimiter, resendOTP);
 router.get("/me", verifyToken, getMe);
 
+// Github OAuth
 router.get(
   "/github",
   passport.authenticate("github", { scope: ["user:email"] }),

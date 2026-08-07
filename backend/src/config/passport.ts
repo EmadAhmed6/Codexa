@@ -15,7 +15,7 @@ const configurePassport = () => {
         accessToken: string,
         refreshToken: string,
         profile: Profile,
-        done: any,
+        done: (error: any, user?: any, info?: any) => void,
       ) => {
         try {
           const email =
