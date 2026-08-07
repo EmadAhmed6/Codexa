@@ -452,8 +452,8 @@ export default function AdminUsersPage() {
 
                           <td className="px-6 py-4 whitespace-nowrap ltr:text-right rtl:text-left">
                             <div className="flex items-center justify-end gap-2">
-                              {/* Edit button: hidden for non-superAdmin users when viewing superAdmin rows */}
-                              {(userItem.role !== "SuperAdmin" || currentUser?.role === "SuperAdmin") && (
+                              {/* Edit button: SuperAdmin can edit anyone; Admin can edit non-SuperAdmin targets */}
+                              {(currentUser?.role === "SuperAdmin" || userItem.role !== "SuperAdmin") && (
                                 <Tooltip
                                   position="top"
                                   content={
@@ -490,15 +490,19 @@ export default function AdminUsersPage() {
                                 </Tooltip>
                               )}
 
-                              {/* Remove Admin button - visible only to superAdmin, only on admin users (not superAdmin themselves) */}
+                              {/* Promote / Demote Admin button - visible strictly to SuperAdmin on non-SuperAdmin targets */}
                               {currentUser?.role === "SuperAdmin" &&
-                                userItem.role === "Admin" && (
+                                userItem.role !== "SuperAdmin" && (
                                   <Tooltip
                                     position="top"
                                     content={
-                                      isArabic
-                                        ? "إلغاء صلاحية الأدمن"
-                                        : "Remove Admin"
+                                      userItem.role === "Admin"
+                                        ? isArabic
+                                          ? "إلغاء صلاحية الأدمن"
+                                          : "Remove Admin"
+                                        : isArabic
+                                          ? "تعيين كأدمن"
+                                          : "Set as Admin"
                                     }
                                   >
                                     <Button
@@ -510,9 +514,17 @@ export default function AdminUsersPage() {
                                       disabled={
                                         toggleAdminMutation.isPending
                                       }
-                                      className="h-8 w-8 p-0 rounded-xl cursor-pointer bg-amber-500/10 text-amber-500 border border-amber-500/30 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all hover:scale-105"
+                                      className={`h-8 w-8 p-0 rounded-xl cursor-pointer transition-all hover:scale-105 ${
+                                        userItem.role === "Admin"
+                                          ? "bg-amber-500/10 text-amber-500 border border-amber-500/30 hover:bg-amber-500 hover:text-white"
+                                          : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white"
+                                      }`}
                                     >
-                                      <ShieldOff className="h-3.5 w-3.5" />
+                                      {userItem.role === "Admin" ? (
+                                        <ShieldOff className="h-3.5 w-3.5" />
+                                      ) : (
+                                        <ShieldCheck className="h-3.5 w-3.5" />
+                                      )}
                                     </Button>
                                   </Tooltip>
                                 )}

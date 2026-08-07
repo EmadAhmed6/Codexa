@@ -68,7 +68,9 @@ export default function UserHoverCard({
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["userProfile", user._id] });
-      queryClient.invalidateQueries({ queryKey: ["authMe"] });
+      if (user._id === currentUser?._id) {
+        queryClient.invalidateQueries({ queryKey: ["authMe"] });
+      }
       toast.success(
         isArabic
           ? newStatus

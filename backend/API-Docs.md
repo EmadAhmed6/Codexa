@@ -46,18 +46,20 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 | #   | Method | Endpoint                                                          | Description                                                      | Auth |    Rate Limit    |
 | :-- | :----- | :---------------------------------------------------------------- | :--------------------------------------------------------------- | :--: | :--------------: |
 | 1   | POST   | `/auth/register`                                                  | Register a new user account with DB OTP                          |  ❌  |        —         |
-| 2   | POST   | `/auth/login`                                                     | Authenticate user and retrieve JWT token                         |  ❌  |  🔒 10 req/min   |
-| 3   | POST   | `/auth/verify-otp`                                                | Verify user email using 6-digit DB OTP code                      |  ❌  |        —         |
-| 4   | POST   | `/auth/resend-otp`                                                | Resend 6-digit OTP code to unverified email                      |  ❌  |  🔒 10 req/min   |
-| 5   | POST   | `/auth/forgot-password`                                           | Send password reset link to user's email                         |  ❌  |  🔒 10 req/min   |
-| 6   | POST   | `/auth/reset-password/:userId/:token`                             | Validate reset token and update password                         |  ❌  |        —         |
-| 7   | GET    | `/auth/me`                                                        | Retrieve currently authenticated user profile                    |  🔒  |        —         |
-| 8   | GET    | `/users`                                                          | Retrieve list of all users                                       |  🔒  | 🔒 100 req/15min |
-| 9   | GET    | `/users/:userId`                                                  | Retrieve detailed user profile                                   |  🔒  | 🔒 100 req/15min |
-| 10  | PUT    | `/users/:userId`                                                  | Update profile details, jobTitle, bio, avatar, and credentials   |  🔒  | 🔒 100 req/15min |
-| 11  | PATCH  | `/users/:userId/toggle-admin`                                     | Toggle user Admin role status (Super Admin Only)                 |  🔒  | 🔒 100 req/15min |
-| 12  | POST   | `/users/:userId/change-password`                                  | Change account password (Profile Owner Only)                     |  🔒  |  🔒 10 req/min   |
-| 13  | DELETE | `/users/:userId`                                                  | Delete user account from the database                            |  🔒  | 🔒 100 req/15min |
+| 2   | POST   | `/auth/login`                                                     | Authenticate user (Email or Username) and retrieve JWT token     |  ❌  |  🔒 10 req/min   |
+| 3   | GET    | `/auth/github`                                                    | Initiate GitHub OAuth 2.0 Login authorization flow               |  ❌  |        —         |
+| 4   | GET    | `/auth/github/callback`                                           | GitHub OAuth 2.0 Callback, Passport auth & JWT redirect          |  ❌  |        —         |
+| 5   | POST   | `/auth/verify-otp`                                                | Verify user email using 6-digit DB OTP code                      |  ❌  |        —         |
+| 6   | POST   | `/auth/resend-otp`                                                | Resend 6-digit OTP code to unverified email                      |  ❌  |  🔒 10 req/min   |
+| 7   | POST   | `/auth/forgot-password`                                           | Send password reset link to user's email                         |  ❌  |  🔒 10 req/min   |
+| 8   | POST   | `/auth/reset-password/:userId/:token`                             | Validate reset token and update password                         |  ❌  |        —         |
+| 9   | GET    | `/auth/me`                                                        | Retrieve currently authenticated user profile                    |  🔒  |        —         |
+| 10  | GET    | `/users`                                                          | Retrieve list of all users                                       |  🔒  | 🔒 100 req/15min |
+| 11  | GET    | `/users/:userId`                                                  | Retrieve detailed user profile                                   |  🔒  | 🔒 100 req/15min |
+| 12  | PUT    | `/users/:userId`                                                  | Update profile details, jobTitle, bio, avatar (OAuth restricted) |  🔒  | 🔒 100 req/15min |
+| 13  | PATCH  | `/users/:userId/toggle-admin`                                     | Toggle user Admin role status (Super Admin Only)                 |  🔒  | 🔒 100 req/15min |
+| 14  | POST   | `/users/:userId/change-password`                                  | Change account password (Local Auth Owners Only)                 |  🔒  |  🔒 10 req/min   |
+| 15  | DELETE | `/users/:userId`                                                  | Delete user account from the database                            |  🔒  | 🔒 100 req/15min |
 | 14  | GET    | `/posts`                                                          | Retrieve all blog posts with populated user, likes, and shares   |  🔒  | 🔒 100 req/15min |
 | 15  | POST   | `/posts`                                                          | Create a new blog post with postImage metadata                   |  🔒  | 🔒 100 req/15min |
 | 16  | POST   | `/posts/:postId/share`                                            | Share an existing post & update shares count                     |  🔒  | 🔒 100 req/15min |
@@ -195,6 +197,51 @@ Invalid credentials, or attempting local password login on account signed up via
   "message": "Invalid email or password"
 }
 ```
+
+---
+
+### GET /auth/github
+
+Initiate GitHub OAuth 2.0 1-click login / signup flow.
+
+#### Request Parameters
+
+None required. Triggers standard OAuth redirect.
+
+#### Responses
+
+##### Response 302
+
+Redirects user browser to GitHub OAuth authorization URL (`https://github.com/login/oauth/authorize?response_type=code&client_id=...`).
+
+---
+
+### GET /auth/github/callback
+
+Callback handler endpoint for GitHub OAuth 2.0 authentication.
+
+#### Flow & Behavior
+
+1. Passport `GitHubStrategy` exchanges authorization code for user's GitHub profile.
+2. Server searches MongoDB for existing user by `email` (`profile.emails[0].value` or fallback `${username}@github.com`).
+3. If user does not exist, a new user document is created with:
+   - `provider: "github"`
+   - `isVerified: true`
+   - Auto-generated hashed random password
+   - Avatar populated from GitHub profile picture
+4. Server generates JWT session token containing user `id`, `username`, and `role`.
+5. Server redirects client to frontend callback route:
+   `${FRONTEND_URL}/auth/callback?token=${token}`
+
+#### Responses
+
+##### Response 302
+
+Redirects to frontend application callback page with signed JWT token parameter.
+
+##### Response 400 / 500
+
+Authentication failed. Redirects to `${FRONTEND_URL}/auth/login?error=github_auth_failed`.
 
 ---
 
@@ -568,11 +615,15 @@ Not authorized.
 
 ##### Response 403
 
-Access Forbidden. The requesting user is not the owner of this account and is not an Administrator.
+Access Forbidden. The requesting user is not the owner of this account and is not an Administrator, OR attempting to modify email/password on an OAuth account (`provider !== "local"`).
 
 ```json
 {
-  "message": "You are not allowed"
+  "success": false,
+  "message": "Request failed",
+  "data": {
+    "message": "OAuth accounts cannot change their email"
+  }
 }
 ```
 
@@ -710,14 +761,14 @@ Current password provided is incorrect.
 
 ##### Response 403
 
-Forbidden. The requesting user is attempting to change another user's password.
+Forbidden. Requesting user is attempting to change another user's password OR account is signed up via OAuth (`provider !== "local"`).
 
 ```json
 {
   "success": false,
   "message": "Request failed",
   "data": {
-    "message": "You cannot change other user's password"
+    "message": "OAuth accounts cannot change passwords"
   }
 }
 ```

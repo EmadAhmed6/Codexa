@@ -71,8 +71,8 @@ const UserSchema = z.object({
     .min(3)
     .max(50)
     .regex(
-      /^[a-z0-9_]+$/,
-      "Username must contain only lowercase letters, numbers, and underscores",
+      /^[a-zA-Z0-9_]+$/,
+      "Username must contain only letters, numbers, and underscores",
     ),
   email: z.string().email().trim().min(4),
   password: passwordSchema,
