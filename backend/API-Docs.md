@@ -202,7 +202,7 @@ Invalid credentials, or attempting local password login on account signed up via
 
 ### GET /auth/github
 
-Initiate GitHub OAuth 2.0 1-click login / signup flow.
+Initiate GitHub OAuth 2.0 1-click login authentication. Redirects client browser to GitHub authorization page.
 
 #### Request Parameters
 
@@ -212,36 +212,42 @@ None required. Triggers standard OAuth redirect.
 
 ##### Response 302
 
-Redirects user browser to GitHub OAuth authorization URL (`https://github.com/login/oauth/authorize?response_type=code&client_id=...`).
+Redirects user browser to GitHub OAuth authorization URL (`https://github.com/login/oauth/authorize`).
 
 ---
 
 ### GET /auth/github/callback
 
-Callback handler endpoint for GitHub OAuth 2.0 authentication.
+Callback handler for GitHub OAuth 2.0 authentication. Authenticates user, creates MongoDB account if new (`provider: "github"`), generates JWT session token, and redirects to client.
 
-#### Flow & Behavior
+#### Query Parameters
 
-1. Passport `GitHubStrategy` exchanges authorization code for user's GitHub profile.
-2. Server searches MongoDB for existing user by `email` (`profile.emails[0].value` or fallback `${username}@github.com`).
-3. If user does not exist, a new user document is created with:
-   - `provider: "github"`
-   - `isVerified: true`
-   - Auto-generated hashed random password
-   - Avatar populated from GitHub profile picture
-4. Server generates JWT session token containing user `id`, `username`, and `role`.
-5. Server redirects client to frontend callback route:
-   `${FRONTEND_URL}/auth/callback?token=${token}`
+| Parameter | Type   | Required | Description                                           |
+| :-------- | :----- | :------: | :---------------------------------------------------- |
+| `code`    | string |    ✅    | Authorization code sent by GitHub after user consent. |
 
 #### Responses
 
 ##### Response 302
 
-Redirects to frontend application callback page with signed JWT token parameter.
+Login successful. Redirects to frontend callback page with signed JWT token.
 
-##### Response 400 / 500
+```
+Redirect URL: ${FRONTEND_URL}/auth/callback?token=<JWT_TOKEN>
+```
 
-Authentication failed. Redirects to `${FRONTEND_URL}/auth/login?error=github_auth_failed`.
+> **Note**: Frontend should extract `token` query param from `/auth/callback?token=...`, store it in cookies (`token`), invalidate `authMe` query key, and navigate to `/`.
+
+##### Response 400
+
+Social login conflict or missing account details.
+
+```json
+{
+  "success": false,
+  "message": "This email is already signed up via social login"
+}
+```
 
 ---
 
