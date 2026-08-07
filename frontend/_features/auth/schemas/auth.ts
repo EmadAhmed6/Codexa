@@ -3,12 +3,12 @@ import { z } from "zod";
 export const loginSchema = z.object({
   email: z
     .string()
-    .min(1, "Email is required")
-    .email("Please enter a valid email address"),
+    .min(1, "Email or Username is required")
+    .min(3, "Must be at least 3 characters long"),
   password: z
     .string()
     .min(1, "Password is required")
-    .min(8, "Password must be at least 8 characters long"),
+    .min(6, "Password must be at least 6 characters long"),
 });
 
 export const registerSchema = z.object({
@@ -23,8 +23,8 @@ export const registerSchema = z.object({
     .min(3, "Username must be at least 3 characters long")
     .max(50, "Username must not exceed 50 characters")
     .regex(
-      /^[a-z0-9_]+$/,
-      "Username must contain only lowercase letters, numbers, and underscores",
+      /^[a-zA-Z0-9_]+$/,
+      "Username must contain only letters, numbers, and underscores",
     ),
   jobTitle: z
     .string()

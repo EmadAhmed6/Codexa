@@ -21,6 +21,7 @@ interface IUser extends Document, IUserSchema {
   isVerified: boolean;
   postsCount: number;
   role: "User" | "Admin" | "SuperAdmin";
+  provider: "local" | "google" | "github";
 }
 
 const userSchema = new Schema<IUser>(
@@ -46,8 +47,15 @@ const userSchema = new Schema<IUser>(
     },
     password: {
       type: String,
-      required: true,
+      required: function (this: IUser) {
+        return this.provider === "local";
+      },
       minLength: 6,
+    },
+    provider: {
+      type: String,
+      enum: ["local", "google", "github"],
+      default: "local",
     },
     jobTitle: {
       type: String,

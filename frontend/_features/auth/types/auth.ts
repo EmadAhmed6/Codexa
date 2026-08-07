@@ -22,6 +22,7 @@ export interface AuthMe {
     publicId: string;
   };
   role: "User" | "Admin" | "SuperAdmin";
+  provider?: "local" | "google" | "github";
   createdAt: string;
   updatedAt: string;
 }

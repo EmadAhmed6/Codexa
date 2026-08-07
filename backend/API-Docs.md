@@ -98,9 +98,10 @@ Register a new user account on the platform.
 
 | Field      | Type   | Required | Description                                                                                                 |
 | :--------- | :----- | :------: | :---------------------------------------------------------------------------------------------------------- |
-| `username` | string |    ✅    | Username of the user (Min length: 3, Max length: 10).                                                       |
+| `fullName` | string |    ✅    | Full name of the user (Min length: 3, Max length: 100).                                                     |
+| `username` | string |    ✅    | Unique username (Min length: 3, Max length: 50, letters, numbers, underscores).                              |
 | `email`    | string |    ✅    | Valid and unique email address (Min length: 4).                                                             |
-| `password` | string |    ✅    | Secure password (Min length: 6, Max length: 72, must contain uppercase, lowercase, and numeric characters). |
+| `password` | string |    ✅    | Secure password (Min length: 6, Max length: 72).                                                           |
 
 #### Responses
 
@@ -117,6 +118,7 @@ User registered successfully. Returns user details along with an auto-generated 
     "_id": "65f1a2b3c4d5e6f789012345",
     "username": "ahmed",
     "email": "ahmed@example.com",
+    "provider": "local",
     "role": "User",
     "isVerified": false,
     "postsCount": 0,
@@ -132,7 +134,7 @@ User registered successfully. Returns user details along with an auto-generated 
 
 ##### Response 400
 
-Invalid input validation or email already exists.
+Invalid input validation or email/username already exists.
 
 ```json
 {
@@ -144,14 +146,17 @@ Invalid input validation or email already exists.
 
 ### POST /auth/login
 
-Log in an existing user and retrieve their JWT session token.
+Log in an existing user using either their registered **Email** or **Username** and retrieve their JWT session token.
 
 #### Request Body
 
-| Field      | Type   | Required | Description                   |
-| :--------- | :----- | :------: | :---------------------------- |
-| `email`    | string |    ✅    | The registered email address. |
-| `password` | string |    ✅    | The account password.         |
+| Field      | Type   | Required | Description                                                                |
+| :--------- | :----- | :------: | :------------------------------------------------------------------------- |
+| `email`    | string |    ❌    | Registered email address (Optional if `username` is provided).             |
+| `username` | string |    ❌    | Registered username (Optional if `email` is provided).                     |
+| `password` | string |    ✅    | The account password.                                                      |
+
+> **Note**: At least one of `email` or `username` must be provided in the request body.
 
 #### Responses
 
@@ -166,6 +171,7 @@ Login successful. Returns user account details and the authorization token.
     "_id": "65f1a2b3c4d5e6f789012345",
     "username": "ahmed",
     "email": "ahmed@example.com",
+    "provider": "local",
     "role": "User",
     "isVerified": true,
     "postsCount": 0,
@@ -182,7 +188,7 @@ Login successful. Returns user account details and the authorization token.
 
 ##### Response 400
 
-Invalid email/password, or Zod validation failed.
+Invalid credentials, or attempting local password login on account signed up via social login.
 
 ```json
 {

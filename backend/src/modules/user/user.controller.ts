@@ -127,6 +127,24 @@ const updateUser = asyncHandler(
       });
       return;
     }
+    if (user.provider !== "local") {
+      if (req.body.email && req.body.email !== user.email) {
+        res.status(403).json({
+          success: false,
+          message: "Request failed",
+          data: { message: "OAuth accounts cannot change their email" },
+        });
+        return;
+      }
+      if (req.body.password) {
+        res.status(403).json({
+          success: false,
+          message: "Request failed",
+          data: { message: "OAuth accounts cannot change their password" },
+        });
+        return;
+      }
+    }
 
     if (user.role === "SuperAdmin" && req.user?.role !== "SuperAdmin") {
       res.status(403).json({
@@ -159,10 +177,11 @@ const updateUser = asyncHandler(
         $set: {
           fullName: req.body.fullName,
           username: req.body.username,
-          email: req.body.email,
-          password: req.body.password,
+          ...(user.provider === "local"
+            ? { email: req.body.email, password: req.body.password }
+            : {}),
           jobTitle: req.body.jobTitle,
-          profilePicture: userImage,
+          ...(userImage ? { profilePicture: userImage } : {}),
           bio: req.body.bio,
         },
       },
@@ -217,11 +236,11 @@ const changePassword = asyncHandler(
       return;
     }
 
-    if (req.user?.id !== req.params.userId) {
+    if (user?.provider !== "local") {
       res.status(403).json({
         success: false,
         message: "Request failed",
-        data: { message: "You cannot change other user's password" },
+        data: { message: "OAuth users cannot change passwords" },
       });
       return;
     }
@@ -236,7 +255,7 @@ const changePassword = asyncHandler(
     }
     const isPasswordMatch = await bcrypt.compare(
       req.body.currentPassword,
-      user.password,
+      user.password as string,
     );
 
     if (!isPasswordMatch) {

@@ -10,23 +10,37 @@ import cors from "cors";
 import swaggerui from "swagger-ui-express";
 import spacs from "./config/swagger.js";
 import { apiLimiter } from "./middlewares/limiter.js";
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
+import session from "express-session";
+import passport, { type Profile } from "passport";
+import passportGoogle from "passport-google-oauth20";
+import type { VerifyCallback } from "jsonwebtoken";
+import configurePassport from "./config/passport.js";
+const GoogleStrategy = passportGoogle.Strategy;
+
 dotenv.config();
 const app: Express = express();
 
 connectToDB();
 
 app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL }));
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use(session({ secret: process.env.JWT_SECRET_KEY || "secret", resave: false, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+configurePassport();
 
 app.use("/auth", auth);
 app.use("/users", apiLimiter, users);
 app.use("/posts", apiLimiter, posts);
 
 app.use("/api-docs", swaggerui.serve, swaggerui.setup(spacs));
+
+
 
 app.use(notFound);
 app.use(errorHandler);

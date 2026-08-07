@@ -219,17 +219,25 @@ export default function EditProfileModal({
               color="secondary"
               className="block mb-1"
             >
-              Email Address
+              {isArabic ? "عنوان الإيميل" : "Email Address"}
             </Text>
             <Input
               type="email"
               icon="mail"
               placeholder="Email"
+              disabled={Boolean(user?.provider && user?.provider !== "local")}
               hasError={!!errors.email}
               {...register("email", {
                 onChange: () => clearErrors("email"),
               })}
             />
+            {user?.provider && user?.provider !== "local" && (
+              <Text size="xs" color="secondary" className="mt-1 opacity-70 text-[11px]">
+                {isArabic
+                  ? "حسابات OAuth لا يمكنها تغيير الإيميل"
+                  : "OAuth accounts cannot change their email address"}
+              </Text>
+            )}
             <Error error={errors.email?.message} />
           </div>
 

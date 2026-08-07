@@ -15,6 +15,8 @@
 ### 💻 Client Side (Frontend)
 - **⚡ Next.js 16 App Router & React 19**: Powered by client/server components, SSR, and dynamic route optimization.
 - **🎨 Glassmorphism & High-Contrast Design**: Tailored theme palette with dark mode support, smooth micro-interactions, and custom typography system (`<Text />`).
+- **👑 Multi-Tiered Role System (Super Admin - **🐙 GitHub OAuth 2.0 Integration & Dual Login**: Supports authentication via traditional credentials (either **Email Address or Username**) OR 1-click **GitHub OAuth**. Automated Passport session handling, JWT generation, dedicated Next.js client callback route (`/auth/callback`), and instant React Query cache invalidation (`queryClient.invalidateQueries({ queryKey: ["authMe"] })`).
+- **🔒 Provider-Based Account Safeguards**: Strict server-side and client-side protections for social login accounts (`provider: "github"`). Disables email & password editing in `EditProfileModal`, hides Change Password options on profile pages, and returns `403 Forbidden` on backend credential modification attempts.
 - **👑 Multi-Tiered Role System (Super Admin / Admin / User)**:
   - **Super Admin (OWNER)**: Dynamic database-driven role (`isSuperAdmin`) with top priority sorting, distinct golden 👑 OWNER badge with Egyptian Arabic localized translations (`صاحب الموقع`), exclusive ability to promote/demote admins, and immunity from deletion/editing by regular admins.
   - **Admin**: Has administrative access to dashboard and user editing, with custom 🛡️ Admin badge (`أدمن`).
@@ -23,18 +25,19 @@
 - **💬 Nested Comments & Inline Replies**: Real-time comment threads supporting multi-level replies (`ReplySection`), inline editing, image attachments, and likes.
 - **🗂️ React Query Cache Strategy**: Instant UI updates across Feed, Single Post Pages, Profile Pages, and Admin Dashboard via global cache invalidation (`["posts"]`, `["post", postId]`, `["userProfile"]`, `["users"]`, `["authMe"]`).
 - **🎴 Interactive Hover Cards**: Hover over any username or avatar (in posts, comments, replies, or admin dashboard) to reveal user profile details (`<UserHoverCard />`) or reaction lists (`<UserListTooltip />`).
-- **👤 Profile & Bio Management**: Editable profile fields (`username` up to 50 chars, `jobTitle` up to 50 chars, `bio` up to 250 chars) and profile avatar uploads.
-- **🔑 Account Password Change Modal**: Interactive Change Password modal (`ChangePasswordModal.tsx`) with real-time Zod schema requirement indicators, password visibility toggles, and strict owner-only access (`isOwnProfile === true`).
+- **👤 Profile & Bio Management**: Editable profile fields (`username` supporting capital/lowercase letters, `jobTitle` up to 50 chars, `bio` up to 250 chars) and profile avatar uploads.
+- **🔑 Account Password Change Modal**: Interactive Change Password modal (`ChangePasswordModal.tsx`) for local accounts with real-time Zod schema requirement indicators, password visibility toggles, and strict owner-only access.
 - **🛡️ Admin Dashboard**: Dedicated administrative panels (`/admin/dashboard/users` & `/admin/dashboard/posts`) with real-time search, role-based filter cards, top-sorted Super Admin listing, and role management buttons.
 
 ### ⚙️ Server Side (Backend)
 - **🚀 Node.js & Express.js REST API**: Modular controller architecture written in TypeScript.
+- **🔑 Passport.js GitHub OAuth 2.0**: Configured `passport-github2` strategy with automated DB user creation/lookup and JWT authorization.
 - **🔐 Role-Based Access Control (RBAC)**: Fine-grained token verification middlewares (`verifyToken`, `verifyAdminToken`, `verifySuperAdminToken`, `verifyAuthorizedToken`).
-- **🛡️ Super Admin Protection**: Strict server-side safeguards preventing regular admins from editing or deleting Super Admin (Owner) profiles, restricting `PATCH /users/:id/toggle-admin` to Super Admins, and enforcing profile owner isolation on `POST /users/:userId/change-password`.
+- **🛡️ Super Admin & Provider Protection**: Strict server-side safeguards preventing regular admins from editing or deleting Super Admin (Owner) profiles, restricting `PATCH /users/:id/toggle-admin` to Super Admins, and blocking password/email modification on OAuth profiles.
 - **🔐 Bulletproof Authentication & Security**: JWT authorization, bcrypt password hashing, rate-limiting (`express-rate-limit` with 10 req/min on sensitive password/auth endpoints), and email verification (OTP via Nodemailer with hidden schema selection).
 - **🗄️ MongoDB & Mongoose ORM**: Schema definitions with deep populates (`user`, `likes`, `shares`, `comments`, `replies`).
 - **☁️ Cloudinary Integration**: Automated image uploading and legacy Cloudinary asset cleanup on file replacements or deletions.
-- **🛡️ Validation & Sanitation**: Strict Zod schemas validating user inputs across register, login, change password (`currentPassword` & `newPassword`), profile updates, posts, comments, and replies.
+- **🛡️ Validation & Sanitation**: Strict Zod schemas validating user inputs across register, login (email or username), change password, profile updates, posts, comments, and replies.
 
 
 ---
@@ -48,7 +51,7 @@
 | **State & Data Fetching** | TanStack React Query v5, React Hook Form, Zod |
 | **Backend Core** | Node.js, Express.js (v5), TypeScript (ESM) |
 | **Database & ODM** | MongoDB, Mongoose |
-| **Authentication & Protection**| JWT, Bcrypt.js, Helmet, CORS, Express-Rate-Limit |
+| **Authentication & Protection**| JWT, Passport.js (GitHub OAuth 2.0), Bcrypt.js, Helmet, CORS, Express-Rate-Limit |
 | **File Storage & Mail** | Cloudinary, Multer, Nodemailer |
 
 ---
@@ -63,13 +66,12 @@ Codexa/
 │   │   ├── auth/               # Auth API, hooks, Zod schemas, types
 │   │   ├── posts/              # Post, comment, reply API, hooks, schemas
 │   │   └── user/               # Profile API, hooks, Zod schemas, types
-│   ├── app/                    # Next.js App Router Pages (Feed, Auth, Profile, Admin)
-
+│   ├── app/                    # Next.js App Router Pages (Feed, Auth, OAuth Callback, Profile, Admin)
 │   └── components/ui/          # Base Primitives (Button, Input, etc.)
 │
 ├── backend/                    # Express.js REST API
 │   ├── src/
-│   │   ├── config/             # DB & Mail Transporter Configurations
+│   │   ├── config/             # DB, Passport OAuth & Mail Transporter Configurations
 │   │   ├── middlewares/        # Auth, Rate-Limiters, Error Handlers
 │   │   ├── modules/            # Domain Modules (auth, posts, comment, reply, user)
 │   │   └── utils/              # Cloudinary, SendEmail helpers
@@ -87,6 +89,7 @@ Codexa/
 - npm / pnpm / yarn
 - MongoDB Instance (Local or MongoDB Atlas)
 - Cloudinary Account & Credentials
+- GitHub Developer Application (for OAuth 2.0 login)
 
 ---
 
@@ -105,6 +108,11 @@ Codexa/
    MONGO_URI=mongodb://localhost:27017/fluxion
    JWT_SECRET_KEY=your_jwt_secret_key
    FRONTEND_URL=http://localhost:3000
+   BACKEND_URL=http://localhost:5000
+
+   # GitHub OAuth 2.0 Credentials
+   GITHUB_CLIENT_ID=your_github_client_id
+   GITHUB_CLIENT_SECRET=your_github_client_secret
 
    # Cloudinary Credentials
    CLOUDINARY_CLOUD_NAME=your_cloud_name

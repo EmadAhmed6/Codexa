@@ -309,8 +309,8 @@ export default function UserProfilePage() {
                       </Button>
                     )}
 
-                    {/* Change Password — strictly visible ONLY to account owner */}
-                    {isOwnProfile && (
+                    {/* Change Password — strictly visible ONLY to local account owner */}
+                    {isOwnProfile && (!userToDisplay?.provider || userToDisplay?.provider === "local") && (
                       <Button
                         onClick={() => setIsChangePasswordModalOpen(true)}
                         variant="outline"
@@ -435,8 +435,8 @@ export default function UserProfilePage() {
         targetUserId={targetUserId}
       />
 
-      {/* Change Password Modal (Owner Only) */}
-      {isOwnProfile && (
+      {/* Change Password Modal (Owner Only, Local Auth Only) */}
+      {isOwnProfile && (!userToDisplay?.provider || userToDisplay?.provider === "local") && (
         <ChangePasswordModal
           isOpen={isChangePasswordModalOpen}
           onClose={() => setIsChangePasswordModalOpen(false)}

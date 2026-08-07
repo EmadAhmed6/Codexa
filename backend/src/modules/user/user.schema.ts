@@ -22,10 +22,24 @@ const RegisterSchema = z.object({
   password: passwordSchema,
 });
 
-const LoginSchema = z.object({
-  email: z.string().email().trim().min(4),
-  password: passwordSchema,
-});
+const LoginSchema = z
+  .object({
+    email: z.string().email().trim().min(4).optional(),
+    username: z
+      .string()
+      .min(3)
+      .max(50)
+      .regex(
+        /^[a-zA-Z0-9_]+$/,
+        "Username must contain only letters, numbers, and underscores",
+      )
+      .optional(),
+    password: passwordSchema,
+  })
+  .refine((data) => data.email || data.username, {
+    message: "Username or email is required",
+    path: ["email"],
+  });
 
 const ForgotPasswordSchema = z.object({
   email: z.string().email(),

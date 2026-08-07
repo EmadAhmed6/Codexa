@@ -20,6 +20,7 @@ import {
 // REGISTER USER
 const register = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const { username, email } = req.body;
     const { error, success } = validateRegisterUser(req.body);
     if (!success) {
       res.status(400).json({
@@ -28,13 +29,27 @@ const register = asyncHandler(
       return;
     }
 
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ $or: [{ email }, { username }] });
 
     if (user) {
+      if (user?.provider !== "local") {
+        res.status(400).json({
+          success: false,
+          message: "Request failed",
+          data: { message: "This email is already signed up via social login" },
+        });
+        return;
+      }
+
       if (user.isVerified) {
         res.status(400).json({
           success: false,
-          data: { message: "Account already exists with this email" },
+          data: {
+            message:
+              user.email === email
+                ? "Account already exists with this email"
+                : "Account already exists with this username",
+          },
         });
         return;
       }
@@ -56,6 +71,7 @@ const register = asyncHandler(
       isVerified: false,
       otp: generatedOtp,
       otpExpired,
+      provider: "local",
     });
 
     const finalUser = await newUser.save();
@@ -82,6 +98,90 @@ const register = asyncHandler(
         token,
         ...others,
       },
+    });
+    return;
+  },
+);
+
+// LOGIN USER
+const login = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { email, username } = req.body;
+    const { error, success } = validateLoginUser(req.body);
+    if (!success) {
+      res
+        .status(400)
+        .json({ message: error.issues[0]?.message || "Invalid Input" });
+      return;
+    }
+    const user = await User.findOne({ $or: [{ email }, { username }] }).select(
+      "+otp +otpExpired",
+    );
+    if (!user) {
+      res
+        .status(400)
+        .json({ success: false, message: "Invalid email or password" });
+      return;
+    }
+
+    if (user.provider !== "local") {
+      res.status(400).json({
+        success: false,
+        message: "Request failed",
+        data: {
+          message: "This emails is already signed up via social login",
+        },
+      });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(
+      req.body.password,
+      user.password,
+    );
+    if (!isPasswordMatch) {
+      res
+        .status(400)
+        .json({ success: false, message: "Invalid email or password" });
+      return;
+    }
+
+    if (!user.isVerified) {
+      const generatedOtp = Math.floor(
+        100000 + Math.random() * 900000,
+      ).toString();
+      const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
+
+      user.otp = generatedOtp;
+      user.otpExpired = otpExpired;
+      await user.save();
+
+      await sendEmail(
+        user.email,
+        "Verify Your Email - Fluxion",
+        generateOtpEmailHtml(user.username, generatedOtp),
+      );
+
+      res.status(403).json({
+        success: false,
+        isVerified: false,
+        email: user.email,
+        message:
+          "Please verify your email. A new OTP code has been sent to your inbox.",
+      });
+      return;
+    }
+
+    const token = user.generateToken();
+    const {
+      password: _,
+      otp: __,
+      otpExpired: ___,
+      ...others
+    } = user.toObject();
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      data: { ...others, token },
     });
     return;
   },
@@ -169,79 +269,6 @@ const resendOTP = asyncHandler(
       data: {
         message: "A new OTP verification code has been sent to your email",
       },
-    });
-    return;
-  },
-);
-
-// LOGIN USER
-const login = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const { error, success } = validateLoginUser(req.body);
-    if (!success) {
-      res
-        .status(400)
-        .json({ message: error.issues[0]?.message || "Invalid Input" });
-      return;
-    }
-    const user = await User.findOne({ email: req.body.email }).select(
-      "+otp +otpExpired",
-    );
-    if (!user) {
-      res
-        .status(400)
-        .json({ success: false, message: "Invalid email or password" });
-      return;
-    }
-
-    const isPasswordMatch = await bcrypt.compare(
-      req.body.password,
-      user.password,
-    );
-    if (!isPasswordMatch) {
-      res
-        .status(400)
-        .json({ success: false, message: "Invalid email or password" });
-      return;
-    }
-
-    if (!user.isVerified) {
-      const generatedOtp = Math.floor(
-        100000 + Math.random() * 900000,
-      ).toString();
-      const otpExpired = new Date(Date.now() + 10 * 60 * 1000);
-
-      user.otp = generatedOtp;
-      user.otpExpired = otpExpired;
-      await user.save();
-
-      await sendEmail(
-        user.email,
-        "Verify Your Email - Fluxion",
-        generateOtpEmailHtml(user.username, generatedOtp),
-      );
-
-      res.status(403).json({
-        success: false,
-        isVerified: false,
-        email: user.email,
-        message:
-          "Please verify your email. A new OTP code has been sent to your inbox.",
-      });
-      return;
-    }
-
-    const token = user.generateToken();
-    const {
-      password: _,
-      otp: __,
-      otpExpired: ___,
-      ...others
-    } = user.toObject();
-    res.status(200).json({
-      success: true,
-      message: "Logged in successfully",
-      data: { ...others, token },
     });
     return;
   },

@@ -42,6 +42,10 @@ export interface AuthTranslations {
   resendEmail: string;
   enter6DigitCode: string;
   alreadyVerified: string;
+  continueWithGithub: string;
+  orDivider: string;
+  loginIdentifierLabel: string;
+  loginIdentifierPlaceholder: string;
 }
 
 export const authTranslations: Record<Language, AuthTranslations> = {
@@ -58,6 +62,8 @@ export const authTranslations: Record<Language, AuthTranslations> = {
     verifyOtpDesc: "Enter the 6-digit verification code sent to your email",
     emailLabel: "Email address",
     emailPlaceholder: "you@example.com",
+    loginIdentifierLabel: "Email address or Username",
+    loginIdentifierPlaceholder: "you@example.com or username",
     passwordLabel: "Password",
     passwordPlaceholder: "••••••••",
     usernameLabel: "Username",
@@ -88,6 +94,8 @@ export const authTranslations: Record<Language, AuthTranslations> = {
     resendEmail: "Resend Email",
     enter6DigitCode: "Enter 6-Digit Code",
     alreadyVerified: "Already verified?",
+    continueWithGithub: "Continue with GitHub",
+    orDivider: "OR",
   },
   ar: {
     welcomeBack: "أهلاً بيك تاني",
@@ -102,6 +110,8 @@ export const authTranslations: Record<Language, AuthTranslations> = {
     verifyOtpDesc: "اكتب كود الـ 6 أرقام اللي اتبعت على إيميلك",
     emailLabel: "عنوان الإيميل",
     emailPlaceholder: "you@example.com",
+    loginIdentifierLabel: "عنوان الإيميل أو اسم المستخدم",
+    loginIdentifierPlaceholder: "you@example.com أو اسم المستخدم",
     passwordLabel: "الباسورد",
     passwordPlaceholder: "••••••••",
     usernameLabel: "اسم المستخدم",
@@ -131,5 +141,7 @@ export const authTranslations: Record<Language, AuthTranslations> = {
     resendEmail: "عادة إرسال الإيميل",
     enter6DigitCode: "ادخل كود الـ 6 أرقام",
     alreadyVerified: "مـتأكد بالفعل؟",
+    continueWithGithub: "متابعة بواسطة GitHub",
+    orDivider: "أو",
   },
 };

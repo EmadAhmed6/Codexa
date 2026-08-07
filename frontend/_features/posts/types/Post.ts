@@ -5,6 +5,7 @@ export interface UserProfile {
   jobTitle?: string;
   email?: string;
   role?: "User" | "Admin" | "SuperAdmin";
+  provider?: "local" | "google" | "github";
   isVerified?: boolean;
   postsCount?: number;
   profilePicture?: {

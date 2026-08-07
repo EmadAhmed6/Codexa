@@ -346,6 +346,10 @@
  *           type: string
  *           format: email
  *           example: ahmed@example.com
+ *         provider:
+ *           type: string
+ *           enum: [local, google, github]
+ *           example: local
  *         role:
  *           type: string
  *           enum: [User, Admin, SuperAdmin]

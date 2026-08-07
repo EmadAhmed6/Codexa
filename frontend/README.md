@@ -88,8 +88,17 @@ Dedicated administrative routes guarded for `isAdmin` and `isSuperAdmin` users:
 
 ---
 
-### 7. Account Security & Change Password Modal
-- **Strict Owner-Only Access (`isOwnProfile`)**: The "Change Password" action button and modal are strictly restricted to the logged-in user viewing their own profile (`isOwnProfile === true`). Neither Admins nor Super Admins can view or trigger password changes for other users.
+### 7. GitHub OAuth 2.0 Authorization & OAuth Safeguards
+- **GitHub OAuth Redirect & Callback Route (`/auth/callback`)**: Clicking "Continue with GitHub" redirects to `${NEXT_PUBLIC_API_URL}/auth/github`. The dedicated client callback route (`app/auth/callback/page.tsx`) receives the `token` parameter from URL, saves it to browser cookies (`Cookies.set("token", token)`), invalidates React Query `authMe` cache (`queryClient.invalidateQueries({ queryKey: ["authMe"] })`), displays success toast, and navigates to the home feed.
+- **Email or Username Login Flexibility**: Login form accepts either an email address or username in a single input field. The auth client (`_features/auth/api/login.ts`) automatically formats the request payload (`email` if input contains `@`, or `username` if not).
+- **OAuth Account Safeguards**:
+  - Email editing in `EditProfileModal` is disabled for OAuth accounts (`user.provider !== "local"`), accompanied by an explanatory notification.
+  - The "Change Password" button and `ChangePasswordModal` are hidden on profile pages for OAuth accounts (`!user.provider || user.provider === "local"`), reflecting server-side restrictions.
+
+---
+
+### 8. Account Security & Change Password Modal
+- **Strict Owner-Only Access (`isOwnProfile`)**: The "Change Password" action button and modal are strictly restricted to local account owners viewing their own profile (`isOwnProfile === true` & `provider === "local"`). Neither Admins nor Super Admins can view or trigger password changes for other users.
 - **Client-Side Zod Validation (`changePasswordSchema`)**: Form validated with real-time requirements checking: minimum 6 characters, maximum 72 characters, at least one uppercase letter (`A-Z`), one lowercase letter (`a-z`), one digit (`0-9`), and matching confirmation password field.
 - **Interactive UI**: Modal built with React Hook Form + Zod resolver (`ChangePasswordModal.tsx`), live requirement checkmarks, and custom toast notifications.
 

@@ -1,5 +1,7 @@
 // ├── POST /auth/register
 // ├── POST /auth/login
+// ├── GET /auth/github
+// ├── GET /auth/github/callback
 // ├── POST /auth/verify-otp
 // ├── POST /auth/resend-otp
 // ├── POST /auth/forgot-password
@@ -76,12 +78,16 @@
  *                     email:
  *                       type: string
  *                       example: ahmed@example.com
+ *                     provider:
+ *                       type: string
+ *                       enum: [local, google, github]
+ *                       example: local
  *                     role:
  *                       type: string
  *                       enum: [User, Admin, SuperAdmin]
  *                       example: User
  *       400:
- *         description: Invalid input or email already exists
+ *         description: Invalid input or email/username already exists
  */
 
 // Login
@@ -89,8 +95,8 @@
  * @swagger
  * /auth/login:
  *   post:
- *     summary: Login user (Rate Limited - 5 req/min)
- *     description: Authenticate a user and return a JWT token. Protected against brute-force (max 5 attempts per minute). Sends new OTP code if email is unverified.
+ *     summary: Login user with Email or Username (Rate Limited - 5 req/min)
+ *     description: Authenticate a user using either their registered email address OR username alongside password. Protected against brute-force (max 5 attempts per minute). Sends new OTP code if email is unverified.
  *     tags:
  *       - Auth
  *     requestBody:
@@ -100,13 +106,15 @@
  *           schema:
  *             type: object
  *             required:
- *               - email
  *               - password
  *             properties:
  *               email:
  *                 type: string
  *                 format: email
  *                 example: ahmed@example.com
+ *               username:
+ *                 type: string
+ *                 example: ahmed
  *               password:
  *                 type: string
  *                 format: password
@@ -134,6 +142,10 @@
  *                     email:
  *                       type: string
  *                       example: ahmed@example.com
+ *                     provider:
+ *                       type: string
+ *                       enum: [local, google, github]
+ *                       example: local
  *                     role:
  *                       type: string
  *                       enum: [User, Admin, SuperAdmin]
@@ -142,11 +154,39 @@
  *                       type: string
  *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       400:
- *         description: Invalid email or password
+ *         description: Invalid email/username or password, or attempting local login on OAuth account
  *       403:
  *         description: Account is unverified. A new OTP has been dispatched to email.
  *       429:
  *         description: Too many attempts, please try again after a minute
+ */
+
+// GitHub OAuth Initiate
+/**
+ * @swagger
+ * /auth/github:
+ *   get:
+ *     summary: Initiate GitHub OAuth 2.0 Login
+ *     description: Redirects user browser to GitHub OAuth authorization screen to authenticate using GitHub account credentials.
+ *     tags:
+ *       - Auth
+ *     responses:
+ *       302:
+ *         description: Redirects to GitHub authorization URL
+ */
+
+// GitHub OAuth Callback
+/**
+ * @swagger
+ * /auth/github/callback:
+ *   get:
+ *     summary: GitHub OAuth 2.0 Callback URL
+ *     description: Passport callback handler after GitHub authorization. Finds or creates DB user with provider set to 'github', generates JWT token, and redirects client to frontend /auth/callback?token=...
+ *     tags:
+ *       - Auth
+ *     responses:
+ *       302:
+ *         description: Redirects to frontend callback page with JWT token or login error query param
  */
 
 // Resend OTP
